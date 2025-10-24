@@ -1,0 +1,42 @@
+# Node
+node_modules/
+dist/
+.svelte-kit/
+build/
+
+# Environment
+.env
+.env.local
+
+# Worktrees directory
+/wt/
+
+# Shared directory - personal files not committed
+/.shared/
+
+# Confidential context (if symlinked to root)
+CLAUDE_CONTEXT.md
+
+# Planning and scratch (if symlinked to root)
+.planning/
+.scratch/
+
+# Claude Code personal settings
+.claude/settings.local.json
+.claude/skills/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
