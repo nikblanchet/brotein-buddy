@@ -2,6 +2,18 @@
 
 This document describes how to deploy BroteinBuddy to production using Vercel.
 
+## Setup Status
+
+Current state (as of Phase 0, deliverable 0.4):
+- [x] GitHub Actions CI workflow configured (`.github/workflows/ci.yml`)
+- [x] Vercel configuration file (`vercel.json`) created
+- [ ] Vercel project created (to be done in Phase 3, deliverable 3.5)
+- [ ] Codecov integration set up (optional)
+- [ ] Preview deployments tested (requires Vercel project)
+- [ ] Production deployment verified (requires Vercel project)
+
+This deliverable establishes the CI/CD infrastructure and configuration. Actual Vercel project creation and first deployment happen in Phase 3 deliverable 3.5 (Deployment & Launch).
+
 ## Overview
 
 BroteinBuddy uses a modern CI/CD pipeline with:
