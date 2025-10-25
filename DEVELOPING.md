@@ -242,6 +242,7 @@ This project uses custom skills and agents to enhance Claude Code's capabilities
 Skills provide context and instructions that guide Claude Code's behavior. They are symlinked from `~/Code/repos/custom-claude-skills/` to `.shared/.claude/skills/`.
 
 **Global Skills** (available in all projects):
+
 - **development-standards**: No emoji in developer-facing content, modern language features, thorough documentation
 - **exhaustive-testing**: Comprehensive test coverage across all test types
 - **dependency-management**: Quality dependencies and package management
@@ -249,6 +250,7 @@ Skills provide context and instructions that guide Claude Code's behavior. They 
 - **handle-deprecation-warnings**: Address deprecation warnings immediately
 
 **Project-Specific Skills** (BroteinBuddy only):
+
 - **git-github-workflow**: Worktree-based workflow, branch naming (setup/, feature/, bug/), commit standards, PR creation with gh CLI, testing requirements, squash-merge strategy. **MUST BE USED for all git/GitHub operations.**
 - **brotein-buddy-standards**: Testing requirements (90% coverage, 100% critical paths), code quality tooling (ESLint, Prettier, Husky), documentation structure (README, DEVELOPING, ADRs, teaching docs), tech stack conventions
 
@@ -257,12 +259,14 @@ Skills provide context and instructions that guide Claude Code's behavior. They 
 Agents are autonomous workers that can use tools to complete complex tasks. They are symlinked from `~/Code/repos/custom-claude-agents/` to `.shared/.claude/agents/`.
 
 **Project-Specific Agents**:
+
 - **code-reviewer**: Comprehensive PR reviews across 11 dimensions. Use IMMEDIATELY AFTER writing code or before creating PRs.
 - **teaching-mentor**: Creates patient, detailed teaching documents explaining design decisions and trade-offs. Use PROACTIVELY after completing deliverables.
 
 ### When to Use Each
 
 **Use git-github-workflow skill when:**
+
 - Creating new worktrees for parallel development
 - Starting work on features, bugs, or setup tasks
 - Committing code changes
@@ -270,17 +274,20 @@ Agents are autonomous workers that can use tools to complete complex tasks. They
 - Managing branches
 
 **Use brotein-buddy-standards skill when:**
+
 - Setting up testing for new features
 - Configuring code quality tools
 - Writing documentation
 - Ensuring consistency with project standards
 
 **Use code-reviewer agent when:**
+
 - You've completed writing or modifying code
 - Before creating pull requests
 - When requested to perform code reviews
 
 **Use teaching-mentor agent when:**
+
 - You've completed a deliverable or feature
 - After implementing significant architectural decisions
 - When creating educational documentation
