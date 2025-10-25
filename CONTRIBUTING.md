@@ -44,20 +44,21 @@ PR) / **Approved with immediate followup needed**
      - Always link to the section headers. -->
 
 - [Problems](#problems)
-  - (Blockers)[#blockers]: <!-- Must fix before merge --> 3 <!-- # of -->
+  - [Blockers](#blockers): <!-- Must fix before merge --> 3 <!-- # of -->
     - [Logic error: Random library implemented incorrectly](#section_link)
     - [Test coverage: Missing async validation test](#section_link)
     - [Bug: Infinite scroll breaks shuffle feature](#section_link)
-  - (Important)[#important]: 1 <!-- Must fix immediately after merge. -->
+  - [Important](#important): 1 <!-- Must fix immediately after merge. -->
     <!-- This happens when fixing it would cause scope creep in the PR. A
          common example is discovering a new, silent, existing problem when
          debugging a problem you caused.  -->
     <!-- Create issues for these. -->
     - [Documentation: Architecture diagram added in CLAUDE.md contradicts one in DEVELOPER.md](#section_link)
-  - (Minor)[#minor]: 1 <!-- Problems that can be addressed later -->
+  - [Minor](#minor): 1 <!-- Problems that can be addressed later -->
     <!-- Create issues for these -->
     - [Consistency: Test of `this()` does not match established conventions](#section_link)
-- [Enhancement ideas](#enhancement-ideas)
+
+* [Enhancement ideas](#enhancement-ideas)
   1. [High impact, low effort](#high-impact-low-effort): 1
   - [Technical debt: `_foo()` logic duplicated](#section_link)
   2. [High impact, moderate effort](#high-impact-moderate-effort):
@@ -68,7 +69,8 @@ PR) / **Approved with immediate followup needed**
   6. [Low impact, low effort](#low-impact-low-effort):
   7. [Moderate impact, high effort](#moderate-impact-high-effort):
   8. [Low impact, moderate effort](#low-impact-moderate-effort):
-- (Nit)[#nit] <!-- Not problems. Small things that could improve code -->
+
+- [Nit](#nit) <!-- Not problems. Small things that could improve code -->
 
 ## Problems
 
