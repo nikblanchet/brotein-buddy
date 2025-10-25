@@ -72,6 +72,7 @@ BroteinBuddy/
   - LocalStorage operations
 
 Run tests:
+
 ```bash
 npm test              # Unit + integration tests
 npm run test:e2e      # End-to-end tests
@@ -105,6 +106,7 @@ npm run format        # Format with Prettier
 See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
 
 **Core types:**
+
 - `Flavor`: Represents a protein shake flavor
 - `Box`: A physical box containing bottles of one flavor
 - `Location`: (x: stack, y: height) coordinates
@@ -127,10 +129,12 @@ See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
 ## Deployment
 
 Deployed automatically to Vercel:
+
 - **Production**: Deployed on merge to `main`
 - **Preview**: Deployed for every PR
 
 Manual deployment:
+
 ```bash
 npm run build
 # Outputs to dist/
@@ -139,6 +143,7 @@ npm run build
 ## Troubleshooting
 
 ### Symlinks not working
+
 ```bash
 # Re-run setup for the worktree
 cd ../..  # Go to repo root
@@ -146,12 +151,14 @@ cd ../..  # Go to repo root
 ```
 
 ### Dependencies out of sync
+
 ```bash
 # From any worktree
 npm install
 ```
 
 ### Worktree cleanup
+
 ```bash
 # Remove a worktree
 git worktree remove wt/<branch-name>

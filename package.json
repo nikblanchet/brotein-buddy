@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "lint": "eslint . --ext .js,.ts,.svelte",
-    "lint:fix": "eslint . --ext .js,.ts,.svelte --fix"
+    "lint:fix": "eslint . --ext .js,.ts,.svelte --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
@@ -21,6 +23,8 @@
     "eslint": "^9.38.0",
     "eslint-plugin-svelte": "^3.12.5",
     "globals": "^16.4.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^3.4.0",
     "svelte": "^5.39.6",
     "svelte-check": "^4.3.2",
     "svelte-eslint-parser": "^1.4.0",
