@@ -5,6 +5,7 @@ This document describes how to deploy BroteinBuddy to production using Vercel.
 ## Setup Status
 
 Current state (as of Phase 0, deliverable 0.4):
+
 - [x] GitHub Actions CI workflow configured (`.github/workflows/ci.yml`)
 - [x] Vercel configuration file (`vercel.json`) created
 - [ ] Vercel project created (to be done in Phase 3, deliverable 3.5)
@@ -67,6 +68,7 @@ No additional Vercel dashboard configuration is needed.
 **Trigger**: Push to `main` branch
 
 **Process**:
+
 1. GitHub Actions CI runs:
    - Linting
    - Type checking
@@ -81,12 +83,14 @@ No additional Vercel dashboard configuration is needed.
 **Trigger**: Open or update a Pull Request
 
 **Process**:
+
 1. GitHub Actions CI runs on PR
 2. Vercel creates a preview deployment
 3. Preview URL is posted as a comment on the PR
 4. Each commit to the PR updates the preview deployment
 
 **Benefits**:
+
 - Test changes in a production-like environment
 - Share preview links for feedback
 - Verify before merging
@@ -98,10 +102,12 @@ No additional Vercel dashboard configuration is needed.
 File: `.github/workflows/ci.yml`
 
 **Runs on**:
+
 - Every push to `main`
 - Every pull request to `main`
 
 **Steps**:
+
 1. Checkout code
 2. Setup Node.js (v20 with npm caching)
 3. Install dependencies
@@ -115,6 +121,7 @@ File: `.github/workflows/ci.yml`
 9. Upload coverage to Codecov (optional)
 
 **Quality Gates**:
+
 - All tests must pass
 - Code must be properly formatted
 - No linting errors
