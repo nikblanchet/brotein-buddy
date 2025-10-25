@@ -4,6 +4,7 @@ import tsParser from '@typescript-eslint/parser';
 import svelte from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
 import globals from 'globals';
+import prettier from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
@@ -55,6 +56,7 @@ export default [
       ...svelte.configs.recommended.rules,
     },
   },
+  prettier,
   {
     ignores: [
       'dist',
