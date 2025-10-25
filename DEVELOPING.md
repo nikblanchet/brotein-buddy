@@ -81,14 +81,60 @@ npm run test:coverage # Coverage report
 
 ### Code Quality
 
-- **ESLint + Prettier** configured with pre-commit hooks
-- **TypeScript strict mode** enabled
-- **No warnings** allowed in production builds
+Automated code quality enforcement ensures consistent style and catches errors early.
+
+**Tools:**
+
+- **ESLint**: Code quality and bug detection for TypeScript and Svelte
+- **Prettier**: Consistent code formatting across all file types
+- **Husky**: Git hooks for pre-commit checks
+- **lint-staged**: Run linters only on staged files for fast commits
+
+**Commands:**
 
 ```bash
-npm run lint          # Run ESLint
-npm run format        # Format with Prettier
+npm run lint          # Run ESLint on all files
+npm run lint:fix      # Run ESLint and auto-fix issues
+npm run format        # Format all files with Prettier
+npm run format:check  # Check formatting without modifying files
 ```
+
+**Pre-commit Hook:**
+
+Every commit automatically runs:
+
+1. ESLint with auto-fix on staged JS/TS/Svelte files
+2. Prettier on all staged files
+3. Only staged files are checked (fast!)
+
+**Editor Setup:**
+
+VS Code settings are included in the repository (`.vscode/settings.json`):
+
+- Format on save enabled
+- ESLint auto-fix on save
+- Prettier as default formatter
+
+Install recommended extensions when prompted, or run:
+
+```bash
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension esbenp.prettier-vscode
+code --install-extension svelte.svelte-vscode
+```
+
+**Configuration:**
+
+- ESLint: `eslint.config.js` (flat config format)
+- Prettier: `.prettierrc`
+- lint-staged: `package.json` → `lint-staged` field
+- Pre-commit hook: `.husky/pre-commit`
+
+**Requirements:**
+
+- **TypeScript strict mode** enabled
+- **No ESLint warnings** allowed in production builds
+- **All code must be formatted** before commit (enforced by pre-commit hook)
 
 ## Architecture
 
