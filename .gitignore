@@ -33,7 +33,8 @@ CLAUDE_CONTEXT.md
 .planning
 .scratch
 
-# Claude Code personal settings
+# Claude Code personal settings (symlinked in worktrees)
+.claude
 .claude/settings.local.json
 .claude/skills
 .claude/agents
