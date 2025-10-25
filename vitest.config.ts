@@ -1,6 +1,11 @@
 import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
+// Note: Integration tests are currently deferred due to @testing-library/svelte v5.2.8
+// compatibility issues with Svelte 5 runes. The test pattern includes tests/integration/**
+// to support future integration tests once library support is added.
+// See tests/integration/README.md for details.
+
 export default defineConfig({
   plugins: [svelte({ hot: !process.env.VITEST })],
   test: {

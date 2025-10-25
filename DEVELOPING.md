@@ -95,6 +95,16 @@ This project follows a comprehensive three-tier testing approach:
 
 Coverage is measured using Vitest's v8 coverage provider and reported in text, JSON, and HTML formats.
 
+#### First-Time Setup: Playwright Browsers
+
+Before running E2E tests for the first time, install Playwright browsers:
+
+```bash
+npx playwright install
+```
+
+This downloads Chromium, WebKit, and Firefox browsers needed for testing. Only needs to be run once per machine.
+
 #### Running Tests
 
 ```bash
