@@ -1,0 +1,6 @@
+This file tests the auto-approval workflow.
+
+Testing that:
+1. PRs from nikblanchet get auto-approved
+2. Branch protection still requires approval
+3. CI must pass before merge
