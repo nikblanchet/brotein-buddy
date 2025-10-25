@@ -26,6 +26,7 @@ This is a personal portfolio project demonstrating modern web development practi
 ### Problem Statement
 
 We need to select a technology stack that:
+
 - Enables rapid UI development with minimal boilerplate
 - Provides strong type safety to catch errors early
 - Supports PWA functionality for iOS installation
@@ -40,22 +41,25 @@ We will use the following technology stack:
 **Frontend Framework:** Svelte 5 + TypeScript
 **Build Tool:** Vite
 **Testing:**
+
 - Vitest for unit and integration tests
 - Playwright for end-to-end tests
 - @testing-library/svelte for component testing
-**Data Persistence:** LocalStorage
-**Deployment:** Vercel with GitHub Actions CI/CD
-**Progressive Web App:** PWA manifest + service worker (using Vite PWA plugin)
+  **Data Persistence:** LocalStorage
+  **Deployment:** Vercel with GitHub Actions CI/CD
+  **Progressive Web App:** PWA manifest + service worker (using Vite PWA plugin)
 
 ### Implementation Details
 
 **Development Environment:**
+
 - TypeScript strict mode enabled
 - ESLint + Prettier for code quality
 - Husky for pre-commit hooks (lint, format, test)
 - Git worktrees for parallel development across multiple features
 
 **Testing Strategy:**
+
 - 90% overall code coverage requirement
 - 100% coverage for critical paths (algorithms, storage, state mutations)
 - Unit tests for pure logic
@@ -63,6 +67,7 @@ We will use the following technology stack:
 - E2E tests for complete user flows
 
 **Deployment Pipeline:**
+
 - GitHub Actions runs lint, type check, tests, and build on all PRs
 - Vercel preview deployments for every PR
 - Automatic production deployment on merge to main
@@ -101,12 +106,14 @@ We will use the following technology stack:
 **Description:** Use React 18 with TypeScript, create-react-app or Vite, React Testing Library
 
 **Pros:**
+
 - Larger ecosystem and community
 - More third-party components available
 - More familiar to potential employers/collaborators
 - Better tooling support overall
 
 **Cons:**
+
 - More boilerplate code (hooks, useState, useEffect)
 - Larger bundle sizes
 - More complex reactivity model
@@ -119,12 +126,14 @@ We will use the following technology stack:
 **Description:** Use Vue 3 with Composition API and TypeScript, Vite, Vitest
 
 **Pros:**
+
 - Good balance between React and Svelte
 - Excellent documentation
 - Strong TypeScript support
 - Good ecosystem
 
 **Cons:**
+
 - More boilerplate than Svelte
 - Composition API learning curve
 - Template syntax less elegant than Svelte
@@ -137,12 +146,14 @@ We will use the following technology stack:
 **Description:** Use IndexedDB instead of LocalStorage for data persistence
 
 **Pros:**
+
 - Much larger storage capacity (hundreds of MB)
 - Structured data with indexes
 - Asynchronous API (non-blocking)
 - Better for complex queries
 
 **Cons:**
+
 - More complex API
 - Requires wrapper library (e.g., Dexie.js) for good DX
 - Overkill for simple key-value storage
@@ -155,12 +166,14 @@ We will use the following technology stack:
 **Description:** Add a backend service for data storage and sync
 
 **Pros:**
+
 - Cloud backup of data
 - Cross-device synchronization
 - Larger storage capacity
 - Could add multi-user features
 
 **Cons:**
+
 - Increased complexity (authentication, API, data sync)
 - Additional dependencies and potential costs
 - Requires internet connection
@@ -174,12 +187,14 @@ We will use the following technology stack:
 **Description:** Build native mobile app instead of PWA
 
 **Pros:**
+
 - Better iOS integration
 - Access to native APIs
 - Better performance for complex operations
 - App store distribution
 
 **Cons:**
+
 - Requires learning new framework
 - More complex build and deployment
 - App store approval process

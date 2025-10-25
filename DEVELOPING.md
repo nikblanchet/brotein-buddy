@@ -72,6 +72,7 @@ BroteinBuddy/
   - LocalStorage operations
 
 Run tests:
+
 ```bash
 npm test              # Unit + integration tests
 npm run test:e2e      # End-to-end tests
@@ -105,6 +106,7 @@ npm run format        # Format with Prettier
 Data model design decisions will be documented in a future ADR when Phase 1 begins.
 
 **Core types:**
+
 - `Flavor`: Represents a protein shake flavor
 - `Box`: A physical box containing bottles of one flavor
 - `Location`: (x: stack, y: height) coordinates
@@ -123,30 +125,36 @@ Data model design decisions will be documented in a future ADR when Phase 1 begi
 BroteinBuddy maintains comprehensive documentation across multiple formats, each serving a specific audience and purpose:
 
 **User-Facing Documentation:**
+
 - **README.md**: Installation instructions, basic usage, and feature overview for end users
 
 **Developer Documentation:**
+
 - **DEVELOPING.md**: This file - complete setup guide, development workflow, architecture overview, and troubleshooting
 - **docs/adr/**: Architecture Decision Records documenting design decisions and their rationale
 - **Teaching docs**: Educational documents explaining concepts and patterns (in `.planning/teaching/`)
 
 **Project Planning:**
+
 - **.planning/**: Implementation plan, task breakdown, and project management (in `.shared/`)
 - **CLAUDE.md**: Project context and standards for AI-assisted development (in `.shared/`)
 
 ### Architecture Decision Records (ADRs)
 
 We use ADRs to document significant architectural and design decisions. Each ADR captures:
+
 - The context and forces influencing a decision
 - The decision itself and why it was made
 - Consequences (positive, negative, and neutral)
 - Alternatives considered and why they were rejected
 
 **ADR Index:**
+
 - [ADR-000: Template](docs/adr/000-template.md) - Template for new ADRs
 - [ADR-001: Technology Stack Selection](docs/adr/001-technology-stack-selection.md) - Svelte, TypeScript, LocalStorage, PWA
 
 **When to write an ADR:**
+
 - Selecting technologies or frameworks
 - Choosing architectural patterns
 - Making trade-offs between competing approaches
@@ -154,6 +162,7 @@ We use ADRs to document significant architectural and design decisions. Each ADR
 - Decisions that are difficult or expensive to reverse
 
 **How to write an ADR:**
+
 1. Copy `docs/adr/000-template.md` to `docs/adr/XXX-your-decision.md`
 2. Fill in all sections thoroughly
 3. Consider multiple alternatives and document why they weren't chosen
@@ -172,10 +181,12 @@ We use ADRs to document significant architectural and design decisions. Each ADR
 ## Deployment
 
 Deployed automatically to Vercel:
+
 - **Production**: Deployed on merge to `main`
 - **Preview**: Deployed for every PR
 
 Manual deployment:
+
 ```bash
 npm run build
 # Outputs to dist/
@@ -184,6 +195,7 @@ npm run build
 ## Troubleshooting
 
 ### Symlinks not working
+
 ```bash
 # Re-run setup for the worktree
 cd ../..  # Go to repo root
@@ -191,12 +203,14 @@ cd ../..  # Go to repo root
 ```
 
 ### Dependencies out of sync
+
 ```bash
 # From any worktree
 npm install
 ```
 
 ### Worktree cleanup
+
 ```bash
 # Remove a worktree
 git worktree remove wt/<branch-name>

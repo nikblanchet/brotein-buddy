@@ -52,6 +52,7 @@ What becomes easier or more difficult to do because of this change? This section
 ## Alternatives Considered
 
 What other options did we consider? For each alternative, explain:
+
 - What it would have looked like
 - Why we didn't choose it
 - What trade-offs we would have made
