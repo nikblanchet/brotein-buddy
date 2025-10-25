@@ -62,22 +62,119 @@ BroteinBuddy/
 - **PRs**: Always open PRs, squash and merge to main
 - **Non-trivial bugs**: Branch from feature branch, fix, squash merge back
 
-### Testing Requirements
+### Testing Strategy
 
-- **90% coverage** overall (enforced by CI)
-- **100% coverage** for critical paths:
+This project follows a comprehensive three-tier testing approach:
+
+**1. Unit Tests** (`tests/unit/`)
+
+- Pure logic and utility functions
+- Algorithm implementations (random selection, box priority)
+- No DOM or component dependencies
+- Fast execution, high coverage
+
+**2. Integration Tests** (`tests/integration/`)
+
+- Svelte component testing with @testing-library/svelte
+- User interaction simulation
+- Component behavior and state management
+- DOM assertions and accessibility checks
+
+**3. End-to-End Tests** (`tests/e2e/`)
+
+- Full application workflows with Playwright
+- Mobile-first testing (iPhone 13 Pro viewport)
+- Cross-browser compatibility
+- User journey validation
+
+#### Coverage Requirements
+
+- **90% overall coverage** (enforced by CI)
+- **100% coverage for critical paths:**
   - Random selection algorithm
   - Box priority sorting
   - Inventory mutations
   - LocalStorage operations
 
 Run tests:
+Coverage is measured using Vitest's v8 coverage provider and reported in text, JSON, and HTML formats.
+
+#### First-Time Setup: Playwright Browsers
+
+Before running E2E tests for the first time, install Playwright browsers:
 
 ```bash
-npm test              # Unit + integration tests
-npm run test:e2e      # End-to-end tests
-npm run test:coverage # Coverage report
+npx playwright install
 ```
+
+This downloads Chromium, WebKit, and Firefox browsers needed for testing. Only needs to be run once per machine.
+
+#### Running Tests
+
+```bash
+# Unit and integration tests
+npm test                  # Run all Vitest tests once
+npm run test:unit         # Run only unit tests
+npm run test:integration  # Run only integration tests
+npm run test:watch        # Run tests in watch mode
+npm run test:ui           # Launch Vitest UI
+npm run test:coverage     # Generate coverage report
+
+# End-to-end tests
+npm run test:e2e          # Run Playwright tests
+npm run test:e2e:ui       # Run Playwright with UI mode
+```
+
+#### Writing Tests
+
+**Unit Test Example:**
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { myFunction } from '$lib/utils';
+
+describe('myFunction', () => {
+  it('handles edge cases', () => {
+    expect(myFunction('')).toBe('');
+  });
+});
+```
+
+**Integration Test Example:**
+
+```typescript
+import { render, screen } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
+import MyComponent from '$lib/components/MyComponent.svelte';
+
+describe('MyComponent', () => {
+  it('handles user interaction', async () => {
+    const user = userEvent.setup();
+    render(MyComponent);
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByText('Updated')).toBeInTheDocument();
+  });
+});
+```
+
+**E2E Test Example:**
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('completes user flow', async ({ page }) => {
+  await page.goto('/');
+  await page.click('button[data-testid="action"]');
+  await expect(page.locator('.result')).toBeVisible();
+});
+```
+
+#### Test Organization
+
+- **Co-locate test utilities**: Shared test helpers go in `tests/helpers/`
+- **Mirror source structure**: Integration tests should mirror `src/` structure
+- **Descriptive names**: Use `.test.ts` for Vitest, `.spec.ts` for Playwright
+- **Test data**: Use factories for complex test data (future)
 
 ### Code Quality
 
