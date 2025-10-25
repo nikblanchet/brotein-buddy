@@ -26,15 +26,17 @@ lerna-debug.log*
 /.shared/
 
 # Confidential context (if symlinked to root)
+CLAUDE.md
 CLAUDE_CONTEXT.md
 
 # Planning and scratch (if symlinked to root)
-.planning/
-.scratch/
+.planning
+.scratch
 
 # Claude Code personal settings
 .claude/settings.local.json
-.claude/skills/
+.claude/skills
+.claude/agents
 
 # Testing
 coverage/
