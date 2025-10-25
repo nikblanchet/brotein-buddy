@@ -42,6 +42,8 @@ CLAUDE_CONTEXT.md
 coverage/
 .nyc_output/
 *.lcov
+playwright-report/
+test-results/
 
 # IDE
 .vscode/*
