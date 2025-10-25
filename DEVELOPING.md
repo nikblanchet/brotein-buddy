@@ -102,7 +102,7 @@ npm run format        # Format with Prettier
 
 ### Data Model
 
-See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
+Data model design decisions will be documented in a future ADR when Phase 1 begins.
 
 **Core types:**
 - `Flavor`: Represents a protein shake flavor
@@ -118,11 +118,56 @@ See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
 
 ## Documentation
 
-- **README.md**: User-facing documentation
-- **DEVELOPING.md**: This file - developer setup and workflow
-- **docs/adr/**: Architecture Decision Records (design decisions)
-- **.planning/**: Implementation plan and planning documents (in `.shared/`)
-- **Teaching docs**: Created with each deliverable (in `.planning/teaching/`)
+### Documentation Philosophy
+
+BroteinBuddy maintains comprehensive documentation across multiple formats, each serving a specific audience and purpose:
+
+**User-Facing Documentation:**
+- **README.md**: Installation instructions, basic usage, and feature overview for end users
+
+**Developer Documentation:**
+- **DEVELOPING.md**: This file - complete setup guide, development workflow, architecture overview, and troubleshooting
+- **docs/adr/**: Architecture Decision Records documenting design decisions and their rationale
+- **Teaching docs**: Educational documents explaining concepts and patterns (in `.planning/teaching/`)
+
+**Project Planning:**
+- **.planning/**: Implementation plan, task breakdown, and project management (in `.shared/`)
+- **CLAUDE.md**: Project context and standards for AI-assisted development (in `.shared/`)
+
+### Architecture Decision Records (ADRs)
+
+We use ADRs to document significant architectural and design decisions. Each ADR captures:
+- The context and forces influencing a decision
+- The decision itself and why it was made
+- Consequences (positive, negative, and neutral)
+- Alternatives considered and why they were rejected
+
+**ADR Index:**
+- [ADR-000: Template](docs/adr/000-template.md) - Template for new ADRs
+- [ADR-001: Technology Stack Selection](docs/adr/001-technology-stack-selection.md) - Svelte, TypeScript, LocalStorage, PWA
+
+**When to write an ADR:**
+- Selecting technologies or frameworks
+- Choosing architectural patterns
+- Making trade-offs between competing approaches
+- Establishing conventions that affect multiple components
+- Decisions that are difficult or expensive to reverse
+
+**How to write an ADR:**
+1. Copy `docs/adr/000-template.md` to `docs/adr/XXX-your-decision.md`
+2. Fill in all sections thoroughly
+3. Consider multiple alternatives and document why they weren't chosen
+4. Include references to relevant resources
+5. Commit the ADR with your related code changes
+
+### Documentation Standards
+
+- Write documentation as you write code, not as an afterthought
+- Use clear, concise language with proper grammar
+- Include code examples for non-trivial functionality
+- Keep documentation up-to-date when code changes
+- Link related documents together
+- Follow the principles in the `development-standards` skill
 
 ## Deployment
 
