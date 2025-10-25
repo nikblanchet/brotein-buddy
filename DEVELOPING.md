@@ -67,18 +67,21 @@ BroteinBuddy/
 This project follows a comprehensive three-tier testing approach:
 
 **1. Unit Tests** (`tests/unit/`)
+
 - Pure logic and utility functions
 - Algorithm implementations (random selection, box priority)
 - No DOM or component dependencies
 - Fast execution, high coverage
 
 **2. Integration Tests** (`tests/integration/`)
+
 - Svelte component testing with @testing-library/svelte
 - User interaction simulation
 - Component behavior and state management
 - DOM assertions and accessibility checks
 
 **3. End-to-End Tests** (`tests/e2e/`)
+
 - Full application workflows with Playwright
 - Mobile-first testing (iPhone 13 Pro viewport)
 - Cross-browser compatibility
@@ -93,6 +96,7 @@ This project follows a comprehensive three-tier testing approach:
   - Inventory mutations
   - LocalStorage operations
 
+Run tests:
 Coverage is measured using Vitest's v8 coverage provider and reported in text, JSON, and HTML formats.
 
 #### First-Time Setup: Playwright Browsers
@@ -124,42 +128,45 @@ npm run test:e2e:ui       # Run Playwright with UI mode
 #### Writing Tests
 
 **Unit Test Example:**
+
 ```typescript
-import { describe, it, expect } from 'vitest'
-import { myFunction } from '$lib/utils'
+import { describe, it, expect } from 'vitest';
+import { myFunction } from '$lib/utils';
 
 describe('myFunction', () => {
   it('handles edge cases', () => {
-    expect(myFunction('')).toBe('')
-  })
-})
+    expect(myFunction('')).toBe('');
+  });
+});
 ```
 
 **Integration Test Example:**
+
 ```typescript
-import { render, screen } from '@testing-library/svelte'
-import userEvent from '@testing-library/user-event'
-import MyComponent from '$lib/components/MyComponent.svelte'
+import { render, screen } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
+import MyComponent from '$lib/components/MyComponent.svelte';
 
 describe('MyComponent', () => {
   it('handles user interaction', async () => {
-    const user = userEvent.setup()
-    render(MyComponent)
-    await user.click(screen.getByRole('button'))
-    expect(screen.getByText('Updated')).toBeInTheDocument()
-  })
-})
+    const user = userEvent.setup();
+    render(MyComponent);
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByText('Updated')).toBeInTheDocument();
+  });
+});
 ```
 
 **E2E Test Example:**
+
 ```typescript
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
 test('completes user flow', async ({ page }) => {
-  await page.goto('/')
-  await page.click('button[data-testid="action"]')
-  await expect(page.locator('.result')).toBeVisible()
-})
+  await page.goto('/');
+  await page.click('button[data-testid="action"]');
+  await expect(page.locator('.result')).toBeVisible();
+});
 ```
 
 #### Test Organization
@@ -171,14 +178,60 @@ test('completes user flow', async ({ page }) => {
 
 ### Code Quality
 
-- **ESLint + Prettier** configured with pre-commit hooks
-- **TypeScript strict mode** enabled
-- **No warnings** allowed in production builds
+Automated code quality enforcement ensures consistent style and catches errors early.
+
+**Tools:**
+
+- **ESLint**: Code quality and bug detection for TypeScript and Svelte
+- **Prettier**: Consistent code formatting across all file types
+- **Husky**: Git hooks for pre-commit checks
+- **lint-staged**: Run linters only on staged files for fast commits
+
+**Commands:**
 
 ```bash
-npm run lint          # Run ESLint
-npm run format        # Format with Prettier
+npm run lint          # Run ESLint on all files
+npm run lint:fix      # Run ESLint and auto-fix issues
+npm run format        # Format all files with Prettier
+npm run format:check  # Check formatting without modifying files
 ```
+
+**Pre-commit Hook:**
+
+Every commit automatically runs:
+
+1. ESLint with auto-fix on staged JS/TS/Svelte files
+2. Prettier on all staged files
+3. Only staged files are checked (fast!)
+
+**Editor Setup:**
+
+VS Code settings are included in the repository (`.vscode/settings.json`):
+
+- Format on save enabled
+- ESLint auto-fix on save
+- Prettier as default formatter
+
+Install recommended extensions when prompted, or run:
+
+```bash
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension esbenp.prettier-vscode
+code --install-extension svelte.svelte-vscode
+```
+
+**Configuration:**
+
+- ESLint: `eslint.config.js` (flat config format)
+- Prettier: `.prettierrc`
+- lint-staged: `package.json` → `lint-staged` field
+- Pre-commit hook: `.husky/pre-commit`
+
+**Requirements:**
+
+- **TypeScript strict mode** enabled
+- **No ESLint warnings** allowed in production builds
+- **All code must be formatted** before commit (enforced by pre-commit hook)
 
 ## Architecture
 
@@ -196,6 +249,7 @@ npm run format        # Format with Prettier
 See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
 
 **Core types:**
+
 - `Flavor`: Represents a protein shake flavor
 - `Box`: A physical box containing bottles of one flavor
 - `Location`: (x: stack, y: height) coordinates
@@ -218,10 +272,12 @@ See `docs/adr/002-data-model-design.md` for detailed architecture decisions.
 ## Deployment
 
 Deployed automatically to Vercel:
+
 - **Production**: Deployed on merge to `main`
 - **Preview**: Deployed for every PR
 
 Manual deployment:
+
 ```bash
 npm run build
 # Outputs to dist/
@@ -230,6 +286,7 @@ npm run build
 ## Troubleshooting
 
 ### Symlinks not working
+
 ```bash
 # Re-run setup for the worktree
 cd ../..  # Go to repo root
@@ -237,12 +294,14 @@ cd ../..  # Go to repo root
 ```
 
 ### Dependencies out of sync
+
 ```bash
 # From any worktree
 npm install
 ```
 
 ### Worktree cleanup
+
 ```bash
 # Remove a worktree
 git worktree remove wt/<branch-name>

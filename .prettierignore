@@ -1,0 +1,9 @@
+dist
+build
+.svelte-kit
+node_modules
+package-lock.json
+.claude
+.planning
+.scratch
+*.min.js

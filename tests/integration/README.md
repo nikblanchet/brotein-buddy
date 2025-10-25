@@ -5,6 +5,6 @@ Note: Integration tests for Svelte 5 components with @testing-library/svelte are
 This will be addressed in a future update once the library adds full Svelte 5 support.
 
 For now, we rely on:
+
 - Unit tests for logic
 - E2E tests for component behavior
-
