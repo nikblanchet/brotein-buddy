@@ -7,7 +7,23 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default [
+  // Ignores must come first
+  {
+    ignores: [
+      'dist',
+      'build',
+      '.svelte-kit',
+      'node_modules',
+      'vite.config.ts',
+      'svelte.config.js',
+      '.claude',
+      '.planning',
+      '.scratch',
+    ],
+  },
+  // Base JavaScript config
   js.configs.recommended,
+  // TypeScript files
   {
     files: ['**/*.js', '**/*.ts'],
     languageOptions: {
@@ -36,6 +52,7 @@ export default [
       ],
     },
   },
+  // Svelte files
   {
     files: ['**/*.svelte'],
     languageOptions: {
@@ -56,18 +73,6 @@ export default [
       ...svelte.configs.recommended.rules,
     },
   },
+  // Prettier must come last to override conflicting rules
   prettier,
-  {
-    ignores: [
-      'dist',
-      'build',
-      '.svelte-kit',
-      'node_modules',
-      '*.config.js',
-      '*.config.ts',
-      '.claude',
-      '.planning',
-      '.scratch',
-    ],
-  },
 ];
