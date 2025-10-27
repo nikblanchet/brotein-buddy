@@ -359,6 +359,38 @@ The BroteinBuddy data model uses TypeScript interfaces to define the structure o
 - [ADR-002: Data Model Design](docs/adr/002-data-model-design.md) - Design rationale and alternatives considered
 - [tests/unit/models.test.ts](tests/unit/models.test.ts) - Comprehensive type guard tests (100% coverage)
 
+### Storage Layer
+
+The storage layer provides persistence for application state using browser localStorage. All storage operations are isolated in a dedicated abstraction layer that handles validation, error recovery, and schema migrations.
+
+**Core functions:**
+
+- **`loadState()`**: Retrieves application state from localStorage with validation. Never fails - returns default state on any error.
+- **`saveState(state)`**: Persists application state to localStorage with pre-save validation. Throws on invalid state or quota exceeded.
+- **`clearState()`**: Removes all stored data (for testing and reset functionality).
+
+**Key design decisions:**
+
+- localStorage chosen over IndexedDB for simplicity (data size < 10KB)
+- Type guards used for validation (no external dependencies like Zod)
+- Graceful error handling: corrupted data returns default state, never crashes
+- Migration framework in place for future schema evolution
+- Storage operations are synchronous (acceptable for small data size)
+
+**Error handling philosophy:**
+
+- **Expected errors** (missing data, corrupted JSON) → log warning, return default state
+- **Quota exceeded** → throw exception for UI to handle
+- **Invalid state on save** → throw error (programming bug)
+- Never lose user data due to storage failures
+
+**See:**
+
+- [src/lib/storage.ts](src/lib/storage.ts) - Storage abstraction implementation
+- [ADR-003: LocalStorage Strategy](docs/adr/003-localstorage-strategy.md) - Why localStorage, validation approach, migration strategy
+- [tests/unit/storage.test.ts](tests/unit/storage.test.ts) - Comprehensive storage tests (100% coverage)
+- [docs/teaching/1.2-web-storage-best-practices.md](docs/teaching/1.2-web-storage-best-practices.md) - Deep dive on web storage patterns
+
 ### Key Algorithms
 
 - **Weighted random selection**: Picks flavors based on total quantity
