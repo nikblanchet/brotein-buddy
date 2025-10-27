@@ -366,7 +366,7 @@ BroteinBuddy maintains comprehensive documentation across multiple formats, each
 
 - **DEVELOPING.md**: This file - complete setup guide, development workflow, architecture overview, and troubleshooting
 - **docs/adr/**: Architecture Decision Records documenting design decisions and their rationale
-- **docs/api/**: API documentation (intentionally deferred until Phase 1 when API exists)
+- **docs/api/**: API documentation (reserved for future use - intentionally deferred until Phase 1 when the application API exists)
 - **Teaching docs**: Educational documents explaining concepts and patterns (in `.planning/teaching/`)
 
 **Project Planning:**
@@ -399,7 +399,7 @@ We use ADRs to document significant architectural and design decisions. Each ADR
 **How to write an ADR:**
 
 1. Copy `docs/adr/000-template.md` to `docs/adr/XXX-your-decision.md`
-   - Use sequential numbering: 001, 002, 003, etc.
+   - Use zero-padded 3-digit sequential numbering: 001, 002, 003, etc.
    - Use descriptive kebab-case names: `002-data-model-design.md`
 2. Fill in all sections thoroughly
 3. Consider multiple alternatives and document why they weren't chosen
