@@ -18,9 +18,6 @@ import { type AppState, createDefaultAppState } from '../../src/types/models';
 const STORAGE_KEY = 'BROTEINBUDDY_APP_STATE';
 
 describe('storage', () => {
-  // Save and restore original localStorage
-  let originalLocalStorage: Storage;
-
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
