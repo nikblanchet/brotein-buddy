@@ -337,14 +337,27 @@ All worktrees automatically have access to these skills and agents via symlinks.
 
 ### Data Model
 
-Data model design decisions will be documented in a future ADR when Phase 1 begins.
+The BroteinBuddy data model uses TypeScript interfaces to define the structure of the application's domain. All type definitions are located in `src/types/models.ts` with comprehensive JSDoc documentation.
 
 **Core types:**
 
-- `Flavor`: Represents a protein shake flavor
-- `Box`: A physical box containing bottles of one flavor
-- `Location`: (x: stack, y: height) coordinates
-- `AppState`: Complete application state
+- **`Location`**: 2D coordinate system for physical storage (stack, height)
+- **`Flavor`**: Protein shake flavor with ID, name, and random selection preference
+- **`Box`**: Physical box containing bottles of a single flavor, with quantity and location
+- **`AppState`**: Root state object containing all boxes, flavors, and settings
+
+**Key design decisions:**
+
+- Normalized structure: Boxes reference flavors by ID (not embedded)
+- Runtime type guards for validating data loaded from LocalStorage
+- Simple coordinate system: stack (horizontal) and height (vertical)
+- All types serialize cleanly to JSON for LocalStorage persistence
+
+**See:**
+
+- [src/types/models.ts](src/types/models.ts) - Full type definitions with JSDoc
+- [ADR-002: Data Model Design](docs/adr/002-data-model-design.md) - Design rationale and alternatives considered
+- [tests/unit/models.test.ts](tests/unit/models.test.ts) - Comprehensive type guard tests (100% coverage)
 
 ### Key Algorithms
 
@@ -387,6 +400,7 @@ We use ADRs to document significant architectural and design decisions. Each ADR
 
 - [ADR-000: Template](docs/adr/000-template.md) - Template for new ADRs
 - [ADR-001: Technology Stack Selection](docs/adr/001-technology-stack-selection.md) - Svelte, TypeScript, LocalStorage, PWA
+- [ADR-002: Data Model Design](docs/adr/002-data-model-design.md) - Normalized ID-based structure, type guards, location system
 
 **When to write an ADR:**
 
