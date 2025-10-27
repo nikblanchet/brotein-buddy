@@ -1,5 +1,8 @@
 # BroteinBuddy
 
+![CI](https://github.com/nikblanchet/brotein-buddy/workflows/CI/badge.svg)
+[![codecov](https://codecov.io/gh/nikblanchet/brotein-buddy/branch/main/graph/badge.svg)](https://codecov.io/gh/nikblanchet/brotein-buddy)
+
 A Progressive Web App for tracking your protein shake inventory by flavor and location.
 
 ## Features

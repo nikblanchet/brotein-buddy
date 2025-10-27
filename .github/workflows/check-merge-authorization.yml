@@ -1,0 +1,23 @@
+name: Check merge authorization
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  verify-author:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PR author is authorized to merge
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          AUTHORIZED_USER="nikblanchet"
+
+          if [ "$AUTHOR" != "$AUTHORIZED_USER" ]; then
+            echo "ERROR: Only $AUTHORIZED_USER can create PRs that are mergeable to main"
+            echo "PR author: $AUTHOR"
+            exit 1
+          fi
+
+          echo "PR author verified: $AUTHOR"
+          echo "Status: AUTHORIZED"
