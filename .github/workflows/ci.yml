@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Check code formatting
+        run: npm run format:check
+
+      - name: Run type check
+        run: npm run check
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        # Vitest is configured with 90% coverage thresholds and will fail if not met
+
+      # E2E tests deferred until Phase 1-2 when there's actual app functionality to test
+      # Current E2E tests are examples that expect placeholder content
+      # Uncomment when ready:
+      # - name: Install Playwright browsers
+      #   run: npx playwright install --with-deps
+      # - name: Run E2E tests
+      #   run: npm run test:e2e
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
