@@ -14,6 +14,7 @@ export default [
       'build',
       '.svelte-kit',
       'node_modules',
+      'coverage',
       'vite.config.ts',
       'svelte.config.js',
       '.claude',
