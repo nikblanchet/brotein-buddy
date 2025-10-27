@@ -39,15 +39,20 @@ We need to select a technology stack that:
 We will use the following technology stack:
 
 **Frontend Framework:** Svelte 5 + TypeScript
+
 **Build Tool:** Vite
+
 **Testing:**
 
 - Vitest for unit and integration tests
 - Playwright for end-to-end tests
 - @testing-library/svelte for component testing
-  **Data Persistence:** LocalStorage
-  **Deployment:** Vercel with GitHub Actions CI/CD
-  **Progressive Web App:** PWA manifest + service worker (using Vite PWA plugin)
+
+**Data Persistence:** LocalStorage
+
+**Deployment:** Vercel with GitHub Actions CI/CD
+
+**Progressive Web App:** PWA manifest + service worker (using Vite PWA plugin)
 
 ### Implementation Details
 
