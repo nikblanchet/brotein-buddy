@@ -180,3 +180,121 @@ export interface AppState {
   /** Application-wide settings and preferences */
   settings: Settings;
 }
+
+/**
+ * Type guard to check if a value is a valid Location.
+ *
+ * @param value - The value to check
+ * @returns true if value is a valid Location
+ *
+ * @example
+ * ```typescript
+ * const data = JSON.parse(localStorage.getItem('location'));
+ * if (isLocation(data)) {
+ *   // TypeScript knows data is a Location here
+ *   console.log(data.stack, data.height);
+ * }
+ * ```
+ */
+export function isLocation(value: unknown): value is Location {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'stack' in value &&
+    'height' in value &&
+    typeof (value as Location).stack === 'number' &&
+    typeof (value as Location).height === 'number' &&
+    (value as Location).stack >= 0 &&
+    (value as Location).height >= 0 &&
+    Number.isInteger((value as Location).stack) &&
+    Number.isInteger((value as Location).height)
+  );
+}
+
+/**
+ * Type guard to check if a value is a valid Flavor.
+ *
+ * @param value - The value to check
+ * @returns true if value is a valid Flavor
+ */
+export function isFlavor(value: unknown): value is Flavor {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'name' in value &&
+    'excludeFromRandom' in value &&
+    typeof (value as Flavor).id === 'string' &&
+    typeof (value as Flavor).name === 'string' &&
+    typeof (value as Flavor).excludeFromRandom === 'boolean' &&
+    (value as Flavor).id.length > 0 &&
+    (value as Flavor).name.length > 0
+  );
+}
+
+/**
+ * Type guard to check if a value is a valid Box.
+ *
+ * @param value - The value to check
+ * @returns true if value is a valid Box
+ */
+export function isBox(value: unknown): value is Box {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'flavorId' in value &&
+    'quantity' in value &&
+    'location' in value &&
+    'isOpen' in value &&
+    typeof (value as Box).id === 'string' &&
+    typeof (value as Box).flavorId === 'string' &&
+    typeof (value as Box).quantity === 'number' &&
+    typeof (value as Box).isOpen === 'boolean' &&
+    (value as Box).id.length > 0 &&
+    (value as Box).flavorId.length > 0 &&
+    (value as Box).quantity >= 0 &&
+    Number.isInteger((value as Box).quantity) &&
+    isLocation((value as Box).location)
+  );
+}
+
+/**
+ * Type guard to check if a value is a valid AppState.
+ *
+ * @param value - The value to check
+ * @returns true if value is a valid AppState
+ */
+export function isAppState(value: unknown): value is AppState {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'boxes' in value &&
+    'flavors' in value &&
+    'favoriteFlavorId' in value &&
+    'settings' in value &&
+    Array.isArray((value as AppState).boxes) &&
+    Array.isArray((value as AppState).flavors) &&
+    (value as AppState).boxes.every(isBox) &&
+    (value as AppState).flavors.every(isFlavor) &&
+    ((value as AppState).favoriteFlavorId === null ||
+      typeof (value as AppState).favoriteFlavorId === 'string') &&
+    typeof (value as AppState).settings === 'object' &&
+    (value as AppState).settings !== null
+  );
+}
+
+/**
+ * Creates a default empty AppState.
+ * Useful for initialization and fallback when loading from storage fails.
+ *
+ * @returns A new empty AppState object
+ */
+export function createDefaultAppState(): AppState {
+  return {
+    boxes: [],
+    flavors: [],
+    favoriteFlavorId: null,
+    settings: {},
+  };
+}
