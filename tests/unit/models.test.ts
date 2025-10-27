@@ -274,6 +274,7 @@ describe('isBox', () => {
 describe('isAppState', () => {
   it('returns true for valid empty AppState', () => {
     const validAppState: AppState = {
+      version: 1,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
@@ -284,6 +285,7 @@ describe('isAppState', () => {
 
   it('returns true for AppState with data', () => {
     const appState: AppState = {
+      version: 1,
       boxes: [
         {
           id: 'box_001',
@@ -308,6 +310,7 @@ describe('isAppState', () => {
 
   it('returns true for AppState with null favoriteFlavorId', () => {
     const appState: AppState = {
+      version: 1,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
@@ -316,8 +319,74 @@ describe('isAppState', () => {
     expect(isAppState(appState)).toBe(true);
   });
 
+  it('returns true for AppState with future version', () => {
+    const appState = {
+      version: 2,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(appState)).toBe(true);
+  });
+
+  it('returns false for missing version', () => {
+    const invalidAppState = {
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false for non-numeric version', () => {
+    const invalidAppState = {
+      version: '1',
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false for negative version', () => {
+    const invalidAppState = {
+      version: -1,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false for zero version', () => {
+    const invalidAppState = {
+      version: 0,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false for non-integer version', () => {
+    const invalidAppState = {
+      version: 1.5,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
   it('returns false for non-array boxes', () => {
     const invalidAppState = {
+      version: 1,
       boxes: 'not an array',
       flavors: [],
       favoriteFlavorId: null,
@@ -328,6 +397,7 @@ describe('isAppState', () => {
 
   it('returns false for non-array flavors', () => {
     const invalidAppState = {
+      version: 1,
       boxes: [],
       flavors: 'not an array',
       favoriteFlavorId: null,
@@ -338,6 +408,7 @@ describe('isAppState', () => {
 
   it('returns false for invalid box in boxes array', () => {
     const invalidAppState = {
+      version: 1,
       boxes: [{ id: '', flavorId: 'invalid', quantity: -1 }],
       flavors: [],
       favoriteFlavorId: null,
@@ -348,6 +419,7 @@ describe('isAppState', () => {
 
   it('returns false for invalid flavor in flavors array', () => {
     const invalidAppState = {
+      version: 1,
       boxes: [],
       flavors: [{ id: '', name: 'Invalid' }],
       favoriteFlavorId: null,
@@ -358,6 +430,7 @@ describe('isAppState', () => {
 
   it('returns false for numeric favoriteFlavorId', () => {
     const invalidAppState = {
+      version: 1,
       boxes: [],
       flavors: [],
       favoriteFlavorId: 123,
@@ -368,6 +441,7 @@ describe('isAppState', () => {
 
   it('returns false for null settings', () => {
     const invalidAppState = {
+      version: 1,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
@@ -378,6 +452,7 @@ describe('isAppState', () => {
 
   it('returns false for missing boxes', () => {
     const invalidAppState = {
+      version: 1,
       flavors: [],
       favoriteFlavorId: null,
       settings: {},
@@ -398,6 +473,11 @@ describe('createDefaultAppState', () => {
   it('creates a valid empty AppState', () => {
     const defaultState = createDefaultAppState();
     expect(isAppState(defaultState)).toBe(true);
+  });
+
+  it('has version 1', () => {
+    const defaultState = createDefaultAppState();
+    expect(defaultState.version).toBe(1);
   });
 
   it('has empty boxes array', () => {

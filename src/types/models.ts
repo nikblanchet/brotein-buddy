@@ -130,12 +130,26 @@ export interface Box {
 /**
  * Application-wide settings and preferences.
  *
+ * @example
+ * ```typescript
+ * // v1: Empty settings object
+ * const currentSettings: Settings = {};
+ *
+ * // Future v2 might include:
+ * const futureSettings: Settings = {
+ *   theme: 'dark',
+ *   defaultBoxQuantity: 12,
+ *   enableNotifications: true,
+ *   sortBoxesBy: 'flavor'
+ * };
+ * ```
+ *
  * @remarks
  * This interface is intentionally minimal in v1. Future settings might include:
- * - Theme preferences
- * - Display options
- * - Notification preferences
- * - Default quantity values
+ * - Theme preferences (light/dark/auto)
+ * - Display options (sort order, view mode)
+ * - Notification preferences (low stock alerts)
+ * - Default quantity values for new boxes
  */
 export interface Settings {
   /** Placeholder for future settings. Currently empty. */
@@ -151,6 +165,7 @@ export interface Settings {
  * @example
  * ```typescript
  * const initialState: AppState = {
+ *   version: 1,
  *   boxes: [],
  *   flavors: [],
  *   favoriteFlavorId: null,
@@ -160,11 +175,19 @@ export interface Settings {
  *
  * @remarks
  * - This entire structure is persisted to LocalStorage as JSON
- * - Schema versioning should be added in the future for migrations
+ * - Schema version enables graceful migrations when structure changes
  * - All references between objects use IDs (normalized structure)
  * - favoriteFlavorId enables quick-pick functionality from home screen
+ * - Current version is 1 (initial schema)
  */
 export interface AppState {
+  /**
+   * Schema version number for migration support.
+   * Increment when making breaking changes to the data structure.
+   * Current version: 1
+   */
+  version: number;
+
   /** All boxes in inventory, including empty boxes if kept for tracking */
   boxes: Box[];
 
@@ -189,6 +212,17 @@ export interface AppState {
  *
  * @example
  * ```typescript
+ * // Valid locations
+ * isLocation({ stack: 0, height: 0 }); // true
+ * isLocation({ stack: 5, height: 2 }); // true
+ *
+ * // Invalid locations
+ * isLocation({ stack: -1, height: 0 }); // false (negative)
+ * isLocation({ stack: 1.5, height: 0 }); // false (non-integer)
+ * isLocation({ stack: 0 }); // false (missing height)
+ * isLocation(null); // false
+ *
+ * // Usage with LocalStorage
  * const data = JSON.parse(localStorage.getItem('location'));
  * if (isLocation(data)) {
  *   // TypeScript knows data is a Location here
@@ -216,6 +250,19 @@ export function isLocation(value: unknown): value is Location {
  *
  * @param value - The value to check
  * @returns true if value is a valid Flavor
+ *
+ * @example
+ * ```typescript
+ * // Valid flavors
+ * isFlavor({ id: 'f1', name: 'Chocolate', excludeFromRandom: false }); // true
+ * isFlavor({ id: 'f2', name: 'Vanilla', excludeFromRandom: true }); // true
+ *
+ * // Invalid flavors
+ * isFlavor({ id: '', name: 'Chocolate', excludeFromRandom: false }); // false (empty id)
+ * isFlavor({ id: 'f1', name: '', excludeFromRandom: false }); // false (empty name)
+ * isFlavor({ id: 'f1', name: 'Chocolate' }); // false (missing excludeFromRandom)
+ * isFlavor({ id: 'f1', name: 'Chocolate', excludeFromRandom: 'false' }); // false (wrong type)
+ * ```
  */
 export function isFlavor(value: unknown): value is Flavor {
   return (
@@ -237,6 +284,32 @@ export function isFlavor(value: unknown): value is Flavor {
  *
  * @param value - The value to check
  * @returns true if value is a valid Box
+ *
+ * @example
+ * ```typescript
+ * // Valid boxes
+ * isBox({
+ *   id: 'b1',
+ *   flavorId: 'f1',
+ *   quantity: 12,
+ *   location: { stack: 0, height: 0 },
+ *   isOpen: false
+ * }); // true
+ *
+ * isBox({
+ *   id: 'b2',
+ *   flavorId: 'f2',
+ *   quantity: 0,
+ *   location: { stack: 1, height: 2 },
+ *   isOpen: true
+ * }); // true
+ *
+ * // Invalid boxes
+ * isBox({ id: '', flavorId: 'f1', quantity: 12, location: {...}, isOpen: false }); // false (empty id)
+ * isBox({ id: 'b1', flavorId: 'f1', quantity: -1, location: {...}, isOpen: false }); // false (negative quantity)
+ * isBox({ id: 'b1', flavorId: 'f1', quantity: 12.5, location: {...}, isOpen: false }); // false (non-integer)
+ * isBox({ id: 'b1', flavorId: 'f1', quantity: 12, location: { stack: -1, height: 0 }, isOpen: false }); // false (invalid location)
+ * ```
  */
 export function isBox(value: unknown): value is Box {
   return (
@@ -264,15 +337,31 @@ export function isBox(value: unknown): value is Box {
  *
  * @param value - The value to check
  * @returns true if value is a valid AppState
+ *
+ * @example
+ * ```typescript
+ * const data = JSON.parse(localStorage.getItem('appState'));
+ * if (isAppState(data)) {
+ *   // TypeScript knows data is AppState
+ *   console.log(`Loaded ${data.boxes.length} boxes`);
+ * } else {
+ *   // Invalid data, use default
+ *   const state = createDefaultAppState();
+ * }
+ * ```
  */
 export function isAppState(value: unknown): value is AppState {
   return (
     typeof value === 'object' &&
     value !== null &&
+    'version' in value &&
     'boxes' in value &&
     'flavors' in value &&
     'favoriteFlavorId' in value &&
     'settings' in value &&
+    typeof (value as AppState).version === 'number' &&
+    (value as AppState).version >= 1 &&
+    Number.isInteger((value as AppState).version) &&
     Array.isArray((value as AppState).boxes) &&
     Array.isArray((value as AppState).flavors) &&
     (value as AppState).boxes.every(isBox) &&
@@ -288,10 +377,11 @@ export function isAppState(value: unknown): value is AppState {
  * Creates a default empty AppState.
  * Useful for initialization and fallback when loading from storage fails.
  *
- * @returns A new empty AppState object
+ * @returns A new empty AppState object with current schema version
  */
 export function createDefaultAppState(): AppState {
   return {
+    version: 1,
     boxes: [],
     flavors: [],
     favoriteFlavorId: null,
