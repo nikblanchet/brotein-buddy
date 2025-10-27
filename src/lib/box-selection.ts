@@ -82,10 +82,7 @@ import type { Box } from '../types/models';
  * const selectedBox = selectPriorityBox(boxes, 'chocolate');
  * ```
  */
-export function selectPriorityBox(
-  boxes: Box[],
-  flavorId: string,
-): Box | null {
+export function selectPriorityBox(boxes: Box[], flavorId: string): Box | null {
   // Filter to only boxes of the requested flavor
   const matchingBoxes = boxes.filter((box) => box.flavorId === flavorId);
 
