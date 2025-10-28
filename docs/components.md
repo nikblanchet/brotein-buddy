@@ -95,10 +95,10 @@ Accessible modal dialog with backdrop, focus management, and smooth animations.
 <Modal open={isOpen} title="Confirm Action" onclose={() => (isOpen = false)}>
   <p>Are you sure you want to continue?</p>
 
-  <svelte:fragment slot="footer">
+  {#snippet footer()}
     <Button variant="secondary" onclick={() => (isOpen = false)}>Cancel</Button>
     <Button variant="primary" onclick={handleConfirm}>Confirm</Button>
-  </svelte:fragment>
+  {/snippet}
 </Modal>
 ```
 
@@ -113,10 +113,27 @@ Accessible modal dialog with backdrop, focus management, and smooth animations.
 | `closeOnEscape`   | `boolean`                          | `true`   | Whether Escape key closes modal        |
 | `size`            | `'sm' \| 'base' \| 'lg' \| 'full'` | `'base'` | Modal size variant                     |
 
-### Slots
+### Content (Svelte 5 Snippets)
 
-- **default**: Modal content area
+The Modal component uses Svelte 5 snippets for content:
+
+- **children**: Modal content area (default content, passed as children)
 - **footer**: Optional footer area (typically for action buttons)
+
+**Usage:**
+
+```svelte
+<Modal ...>
+  <!-- Default content goes here -->
+  <p>Modal body content</p>
+
+  <!-- Footer snippet (optional) -->
+  {#snippet footer()}
+    <Button>Cancel</Button>
+    <Button variant="primary">Confirm</Button>
+  {/snippet}
+</Modal>
+```
 
 ### Sizes
 
