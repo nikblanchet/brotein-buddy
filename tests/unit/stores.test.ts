@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import { appState, loadStateFromStorage } from '../../src/lib/stores';
+import { appState, loadStateFromStorage, addBox } from '../../src/lib/stores';
 import type { Box, Flavor, Location } from '../../src/types/models';
 
 /**
@@ -201,6 +201,68 @@ describe('stores', () => {
 
       setItemSpy.mockRestore();
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Box Operations', () => {
+    describe('addBox', () => {
+      it('should add a new box to the state', () => {
+        const box = createTestBox();
+        addBox(box);
+
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(1);
+        expect(state.boxes[0]).toEqual(box);
+      });
+
+      it('should persist added box to localStorage', () => {
+        const box = createTestBox({ id: 'box_persist_test' });
+        addBox(box);
+
+        // Verify localStorage was updated
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.boxes).toHaveLength(1);
+        expect(parsed.boxes[0].id).toBe('box_persist_test');
+      });
+
+      it('should throw error when adding box with duplicate ID', () => {
+        const box1 = createTestBox({ id: 'box_duplicate' });
+        const box2 = createTestBox({ id: 'box_duplicate' });
+
+        addBox(box1);
+
+        expect(() => addBox(box2)).toThrow('Box with ID "box_duplicate" already exists');
+
+        // Verify only one box exists
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(1);
+      });
+
+      it('should allow adding multiple boxes with different IDs', () => {
+        const box1 = createTestBox({ id: 'box_1' });
+        const box2 = createTestBox({ id: 'box_2' });
+        const box3 = createTestBox({ id: 'box_3' });
+
+        addBox(box1);
+        addBox(box2);
+        addBox(box3);
+
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(3);
+        expect(state.boxes.map((b) => b.id)).toEqual(['box_1', 'box_2', 'box_3']);
+      });
+
+      it('should not validate flavorId (allows adding boxes before flavors)', () => {
+        const box = createTestBox({ flavorId: 'nonexistent_flavor' });
+
+        // Should not throw even though flavor doesn't exist
+        expect(() => addBox(box)).not.toThrow();
+
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(1);
+        expect(state.boxes[0].flavorId).toBe('nonexistent_flavor');
+      });
     });
   });
 });

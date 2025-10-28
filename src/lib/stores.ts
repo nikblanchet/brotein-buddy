@@ -10,7 +10,7 @@
 
 import { writable, type Writable } from 'svelte/store';
 import { loadState, saveState } from './storage';
-import type { AppState } from '../types/models';
+import type { AppState, Box } from '../types/models';
 
 /**
  * Creates the application state store with auto-save functionality.
@@ -78,4 +78,45 @@ export const appState = createAppStore();
  */
 export function loadStateFromStorage(): void {
   appState.set(loadState());
+}
+
+/**
+ * Adds a new box to the inventory.
+ *
+ * The box must have a unique ID. If a box with the same ID already exists,
+ * an error is thrown.
+ *
+ * @param box - The box to add to inventory
+ * @throws {Error} If a box with the same ID already exists
+ *
+ * @example
+ * ```typescript
+ * const newBox: Box = {
+ *   id: 'box_001',
+ *   flavorId: 'flavor_chocolate',
+ *   quantity: 12,
+ *   location: { stack: 1, height: 0 },
+ *   isOpen: false
+ * };
+ * addBox(newBox);
+ * ```
+ *
+ * @remarks
+ * - ID must be unique across all boxes
+ * - FlavorId is not validated (allows adding boxes before flavors)
+ * - State update and auto-save happen immediately
+ */
+export function addBox(box: Box): void {
+  appState.update((state) => {
+    // Check for duplicate ID
+    if (state.boxes.some((b) => b.id === box.id)) {
+      throw new Error(`Box with ID "${box.id}" already exists`);
+    }
+
+    // Create new state with box added
+    return {
+      ...state,
+      boxes: [...state.boxes, box],
+    };
+  });
 }
