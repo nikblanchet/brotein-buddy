@@ -391,6 +391,35 @@ The storage layer provides persistence for application state using browser local
 - [tests/unit/storage.test.ts](tests/unit/storage.test.ts) - Comprehensive storage tests (100% coverage)
 - [docs/teaching/1.2-web-storage-best-practices.md](docs/teaching/1.2-web-storage-best-practices.md) - Deep dive on web storage patterns
 
+### Component Library
+
+The BroteinBuddy UI is built on a custom design system with reusable components. All components use CSS variables (design tokens) for consistency and maintainability.
+
+**Core components:**
+
+- **Button**: Versatile button with 4 variants (primary, secondary, danger, ghost) and 3 sizes (sm, base, lg)
+- **Modal**: Accessible dialog with animations, focus management, and configurable close behavior
+- **NumberPad**: Touch-friendly number entry (1-12 grid) with 44px minimum touch targets
+
+**Design tokens** (`src/styles/variables.css`):
+
+- Colors (primary, semantic, surfaces, text, borders)
+- Typography (font sizes, weights, line heights)
+- Spacing (4px grid system)
+- Border radius, shadows, transitions
+- Z-index layers for overlays
+- Touch target minimums (44px per iOS HIG)
+
+**Component demo:** Run `npm run dev` to see interactive examples of all components with various configurations.
+
+**See:**
+
+- [docs/components.md](docs/components.md) - Complete component API documentation with examples
+- [ADR-005: Design System](docs/adr/005-design-system.md) - Design decisions (CSS variables vs Tailwind, color palette, accessibility standards)
+- [src/lib/ComponentDemo.svelte](src/lib/ComponentDemo.svelte) - Interactive component showcase
+- [src/styles/variables.css](src/styles/variables.css) - All design tokens
+- [src/styles/utilities.css](src/styles/utilities.css) - Common utility classes
+
 ### Key Algorithms
 
 - **Weighted random selection**: Picks flavors based on total quantity
