@@ -391,85 +391,34 @@ The storage layer provides persistence for application state using browser local
 - [tests/unit/storage.test.ts](tests/unit/storage.test.ts) - Comprehensive storage tests (100% coverage)
 - [docs/teaching/1.2-web-storage-best-practices.md](docs/teaching/1.2-web-storage-best-practices.md) - Deep dive on web storage patterns
 
-### State Management
+### Component Library
 
-The application uses Svelte's built-in writable store for reactive state management, with automatic LocalStorage persistence. The store layer wraps the storage abstraction and provides action functions for all CRUD operations.
+The BroteinBuddy UI is built on a custom design system with reusable components. All components use CSS variables (design tokens) for consistency and maintainability.
 
-**Core API:**
+**Core components:**
 
-```typescript
-import {
-  appState,
-  loadStateFromStorage,
-  addBox,
-  removeBox,
-  updateBoxQuantity,
-  updateBoxLocation,
-  addFlavor,
-  updateFlavor,
-  setFavoriteFlavor,
-} from '$lib/stores';
+- **Button**: Versatile button with 4 variants (primary, secondary, danger, ghost) and 3 sizes (sm, base, lg)
+- **Modal**: Accessible dialog with animations, focus management, and configurable close behavior
+- **NumberPad**: Touch-friendly number entry (1-12 grid) with 44px minimum touch targets
 
-// Subscribe to state changes (in components)
-$: boxes = $appState.boxes;
-$: flavors = $appState.flavors;
+**Design tokens** (`src/styles/variables.css`):
 
-// Modify state (via action functions)
-addBox({ id: 'box_1', flavorId: 'chocolate', quantity: 12, ... });
-updateBoxQuantity('box_1', 11);
-removeBox('box_1');
-```
+- Colors (primary, semantic, surfaces, text, borders)
+- Typography (font sizes, weights, line heights)
+- Spacing (4px grid system)
+- Border radius, shadows, transitions
+- Z-index layers for overlays
+- Touch target minimums (44px per iOS HIG)
 
-**Key design decisions:**
-
-- **Single writable store** containing full AppState (not multiple stores)
-- **Action functions** for mutations (not methods, more testable and Svelte-idiomatic)
-- **Auto-save on every change** via subscription (no manual save, immediate persistence)
-- **Immutable updates** using spread operators (no direct mutations)
-- **Validation errors throw** (caller handles UI feedback)
-- **Storage errors log** (app continues, state held in memory)
-- **No referential integrity checks** (allows flexible setup order)
-
-**Example usage in components:**
-
-```svelte
-<script lang="ts">
-  import { appState, updateBoxQuantity } from '$lib/stores';
-
-  function useOneBottle(boxId: string) {
-    const box = $appState.boxes.find((b) => b.id === boxId);
-    if (box) {
-      updateBoxQuantity(boxId, box.quantity - 1);
-    }
-  }
-</script>
-
-<div>
-  {#each $appState.boxes as box}
-    <button on:click={() => useOneBottle(box.id)}>
-      Use from {box.id} ({box.quantity} left)
-    </button>
-  {/each}
-</div>
-```
-
-**Error handling:**
-
-```typescript
-try {
-  addBox(newBox);
-} catch (error) {
-  // Duplicate ID or validation error
-  alert(error.message);
-}
-```
+**Component demo:** Run `npm run dev` to see interactive examples of all components with various configurations.
 
 **See:**
 
-- [src/lib/stores.ts](src/lib/stores.ts) - Store implementation with comprehensive JSDoc
-- [ADR-004: State Management Approach](docs/adr/004-state-management-approach.md) - Design decisions and alternatives considered
-- [tests/unit/stores.test.ts](tests/unit/stores.test.ts) - 51 comprehensive tests (100% coverage)
-- [docs/teaching/1.5-svelte-stores-localstorage.md](docs/teaching/1.5-svelte-stores-localstorage.md) - Deep dive on Svelte stores and patterns
+- [docs/components.md](docs/components.md) - Complete component API documentation with examples
+- [ADR-005: Design System](docs/adr/005-design-system.md) - Design decisions (CSS variables vs Tailwind, color palette, accessibility standards)
+- [src/lib/ComponentDemo.svelte](src/lib/ComponentDemo.svelte) - Interactive component showcase
+- [src/styles/variables.css](src/styles/variables.css) - All design tokens
+- [src/styles/utilities.css](src/styles/utilities.css) - Common utility classes
 
 ### Key Algorithms
 
