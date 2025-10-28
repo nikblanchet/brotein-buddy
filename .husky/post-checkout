@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Post-checkout hook: Runs after git checkout, git switch, and during git pull
+# Automatically installs dependencies if package files changed
+#
+# Arguments: $1 = previous HEAD, $2 = new HEAD, $3 = flag (1 = branch, 0 = file)
+
+# Only run on branch checkouts, not file checkouts
+if [ "$3" = "1" ]; then
+  # Get list of files that changed between previous and new HEAD
+  changed_files=$(git diff --name-only $1 $2)
+
+  # Call shared dependency checker
+  .husky/check-dependencies.sh "post-checkout" "$changed_files"
+fi
