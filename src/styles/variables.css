@@ -1,0 +1,162 @@
+/**
+ * Design System Variables
+ *
+ * Defines all design tokens for the BroteinBuddy application including:
+ * - Color palette (light and dark mode)
+ * - Typography scale
+ * - Spacing scale
+ * - Border radius values
+ * - Shadow definitions
+ * - Transition timings
+ *
+ * All components should reference these CSS variables instead of hardcoding values.
+ * This ensures consistency across the application and makes theming easier.
+ */
+
+:root {
+  /* ========================================
+     Colors - Primary
+     ======================================== */
+  --color-primary: #646cff;
+  --color-primary-hover: #535bf2;
+  --color-primary-active: #4248d6;
+
+  /* ========================================
+     Colors - Semantic
+     ======================================== */
+  --color-success: #22c55e;
+  --color-success-hover: #16a34a;
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+
+  /* ========================================
+     Colors - Surfaces
+     ======================================== */
+  --color-surface-100: #ffffff;
+  --color-surface-200: #f9f9f9;
+  --color-surface-300: #e5e5e5;
+  --color-surface-400: #d4d4d4;
+
+  /* ========================================
+     Colors - Text
+     ======================================== */
+  --color-text-primary: rgba(0, 0, 0, 0.87);
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
+  --color-text-inverse: rgba(255, 255, 255, 0.87);
+
+  /* ========================================
+     Colors - Borders
+     ======================================== */
+  --color-border-light: rgba(0, 0, 0, 0.12);
+  --color-border-medium: rgba(0, 0, 0, 0.24);
+  --color-border-heavy: rgba(0, 0, 0, 0.38);
+
+  /* ========================================
+     Typography
+     ======================================== */
+  --font-family-base: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 2rem; /* 32px */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ========================================
+     Spacing
+     ======================================== */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+
+  /* ========================================
+     Border Radius
+     ======================================== */
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ========================================
+     Shadows
+     ======================================== */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ========================================
+     Transitions
+     ======================================== */
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+  --transition-slow: 350ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ========================================
+     Z-Index
+     ======================================== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ========================================
+     Touch Targets
+     ======================================== */
+  --touch-target-min: 44px; /* iOS HIG minimum touch target size */
+}
+
+/**
+ * Dark Mode Overrides
+ *
+ * Applied automatically based on system preference.
+ * Overrides surface, text, and border colors for dark mode.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces */
+    --color-surface-100: #1a1a1a;
+    --color-surface-200: #242424;
+    --color-surface-300: #2e2e2e;
+    --color-surface-400: #383838;
+
+    /* Text */
+    --color-text-primary: rgba(255, 255, 255, 0.87);
+    --color-text-secondary: rgba(255, 255, 255, 0.6);
+    --color-text-disabled: rgba(255, 255, 255, 0.38);
+    --color-text-inverse: rgba(0, 0, 0, 0.87);
+
+    /* Borders */
+    --color-border-light: rgba(255, 255, 255, 0.12);
+    --color-border-medium: rgba(255, 255, 255, 0.24);
+    --color-border-heavy: rgba(255, 255, 255, 0.38);
+  }
+}
