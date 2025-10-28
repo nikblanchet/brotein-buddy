@@ -234,6 +234,59 @@ code --install-extension svelte.svelte-vscode
 - **No ESLint warnings** allowed in production builds
 - **All code must be formatted** before commit (enforced by pre-commit hook)
 
+**Emoji Usage Policy:**
+
+This project follows a strict emoji usage policy to maintain professional code and clear distinction between developer-facing and user-facing content.
+
+**PROHIBITED** (Developer-Facing Content):
+
+- Code comments and documentation strings
+- Commit messages
+- Pull request titles and descriptions
+- Issue titles and descriptions
+- Developer documentation (README, DEVELOPING, ADRs, teaching docs)
+- CLI/terminal output (even if user-facing)
+- Git history and developer communications
+
+**ALLOWED** (User-Facing UI Only):
+
+- Button labels in Svelte components (e.g., "🎲 Random Pick")
+- User-visible text in web application interfaces
+- Toast notifications and user alerts
+- Any text rendered in variable-width fonts for end users
+
+**Rationale:**
+
+- Emoji in developer-facing content signals "AI-generated code that wasn't reviewed"
+- Professional tone is critical for code review, collaboration, and maintainability
+- User-facing emoji enhances UX and provides visual hierarchy
+- Clear guidelines prevent inconsistency across contributors
+
+**Examples:**
+
+```typescript
+// WRONG: Emoji in code comments
+// Add the user's favorite flavor  ✅
+
+// RIGHT: No emoji in code comments
+// Add the user's favorite flavor
+```
+
+```svelte
+<!-- RIGHT: Emoji in user-facing UI -->
+<Button>🎲 Random Pick</Button>
+```
+
+```bash
+# WRONG: Emoji in commit messages
+git commit -m "Add random selection feature ✨"
+
+# RIGHT: No emoji in commit messages
+git commit -m "Add random selection feature"
+```
+
+For complete guidelines, see the `development-standards` skill.
+
 ## Claude Code Skills and Agents
 
 This project uses custom skills and agents to enhance Claude Code's capabilities with project-specific knowledge and workflows.
