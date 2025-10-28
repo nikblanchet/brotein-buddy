@@ -7,7 +7,14 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import { appState, loadStateFromStorage, addBox } from '../../src/lib/stores';
+import {
+  appState,
+  loadStateFromStorage,
+  addBox,
+  removeBox,
+  updateBoxQuantity,
+  updateBoxLocation,
+} from '../../src/lib/stores';
 import type { Box, Flavor, Location } from '../../src/types/models';
 
 /**
@@ -262,6 +269,197 @@ describe('stores', () => {
         const state = getCurrentState();
         expect(state.boxes).toHaveLength(1);
         expect(state.boxes[0].flavorId).toBe('nonexistent_flavor');
+      });
+    });
+
+    describe('removeBox', () => {
+      it('should remove a box from the state', () => {
+        const box = createTestBox({ id: 'box_to_remove' });
+        addBox(box);
+
+        let state = getCurrentState();
+        expect(state.boxes).toHaveLength(1);
+
+        removeBox('box_to_remove');
+
+        state = getCurrentState();
+        expect(state.boxes).toHaveLength(0);
+      });
+
+      it('should persist removal to localStorage', () => {
+        const box1 = createTestBox({ id: 'box_1' });
+        const box2 = createTestBox({ id: 'box_2' });
+        addBox(box1);
+        addBox(box2);
+
+        removeBox('box_1');
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.boxes).toHaveLength(1);
+        expect(parsed.boxes[0].id).toBe('box_2');
+      });
+
+      it('should throw error when removing non-existent box', () => {
+        expect(() => removeBox('nonexistent')).toThrow('Box with ID "nonexistent" not found');
+
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(0);
+      });
+
+      it('should remove correct box when multiple exist', () => {
+        const box1 = createTestBox({ id: 'box_1' });
+        const box2 = createTestBox({ id: 'box_2' });
+        const box3 = createTestBox({ id: 'box_3' });
+
+        addBox(box1);
+        addBox(box2);
+        addBox(box3);
+
+        removeBox('box_2');
+
+        const state = getCurrentState();
+        expect(state.boxes).toHaveLength(2);
+        expect(state.boxes.map((b) => b.id)).toEqual(['box_1', 'box_3']);
+      });
+    });
+
+    describe('updateBoxQuantity', () => {
+      it('should update box quantity', () => {
+        const box = createTestBox({ id: 'box_qty', quantity: 12 });
+        addBox(box);
+
+        updateBoxQuantity('box_qty', 5);
+
+        const state = getCurrentState();
+        expect(state.boxes[0].quantity).toBe(5);
+      });
+
+      it('should persist quantity update to localStorage', () => {
+        const box = createTestBox({ id: 'box_qty' });
+        addBox(box);
+
+        updateBoxQuantity('box_qty', 8);
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.boxes[0].quantity).toBe(8);
+      });
+
+      it('should allow updating quantity to zero', () => {
+        const box = createTestBox({ id: 'box_zero', quantity: 5 });
+        addBox(box);
+
+        expect(() => updateBoxQuantity('box_zero', 0)).not.toThrow();
+
+        const state = getCurrentState();
+        expect(state.boxes[0].quantity).toBe(0);
+      });
+
+      it('should throw error on negative quantity', () => {
+        const box = createTestBox({ id: 'box_neg' });
+        addBox(box);
+
+        expect(() => updateBoxQuantity('box_neg', -1)).toThrow(
+          'Quantity must be non-negative, got -1'
+        );
+      });
+
+      it('should throw error on non-integer quantity', () => {
+        const box = createTestBox({ id: 'box_float' });
+        addBox(box);
+
+        expect(() => updateBoxQuantity('box_float', 3.5)).toThrow(
+          'Quantity must be an integer, got 3.5'
+        );
+      });
+
+      it('should throw error when box not found', () => {
+        expect(() => updateBoxQuantity('nonexistent', 5)).toThrow(
+          'Box with ID "nonexistent" not found'
+        );
+      });
+
+      it('should not modify other box properties', () => {
+        const box = createTestBox({
+          id: 'box_props',
+          quantity: 12,
+          flavorId: 'flavor_test',
+          isOpen: true,
+        });
+        addBox(box);
+
+        updateBoxQuantity('box_props', 6);
+
+        const state = getCurrentState();
+        const updated = state.boxes[0];
+        expect(updated.quantity).toBe(6);
+        expect(updated.flavorId).toBe('flavor_test');
+        expect(updated.isOpen).toBe(true);
+        expect(updated.location).toEqual(box.location);
+      });
+    });
+
+    describe('updateBoxLocation', () => {
+      it('should update box location', () => {
+        const box = createTestBox({ id: 'box_loc', location: { stack: 0, height: 0 } });
+        addBox(box);
+
+        updateBoxLocation('box_loc', { stack: 2, height: 3 });
+
+        const state = getCurrentState();
+        expect(state.boxes[0].location).toEqual({ stack: 2, height: 3 });
+      });
+
+      it('should persist location update to localStorage', () => {
+        const box = createTestBox({ id: 'box_loc' });
+        addBox(box);
+
+        updateBoxLocation('box_loc', { stack: 5, height: 1 });
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.boxes[0].location).toEqual({ stack: 5, height: 1 });
+      });
+
+      it('should throw error when box not found', () => {
+        expect(() => updateBoxLocation('nonexistent', { stack: 1, height: 1 })).toThrow(
+          'Box with ID "nonexistent" not found'
+        );
+      });
+
+      it('should not modify other box properties', () => {
+        const box = createTestBox({
+          id: 'box_loc_props',
+          quantity: 12,
+          flavorId: 'flavor_test',
+          isOpen: true,
+        });
+        addBox(box);
+
+        updateBoxLocation('box_loc_props', { stack: 3, height: 2 });
+
+        const state = getCurrentState();
+        const updated = state.boxes[0];
+        expect(updated.location).toEqual({ stack: 3, height: 2 });
+        expect(updated.quantity).toBe(12);
+        expect(updated.flavorId).toBe('flavor_test');
+        expect(updated.isOpen).toBe(true);
+      });
+
+      it('should not validate location conflicts', () => {
+        const box1 = createTestBox({ id: 'box_1', location: { stack: 1, height: 0 } });
+        const box2 = createTestBox({ id: 'box_2', location: { stack: 2, height: 0 } });
+
+        addBox(box1);
+        addBox(box2);
+
+        // Should not throw even though boxes will be at same location
+        expect(() => updateBoxLocation('box_2', { stack: 1, height: 0 })).not.toThrow();
+
+        const state = getCurrentState();
+        expect(state.boxes[0].location).toEqual({ stack: 1, height: 0 });
+        expect(state.boxes[1].location).toEqual({ stack: 1, height: 0 });
       });
     });
   });

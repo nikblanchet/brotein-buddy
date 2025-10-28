@@ -10,7 +10,7 @@
 
 import { writable, type Writable } from 'svelte/store';
 import { loadState, saveState } from './storage';
-import type { AppState, Box } from '../types/models';
+import type { AppState, Box, Location } from '../types/models';
 
 /**
  * Creates the application state store with auto-save functionality.
@@ -117,6 +117,127 @@ export function addBox(box: Box): void {
     return {
       ...state,
       boxes: [...state.boxes, box],
+    };
+  });
+}
+
+/**
+ * Removes a box from the inventory.
+ *
+ * @param boxId - The ID of the box to remove
+ * @throws {Error} If no box with the given ID exists
+ *
+ * @example
+ * ```typescript
+ * removeBox('box_001');
+ * ```
+ *
+ * @remarks
+ * - Throws error if box not found (indicates programming error)
+ * - Permanently removes box from state
+ * - Cannot be undone (no undo/redo in v1)
+ */
+export function removeBox(boxId: string): void {
+  appState.update((state) => {
+    // Find box to verify it exists
+    const box = state.boxes.find((b) => b.id === boxId);
+    if (!box) {
+      throw new Error(`Box with ID "${boxId}" not found`);
+    }
+
+    // Create new state with box removed
+    return {
+      ...state,
+      boxes: state.boxes.filter((b) => b.id !== boxId),
+    };
+  });
+}
+
+/**
+ * Updates the quantity of bottles in a box.
+ *
+ * @param boxId - The ID of the box to update
+ * @param newQuantity - The new quantity (must be >= 0)
+ * @throws {Error} If box not found or quantity is negative
+ *
+ * @example
+ * ```typescript
+ * // Deduct one bottle after use
+ * const box = getCurrentBox();
+ * updateBoxQuantity(box.id, box.quantity - 1);
+ * ```
+ *
+ * @remarks
+ * - Quantity must be non-negative integer
+ * - Does not automatically remove box when quantity reaches 0
+ * - Caller should handle zero quantity (prompt to delete, keep empty, etc.)
+ */
+export function updateBoxQuantity(boxId: string, newQuantity: number): void {
+  if (newQuantity < 0) {
+    throw new Error(`Quantity must be non-negative, got ${newQuantity}`);
+  }
+
+  if (!Number.isInteger(newQuantity)) {
+    throw new Error(`Quantity must be an integer, got ${newQuantity}`);
+  }
+
+  appState.update((state) => {
+    // Find box to verify it exists
+    const boxIndex = state.boxes.findIndex((b) => b.id === boxId);
+    if (boxIndex === -1) {
+      throw new Error(`Box with ID "${boxId}" not found`);
+    }
+
+    // Create new state with updated box
+    const updatedBoxes = [...state.boxes];
+    updatedBoxes[boxIndex] = {
+      ...updatedBoxes[boxIndex],
+      quantity: newQuantity,
+    };
+
+    return {
+      ...state,
+      boxes: updatedBoxes,
+    };
+  });
+}
+
+/**
+ * Updates the physical location of a box.
+ *
+ * @param boxId - The ID of the box to move
+ * @param location - The new location
+ * @throws {Error} If box not found
+ *
+ * @example
+ * ```typescript
+ * // Move box to stack 2, height 1
+ * updateBoxLocation('box_001', { stack: 2, height: 1 });
+ * ```
+ *
+ * @remarks
+ * - Does not validate location conflicts (multiple boxes at same location)
+ * - Conflict detection/resolution handled by UI layer
+ * - Location coordinates should be non-negative integers
+ */
+export function updateBoxLocation(boxId: string, location: Location): void {
+  appState.update((state) => {
+    // Find box to verify it exists
+    const boxIndex = state.boxes.findIndex((b) => b.id === boxId);
+    if (boxIndex === -1) {
+      throw new Error(`Box with ID "${boxId}" not found`);
+    }
+
+    // Create new state with updated box
+    const updatedBoxes = [...state.boxes];
+    updatedBoxes[boxIndex] = {
+      ...updatedBoxes[boxIndex],
+      location,
+    };
+
+    return {
+      ...state,
+      boxes: updatedBoxes,
     };
   });
 }
