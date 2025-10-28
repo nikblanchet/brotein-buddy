@@ -18,7 +18,7 @@ import {
   updateFlavor,
   setFavoriteFlavor,
 } from '../../src/lib/stores';
-import type { Box, Flavor, Location } from '../../src/types/models';
+import type { Box, Flavor } from '../../src/types/models';
 
 /**
  * Test helper: Gets current store value synchronously.
