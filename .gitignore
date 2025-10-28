@@ -34,7 +34,9 @@ CLAUDE_CONTEXT.md
 .scratch
 
 # Claude Code personal settings (symlinked in worktrees)
-.claude/
+.claude/agents
+.claude/settings.local.json
+.claude/skills
 
 # Testing
 coverage/
