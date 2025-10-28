@@ -10,7 +10,7 @@
 
 import { writable, type Writable } from 'svelte/store';
 import { loadState, saveState } from './storage';
-import type { AppState, Box, Location } from '../types/models';
+import type { AppState, Box, Flavor, Location } from '../types/models';
 
 /**
  * Creates the application state store with auto-save functionality.
@@ -240,4 +240,123 @@ export function updateBoxLocation(boxId: string, location: Location): void {
       boxes: updatedBoxes,
     };
   });
+}
+
+/**
+ * Adds a new flavor to the application.
+ *
+ * The flavor must have a unique ID. If a flavor with the same ID already exists,
+ * an error is thrown.
+ *
+ * @param flavor - The flavor to add
+ * @throws {Error} If a flavor with the same ID already exists
+ *
+ * @example
+ * ```typescript
+ * const newFlavor: Flavor = {
+ *   id: 'flavor_chocolate',
+ *   name: 'Chocolate',
+ *   excludeFromRandom: false
+ * };
+ * addFlavor(newFlavor);
+ * ```
+ *
+ * @remarks
+ * - ID must be unique across all flavors
+ * - Name can be changed later with updateFlavor
+ * - State update and auto-save happen immediately
+ */
+export function addFlavor(flavor: Flavor): void {
+  appState.update((state) => {
+    // Check for duplicate ID
+    if (state.flavors.some((f) => f.id === flavor.id)) {
+      throw new Error(`Flavor with ID "${flavor.id}" already exists`);
+    }
+
+    // Create new state with flavor added
+    return {
+      ...state,
+      flavors: [...state.flavors, flavor],
+    };
+  });
+}
+
+/**
+ * Updates an existing flavor's properties.
+ *
+ * Accepts partial updates - only provided fields will be changed.
+ * Cannot change the flavor ID.
+ *
+ * @param flavorId - The ID of the flavor to update
+ * @param updates - Partial flavor object with fields to update
+ * @throws {Error} If flavor not found
+ *
+ * @example
+ * ```typescript
+ * // Update just the name
+ * updateFlavor('flavor_001', { name: 'Dark Chocolate' });
+ *
+ * // Update excludeFromRandom flag
+ * updateFlavor('flavor_001', { excludeFromRandom: true });
+ *
+ * // Update multiple fields
+ * updateFlavor('flavor_001', {
+ *   name: 'Milk Chocolate',
+ *   excludeFromRandom: false
+ * });
+ * ```
+ *
+ * @remarks
+ * - Only provided fields are updated (partial update)
+ * - ID cannot be changed (not included in updates parameter)
+ * - Changes are immediately persisted
+ */
+export function updateFlavor(flavorId: string, updates: Partial<Flavor>): void {
+  appState.update((state) => {
+    // Find flavor to verify it exists
+    const flavorIndex = state.flavors.findIndex((f) => f.id === flavorId);
+    if (flavorIndex === -1) {
+      throw new Error(`Flavor with ID "${flavorId}" not found`);
+    }
+
+    // Create new state with updated flavor
+    const updatedFlavors = [...state.flavors];
+    updatedFlavors[flavorIndex] = {
+      ...updatedFlavors[flavorIndex],
+      ...updates,
+      // Ensure ID cannot be changed via updates
+      id: flavorId,
+    };
+
+    return {
+      ...state,
+      flavors: updatedFlavors,
+    };
+  });
+}
+
+/**
+ * Sets or clears the user's favorite flavor for quick-pick.
+ *
+ * @param flavorId - The ID of the flavor to set as favorite, or null to clear
+ *
+ * @example
+ * ```typescript
+ * // Set favorite
+ * setFavoriteFlavor('flavor_chocolate');
+ *
+ * // Clear favorite
+ * setFavoriteFlavor(null);
+ * ```
+ *
+ * @remarks
+ * - Does not validate that flavorId exists (allows setting before flavor created)
+ * - Passing null clears the favorite
+ * - Changes are immediately persisted
+ */
+export function setFavoriteFlavor(flavorId: string | null): void {
+  appState.update((state) => ({
+    ...state,
+    favoriteFlavorId: flavorId,
+  }));
 }

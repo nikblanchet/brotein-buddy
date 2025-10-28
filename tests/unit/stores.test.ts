@@ -14,6 +14,9 @@ import {
   removeBox,
   updateBoxQuantity,
   updateBoxLocation,
+  addFlavor,
+  updateFlavor,
+  setFavoriteFlavor,
 } from '../../src/lib/stores';
 import type { Box, Flavor, Location } from '../../src/types/models';
 
@@ -460,6 +463,181 @@ describe('stores', () => {
         const state = getCurrentState();
         expect(state.boxes[0].location).toEqual({ stack: 1, height: 0 });
         expect(state.boxes[1].location).toEqual({ stack: 1, height: 0 });
+      });
+    });
+  });
+
+  describe('Flavor Operations', () => {
+    describe('addFlavor', () => {
+      it('should add a new flavor to the state', () => {
+        const flavor = createTestFlavor();
+        addFlavor(flavor);
+
+        const state = getCurrentState();
+        expect(state.flavors).toHaveLength(1);
+        expect(state.flavors[0]).toEqual(flavor);
+      });
+
+      it('should persist added flavor to localStorage', () => {
+        const flavor = createTestFlavor({ id: 'flavor_persist_test' });
+        addFlavor(flavor);
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.flavors).toHaveLength(1);
+        expect(parsed.flavors[0].id).toBe('flavor_persist_test');
+      });
+
+      it('should throw error when adding flavor with duplicate ID', () => {
+        const flavor1 = createTestFlavor({ id: 'flavor_duplicate' });
+        const flavor2 = createTestFlavor({ id: 'flavor_duplicate' });
+
+        addFlavor(flavor1);
+
+        expect(() => addFlavor(flavor2)).toThrow(
+          'Flavor with ID "flavor_duplicate" already exists'
+        );
+
+        const state = getCurrentState();
+        expect(state.flavors).toHaveLength(1);
+      });
+
+      it('should allow adding multiple flavors with different IDs', () => {
+        const flavor1 = createTestFlavor({ id: 'flavor_1' });
+        const flavor2 = createTestFlavor({ id: 'flavor_2' });
+        const flavor3 = createTestFlavor({ id: 'flavor_3' });
+
+        addFlavor(flavor1);
+        addFlavor(flavor2);
+        addFlavor(flavor3);
+
+        const state = getCurrentState();
+        expect(state.flavors).toHaveLength(3);
+        expect(state.flavors.map((f) => f.id)).toEqual(['flavor_1', 'flavor_2', 'flavor_3']);
+      });
+    });
+
+    describe('updateFlavor', () => {
+      it('should update flavor name', () => {
+        const flavor = createTestFlavor({ id: 'flavor_update', name: 'Original' });
+        addFlavor(flavor);
+
+        updateFlavor('flavor_update', { name: 'Updated' });
+
+        const state = getCurrentState();
+        expect(state.flavors[0].name).toBe('Updated');
+      });
+
+      it('should update excludeFromRandom flag', () => {
+        const flavor = createTestFlavor({ id: 'flavor_exclude', excludeFromRandom: false });
+        addFlavor(flavor);
+
+        updateFlavor('flavor_exclude', { excludeFromRandom: true });
+
+        const state = getCurrentState();
+        expect(state.flavors[0].excludeFromRandom).toBe(true);
+      });
+
+      it('should update multiple fields at once', () => {
+        const flavor = createTestFlavor({
+          id: 'flavor_multi',
+          name: 'Original',
+          excludeFromRandom: false,
+        });
+        addFlavor(flavor);
+
+        updateFlavor('flavor_multi', { name: 'New Name', excludeFromRandom: true });
+
+        const state = getCurrentState();
+        expect(state.flavors[0].name).toBe('New Name');
+        expect(state.flavors[0].excludeFromRandom).toBe(true);
+      });
+
+      it('should persist flavor updates to localStorage', () => {
+        const flavor = createTestFlavor({ id: 'flavor_persist' });
+        addFlavor(flavor);
+
+        updateFlavor('flavor_persist', { name: 'Persisted Name' });
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.flavors[0].name).toBe('Persisted Name');
+      });
+
+      it('should throw error when flavor not found', () => {
+        expect(() => updateFlavor('nonexistent', { name: 'Test' })).toThrow(
+          'Flavor with ID "nonexistent" not found'
+        );
+      });
+
+      it('should not allow changing flavor ID via updates', () => {
+        const flavor = createTestFlavor({ id: 'flavor_id_test' });
+        addFlavor(flavor);
+
+        // Try to change ID (should be ignored)
+        updateFlavor('flavor_id_test', { id: 'new_id', name: 'Updated' } as Partial<Flavor>);
+
+        const state = getCurrentState();
+        expect(state.flavors[0].id).toBe('flavor_id_test');
+        expect(state.flavors[0].name).toBe('Updated');
+      });
+
+      it('should handle partial updates correctly', () => {
+        const flavor = createTestFlavor({
+          id: 'flavor_partial',
+          name: 'Original',
+          excludeFromRandom: false,
+        });
+        addFlavor(flavor);
+
+        // Update only name
+        updateFlavor('flavor_partial', { name: 'Only Name Changed' });
+
+        const state = getCurrentState();
+        expect(state.flavors[0].name).toBe('Only Name Changed');
+        expect(state.flavors[0].excludeFromRandom).toBe(false); // Should not change
+      });
+    });
+
+    describe('setFavoriteFlavor', () => {
+      it('should set favorite flavor', () => {
+        setFavoriteFlavor('flavor_favorite');
+
+        const state = getCurrentState();
+        expect(state.favoriteFlavorId).toBe('flavor_favorite');
+      });
+
+      it('should clear favorite flavor with null', () => {
+        setFavoriteFlavor('flavor_favorite');
+        setFavoriteFlavor(null);
+
+        const state = getCurrentState();
+        expect(state.favoriteFlavorId).toBeNull();
+      });
+
+      it('should persist favorite flavor to localStorage', () => {
+        setFavoriteFlavor('flavor_persist');
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        const parsed = JSON.parse(stored!);
+        expect(parsed.favoriteFlavorId).toBe('flavor_persist');
+      });
+
+      it('should allow changing favorite flavor', () => {
+        setFavoriteFlavor('flavor_1');
+        setFavoriteFlavor('flavor_2');
+        setFavoriteFlavor('flavor_3');
+
+        const state = getCurrentState();
+        expect(state.favoriteFlavorId).toBe('flavor_3');
+      });
+
+      it('should not validate that flavor exists', () => {
+        // Should not throw even though flavor doesn't exist
+        expect(() => setFavoriteFlavor('nonexistent_flavor')).not.toThrow();
+
+        const state = getCurrentState();
+        expect(state.favoriteFlavorId).toBe('nonexistent_flavor');
       });
     });
   });
