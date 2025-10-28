@@ -14,7 +14,12 @@
    * ```
    */
 
+  import type { Snippet } from 'svelte';
   import { getButtonClasses, type ButtonProps } from './button-utils.js';
+
+  interface Props extends ButtonProps {
+    children?: Snippet;
+  }
 
   let {
     variant = 'primary',
@@ -23,13 +28,14 @@
     fullWidth = false,
     type = 'button',
     onclick,
-  }: ButtonProps = $props();
+    children,
+  }: Props = $props();
 
   const buttonClasses = $derived(getButtonClasses(variant, size, fullWidth));
 </script>
 
 <button class={buttonClasses} {type} {disabled} {onclick}>
-  <slot />
+  {@render children?.()}
 </button>
 
 <style>

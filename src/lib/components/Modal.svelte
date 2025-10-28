@@ -10,13 +10,15 @@
    * ```svelte
    * <Modal open={isOpen} title="Confirm Action" onclose={() => setIsOpen(false)}>
    *   <p>Are you sure you want to continue?</p>
-   *   <svelte:fragment slot="footer">
+   *   {#snippet footer()}
    *     <Button onclick={() => setIsOpen(false)}>Cancel</Button>
    *     <Button variant="primary" onclick={handleConfirm}>Confirm</Button>
-   *   </svelte:fragment>
+   *   {/snippet}
    * </Modal>
    * ```
    */
+
+  import type { Snippet } from 'svelte';
 
   interface ModalProps {
     /**
@@ -63,6 +65,16 @@
      * @default 'base'
      */
     size?: 'sm' | 'base' | 'lg' | 'full';
+
+    /**
+     * Modal content (default slot)
+     */
+    children?: Snippet;
+
+    /**
+     * Modal footer content (optional)
+     */
+    footer?: Snippet;
   }
 
   let {
@@ -72,9 +84,11 @@
     closeOnBackdrop = true,
     closeOnEscape = true,
     size = 'base',
+    children,
+    footer,
   }: ModalProps = $props();
 
-  let dialogElement: HTMLDivElement | null = null;
+  let dialogElement = $state<HTMLDivElement | null>(null);
   let previouslyFocusedElement: HTMLElement | null = null;
 
   /**
@@ -217,13 +231,13 @@
 
       <!-- Content -->
       <div class="modal-content">
-        <slot />
+        {@render children?.()}
       </div>
 
-      <!-- Footer (optional slot) -->
-      {#if $$slots.footer}
+      <!-- Footer (optional snippet) -->
+      {#if footer}
         <div class="modal-footer">
-          <slot name="footer" />
+          {@render footer?.()}
         </div>
       {/if}
     </div>

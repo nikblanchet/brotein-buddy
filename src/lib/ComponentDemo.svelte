@@ -185,7 +185,7 @@
     dialog.
   </p>
 
-  <svelte:fragment slot="footer">
+  {#snippet footer()}
     <Button variant="secondary" onclick={() => (modalOpen = false)}>Cancel</Button>
     <Button
       variant="primary"
@@ -196,7 +196,7 @@
     >
       Confirm
     </Button>
-  </svelte:fragment>
+  {/snippet}
 </Modal>
 
 <style>
