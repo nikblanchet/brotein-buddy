@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Post-merge hook: Runs after git merge completes
+# Automatically installs dependencies if package files changed
+
+# Get list of files that changed in the merge
+changed_files=$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)
+
+# Call shared dependency checker
+.husky/check-dependencies.sh "post-merge" "$changed_files"

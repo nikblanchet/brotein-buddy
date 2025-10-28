@@ -287,6 +287,157 @@ git commit -m "Add random selection feature"
 
 For complete guidelines, see the `development-standards` skill.
 
+### Automatic Dependency Management
+
+BroteinBuddy uses git hooks to automatically keep dependencies synchronized when package files change. This prevents stale dependency issues in worktree-based workflows.
+
+#### How It Works
+
+When you pull or merge changes that modify `package.json` or `package-lock.json`, git hooks automatically run `npm install` to update your `node_modules`.
+
+Two hooks work together to provide comprehensive coverage:
+
+1. **post-merge**: Runs after `git merge` completes
+2. **post-checkout**: Runs after `git checkout`, `git switch`, and during `git pull`
+
+The post-checkout hook is particularly important because it catches **fast-forward pulls** (the most common scenario), which don't trigger post-merge.
+
+#### What You'll See
+
+When dependencies change, you'll see output like this:
+
+```
+[post-checkout] 14:23:45 - Detected dependency changes
+[post-checkout] 14:23:45 - Running npm install...
+
+added 5 packages, and audited 322 packages in 2s
+
+[post-checkout] 14:23:47 - Dependencies updated successfully
+[post-checkout] 14:23:47 - Updating git hooks...
+[post-checkout] 14:23:48 - Git hooks updated
+```
+
+#### Activity Logging
+
+All hook activity is logged to `.git/hooks.log` with timestamps:
+
+```bash
+# View recent hook activity
+tail -20 $(git rev-parse --git-dir)/hooks.log
+```
+
+The log includes:
+
+- When hooks triggered
+- Whether package changes were detected
+- npm install success/failure status
+- Hook errors and warnings
+
+Log files automatically rotate when they exceed 1MB (old log saved as `hooks.log.old`).
+
+#### Quiet Mode
+
+If you prefer less verbose output, set the `GIT_QUIET` environment variable:
+
+```bash
+# Single operation
+GIT_QUIET=1 git pull
+
+# Set permanently in shell config
+export GIT_QUIET=1
+```
+
+In quiet mode, you'll only see minimal notifications:
+
+```
+[post-checkout] Updating dependencies...
+[post-checkout] Dependencies updated
+```
+
+#### Disabling Hooks Temporarily
+
+If you need to skip automatic dependency installation:
+
+**Option 1: Skip all hooks**
+
+```bash
+git pull --no-verify
+git merge --no-verify
+```
+
+**Option 2: Temporarily disable specific hook**
+
+```bash
+# Disable
+mv .husky/post-checkout .husky/post-checkout.disabled
+
+# Re-enable
+mv .husky/post-checkout.disabled .husky/post-checkout
+```
+
+#### Manual Dependency Installation
+
+If a hook fails or you need to install manually:
+
+```bash
+npm install          # Install dependencies
+npm run prepare      # Re-initialize git hooks
+```
+
+#### Troubleshooting
+
+**Hook didn't run after pulling changes:**
+
+1. Check if package.json actually changed: `git log -1 --stat`
+2. Verify hooks are executable: `ls -la .husky/post-*`
+3. Check hook log for errors: `cat $(git rev-parse --git-dir)/hooks.log`
+4. Manually run hook to test: `.husky/post-checkout HEAD HEAD 1`
+
+**npm install fails during hook:**
+
+- Hook exits gracefully (doesn't block git operation)
+- Check the warning message and hook log
+- Run `npm install` manually
+- Common causes: network issues, corrupted package-lock.json
+
+**Dependencies seem stale:**
+
+1. Check when node_modules was last updated: `ls -ld node_modules`
+2. Check recent hook activity in log file
+3. Run `npm install` manually
+4. Verify .husky/post-checkout exists and is executable
+
+**Hook runs too frequently:**
+
+- post-checkout runs on every branch switch (by design)
+- Only installs when package files actually changed
+- Use quiet mode to reduce output
+
+#### Technical Details
+
+**Hook Locations:**
+
+- Shared logic: `.husky/check-dependencies.sh`
+- Post-merge: `.husky/post-merge`
+- Post-checkout: `.husky/post-checkout`
+
+**Detection Method:**
+
+- post-merge: Compares `ORIG_HEAD` to `HEAD`
+- post-checkout: Compares previous ref to new ref
+
+**Safety:**
+
+- Hooks always exit 0 (never block git operations)
+- npm install failures are logged and displayed
+- User can continue working even if install fails
+
+**Testing:**
+
+- 15 comprehensive test cases in `tests/unit/hooks-dependency.test.ts`
+- Tests cover: change detection, logging, quiet mode, error handling
+- Run with: `npm test`
+
 ## Claude Code Skills and Agents
 
 This project uses custom skills and agents to enhance Claude Code's capabilities with project-specific knowledge and workflows.
