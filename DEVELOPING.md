@@ -420,6 +420,94 @@ The BroteinBuddy UI is built on a custom design system with reusable components.
 - [src/styles/variables.css](src/styles/variables.css) - All design tokens
 - [src/styles/utilities.css](src/styles/utilities.css) - Common utility classes
 
+### Client-Side Routing
+
+BroteinBuddy uses **svelte-spa-router** for client-side navigation with hash-based routing. The routing infrastructure was established in task 2.2 to enable parallel development of screen components without App.svelte conflicts.
+
+**Core routing files:**
+
+- **`src/lib/router/routes.ts`**: Route definitions and type-safe navigation helpers
+- **`src/routes/`**: Route component implementations (one component per route)
+- **`src/App.svelte`**: Simple routing container that delegates to Router
+
+**Route structure:**
+
+```
+/ → Home (main navigation)
+/random → Random flavor selection
+/random/confirm → Selection confirmation
+/inventory → Inventory management
+/inventory/:boxId/edit → Individual box editing
+/inventory/rearrange → Drag-and-drop rearrangement
+* → 404 Not Found
+```
+
+**Type-safe navigation:**
+
+Instead of hardcoding route strings, use the `ROUTES` constants for compile-time safety:
+
+```typescript
+import { push } from 'svelte-spa-router';
+import { ROUTES } from '$lib/router/routes';
+
+// Navigate to inventory
+push(ROUTES.INVENTORY);
+
+// Navigate to box edit with parameter
+push(ROUTES.INVENTORY_BOX_EDIT('box-123'));
+```
+
+**Key design decisions:**
+
+- **Hash-based URLs** (`/#/inventory`) - zero server configuration needed for static PWA deployment
+- **Placeholder pattern** - task 2.2 created minimal placeholders for all routes, enabling tasks 2.3-2.7 to implement them in parallel
+- **svelte-spa-router** chosen over alternatives (tinro, SvelteKit) for simplicity and PWA compatibility
+- All routes configured upfront to avoid App.svelte merge conflicts during parallel development
+
+**URL format examples:**
+
+- `https://broteinbuddy.app/#/` - Home
+- `https://broteinbuddy.app/#/inventory` - Inventory screen
+- `https://broteinbuddy.app/#/inventory/box-abc-123/edit` - Edit specific box
+
+**See:**
+
+- [src/lib/router/routes.ts](src/lib/router/routes.ts) - Route configuration and ROUTES constants
+- [ADR-006: Routing Strategy](docs/adr/006-routing-strategy.md) - Why hash routing, library comparison, placeholder pattern rationale
+- [tests/unit/router/routes.test.ts](tests/unit/router/routes.test.ts) - Route configuration tests (18 tests, 100% coverage)
+- [tests/e2e/routing.spec.ts](tests/e2e/routing.spec.ts) - Comprehensive routing E2E tests (26 tests covering navigation, deep linking, 404 handling)
+
+### State Management
+
+The application state is managed using Svelte stores with automatic LocalStorage synchronization. All state operations are centralized in `src/lib/stores.ts`.
+
+**Core store:**
+
+- **`appState`**: Writable store containing the full AppState (boxes, flavors, settings)
+- **Auto-save**: Every state mutation automatically persists to LocalStorage
+- **Initialization**: `loadStateFromStorage()` loads persisted state on app startup
+
+**State mutation functions:**
+
+- `addBox(box)`, `removeBox(boxId)`, `updateBoxQuantity()`, `updateBoxLocation()`
+- `addFlavor(flavor)`, `updateFlavor()`, `removeFlavor()`
+- `setFavoriteFlavor(flavorId)`
+
+**Key design decisions:**
+
+- Svelte stores provide reactive state updates throughout the component tree
+- Immutable updates with spread operators prevent accidental mutations
+- Validation errors throw immediately (programming bugs)
+- Storage errors log but don't crash (graceful degradation)
+- No referential integrity validation (flexible initialization order)
+
+**See:**
+
+- [src/lib/stores.ts](src/lib/stores.ts) - Store implementation with 8 action functions
+- [ADR-004: State Management Approach](docs/adr/004-state-management-approach.md) - Why Svelte stores, auto-save strategy, validation philosophy
+- [tests/unit/stores.test.ts](tests/unit/stores.test.ts) - Comprehensive state management tests (51 tests, 100% coverage)
+- [docs/teaching/1.5-svelte-stores-localstorage.md](docs/teaching/1.5-svelte-stores-localstorage.md) - Deep dive on reactive state and persistence
+
 ### Key Algorithms
 
 - **Weighted random selection**: Picks flavors based on total quantity
