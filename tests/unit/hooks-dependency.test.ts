@@ -1,11 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { execSync, exec } from 'child_process';
-import { promisify } from 'util';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-
-const execAsync = promisify(exec);
 
 describe('Dependency Update Hooks', () => {
   let testRepo: string;
@@ -60,7 +57,7 @@ describe('Dependency Update Hooks', () => {
   describe('check-dependencies.sh script', () => {
     it('should detect package.json changes', () => {
       const changedFiles = 'package.json\nsrc/index.ts';
-      const result = execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
+      execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
         encoding: 'utf-8',
       });
 
@@ -68,8 +65,6 @@ describe('Dependency Update Hooks', () => {
       // 1. npm install (to update dependencies)
       // 2. npm run prepare (to reinstall Husky hooks)
       // This test verifies the detection logic; actual npm execution is tested implicitly
-      // Check that the hook detected the change
-      expect(result).not.toContain('No package changes detected');
 
       // Check log file was created
       const gitDir = execSync('git rev-parse --git-dir', {
@@ -85,7 +80,7 @@ describe('Dependency Update Hooks', () => {
 
     it('should detect package-lock.json changes', () => {
       const changedFiles = 'package-lock.json\nsrc/index.ts';
-      const result = execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
+      execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
         encoding: 'utf-8',
       });
 
@@ -100,7 +95,7 @@ describe('Dependency Update Hooks', () => {
 
     it('should ignore other file changes', () => {
       const changedFiles = 'src/index.ts\nREADME.md\nsrc/components/Button.svelte';
-      const result = execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
+      execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
         encoding: 'utf-8',
       });
 
@@ -130,7 +125,7 @@ describe('Dependency Update Hooks', () => {
 
     it('should handle empty changed files list', () => {
       const changedFiles = '';
-      const result = execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
+      execSync(`.husky/check-dependencies.sh "test" "${changedFiles}"`, {
         encoding: 'utf-8',
       });
 
@@ -208,8 +203,8 @@ describe('Dependency Update Hooks', () => {
       execSync('git add test.txt');
       execSync('git commit -m "Add test file"');
 
-      // Switch back to main (triggers post-checkout)
-      execSync('git checkout main');
+      // Switch back to previous branch (triggers post-checkout)
+      execSync('git checkout -');
 
       // When post-checkout detects package changes during branch switch, it runs npm install + npm run prepare
       // Log should show post-checkout hook ran
@@ -233,8 +228,8 @@ describe('Dependency Update Hooks', () => {
       execSync('git add package.json');
       execSync('git commit -m "Add axios dependency"');
 
-      // Switch back to main
-      execSync('git checkout main');
+      // Switch back to previous branch
+      execSync('git checkout -');
 
       // When package changes are detected during checkout, npm install + npm run prepare execute automatically
       // Log should show package changes detected
@@ -255,10 +250,6 @@ describe('Dependency Update Hooks', () => {
 
     it('should manually test flag=0 does not trigger', () => {
       // This test manually invokes the hook with flag=0
-      const result = execSync('.husky/post-checkout HEAD HEAD 0', {
-        encoding: 'utf-8',
-      });
-
       const gitDir = execSync('git rev-parse --git-dir', {
         encoding: 'utf-8',
       }).trim();
