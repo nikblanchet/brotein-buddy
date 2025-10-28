@@ -15,7 +15,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'tests/', '**/*.config.*', '**/*.d.ts', '**/index.html'],
+      exclude: [
+        'node_modules/',
+        'tests/',
+        '**/*.config.*',
+        '**/*.d.ts',
+        '**/index.html',
+        'src/routes/', // Exclude placeholder route components from coverage
+      ],
       thresholds: {
         lines: 90,
         functions: 90,
