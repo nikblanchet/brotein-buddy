@@ -270,15 +270,10 @@ test.describe('Home Screen', () => {
     test('buttons respond to hover state', async ({ page }) => {
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
 
-      // Get initial background color
-      const initialBg = await randomButton.evaluate(
-        (el) => window.getComputedStyle(el).backgroundColor
-      );
-
       // Hover over button
       await randomButton.hover();
 
-      // Background should change on hover (or cursor should change)
+      // Cursor should change to pointer on hover
       const cursor = await randomButton.evaluate((el) => window.getComputedStyle(el).cursor);
 
       expect(cursor).toBe('pointer');
