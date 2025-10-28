@@ -1,21 +1,10 @@
 #!/bin/sh
 
-# Check if package.json or package-lock.json changed in the merge
+# Post-merge hook: Runs after git merge completes
+# Automatically installs dependencies if package files changed
+
+# Get list of files that changed in the merge
 changed_files=$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)
 
-if echo "$changed_files" | grep -q "package.json\|package-lock.json"; then
-  echo ""
-  echo "[post-merge] Detected changes to package.json or package-lock.json"
-  echo "[post-merge] Running npm install..."
-  echo ""
-
-  if npm install; then
-    echo ""
-    echo "[post-merge] Dependencies updated successfully"
-  else
-    echo ""
-    echo "[post-merge] Warning: npm install failed"
-    echo "[post-merge] You may need to run 'npm install' manually"
-    exit 0  # Don't fail the merge
-  fi
-fi
+# Call shared dependency checker
+.husky/check-dependencies.sh "post-merge" "$changed_files"
