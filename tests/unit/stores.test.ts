@@ -641,4 +641,182 @@ describe('stores', () => {
       });
     });
   });
+
+  describe('Integration Scenarios', () => {
+    it('should handle full box lifecycle (add, update, remove)', () => {
+      const box = createTestBox({ id: 'lifecycle_box', quantity: 12 });
+
+      // Add box
+      addBox(box);
+      let state = getCurrentState();
+      expect(state.boxes).toHaveLength(1);
+      expect(state.boxes[0].quantity).toBe(12);
+
+      // Update quantity
+      updateBoxQuantity('lifecycle_box', 5);
+      state = getCurrentState();
+      expect(state.boxes[0].quantity).toBe(5);
+
+      // Update location
+      updateBoxLocation('lifecycle_box', { stack: 2, height: 1 });
+      state = getCurrentState();
+      expect(state.boxes[0].location).toEqual({ stack: 2, height: 1 });
+
+      // Remove box
+      removeBox('lifecycle_box');
+      state = getCurrentState();
+      expect(state.boxes).toHaveLength(0);
+
+      // Verify localStorage reflects final state
+      const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const parsed = JSON.parse(stored!);
+      expect(parsed.boxes).toHaveLength(0);
+    });
+
+    it('should handle full flavor lifecycle (add, update, set as favorite)', () => {
+      const flavor = createTestFlavor({ id: 'lifecycle_flavor', name: 'Original' });
+
+      // Add flavor
+      addFlavor(flavor);
+      let state = getCurrentState();
+      expect(state.flavors).toHaveLength(1);
+      expect(state.flavors[0].name).toBe('Original');
+
+      // Update flavor
+      updateFlavor('lifecycle_flavor', { name: 'Updated', excludeFromRandom: true });
+      state = getCurrentState();
+      expect(state.flavors[0].name).toBe('Updated');
+      expect(state.flavors[0].excludeFromRandom).toBe(true);
+
+      // Set as favorite
+      setFavoriteFlavor('lifecycle_flavor');
+      state = getCurrentState();
+      expect(state.favoriteFlavorId).toBe('lifecycle_flavor');
+
+      // Verify localStorage reflects final state
+      const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const parsed = JSON.parse(stored!);
+      expect(parsed.flavors[0].name).toBe('Updated');
+      expect(parsed.favoriteFlavorId).toBe('lifecycle_flavor');
+    });
+
+    it('should handle cross-entity operations (flavors and boxes)', () => {
+      // Add flavor
+      const flavor = createTestFlavor({ id: 'cross_flavor', name: 'Chocolate' });
+      addFlavor(flavor);
+
+      // Add boxes referencing the flavor
+      const box1 = createTestBox({ id: 'box_1', flavorId: 'cross_flavor', quantity: 12 });
+      const box2 = createTestBox({ id: 'box_2', flavorId: 'cross_flavor', quantity: 8 });
+      addBox(box1);
+      addBox(box2);
+
+      // Update flavor name
+      updateFlavor('cross_flavor', { name: 'Dark Chocolate' });
+
+      // Set as favorite
+      setFavoriteFlavor('cross_flavor');
+
+      // Verify state
+      const state = getCurrentState();
+      expect(state.flavors).toHaveLength(1);
+      expect(state.flavors[0].name).toBe('Dark Chocolate');
+      expect(state.boxes).toHaveLength(2);
+      expect(state.boxes.every((b) => b.flavorId === 'cross_flavor')).toBe(true);
+      expect(state.favoriteFlavorId).toBe('cross_flavor');
+    });
+
+    it('should persist multiple rapid updates correctly', () => {
+      const box = createTestBox({ id: 'rapid_box', quantity: 12 });
+      addBox(box);
+
+      // Make several rapid updates
+      updateBoxQuantity('rapid_box', 11);
+      updateBoxQuantity('rapid_box', 10);
+      updateBoxQuantity('rapid_box', 9);
+      updateBoxLocation('rapid_box', { stack: 1, height: 0 });
+      updateBoxLocation('rapid_box', { stack: 2, height: 1 });
+
+      // Verify final state
+      const state = getCurrentState();
+      expect(state.boxes[0].quantity).toBe(9);
+      expect(state.boxes[0].location).toEqual({ stack: 2, height: 1 });
+
+      // Verify localStorage has final state
+      const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const parsed = JSON.parse(stored!);
+      expect(parsed.boxes[0].quantity).toBe(9);
+      expect(parsed.boxes[0].location).toEqual({ stack: 2, height: 1 });
+    });
+
+    it('should support multiple subscribers receiving same updates', () => {
+      const updates: number[] = [];
+      const otherUpdates: number[] = [];
+
+      // Subscribe with two different handlers
+      const unsubscribe1 = appState.subscribe((state) => {
+        updates.push(state.boxes.length);
+      });
+
+      const unsubscribe2 = appState.subscribe((state) => {
+        otherUpdates.push(state.boxes.length);
+      });
+
+      // Make changes
+      addBox(createTestBox({ id: 'sub_1' }));
+      addBox(createTestBox({ id: 'sub_2' }));
+      removeBox('sub_1');
+
+      // Both subscribers should have received all updates
+      expect(updates.length).toBeGreaterThan(0);
+      expect(otherUpdates.length).toBeGreaterThan(0);
+
+      // Should have same final value
+      expect(updates[updates.length - 1]).toBe(1);
+      expect(otherUpdates[otherUpdates.length - 1]).toBe(1);
+
+      unsubscribe1();
+      unsubscribe2();
+    });
+
+    it('should handle complex inventory scenario', () => {
+      // Setup: Add 3 flavors
+      addFlavor(createTestFlavor({ id: 'choc', name: 'Chocolate' }));
+      addFlavor(createTestFlavor({ id: 'van', name: 'Vanilla' }));
+      addFlavor(createTestFlavor({ id: 'straw', name: 'Strawberry' }));
+
+      // Add boxes for each flavor
+      addBox(createTestBox({ id: 'box_choc_1', flavorId: 'choc', quantity: 12 }));
+      addBox(createTestBox({ id: 'box_choc_2', flavorId: 'choc', quantity: 6 }));
+      addBox(createTestBox({ id: 'box_van', flavorId: 'van', quantity: 8 }));
+      addBox(createTestBox({ id: 'box_straw', flavorId: 'straw', quantity: 10 }));
+
+      // Set favorite
+      setFavoriteFlavor('choc');
+
+      // Exclude strawberry from random
+      updateFlavor('straw', { excludeFromRandom: true });
+
+      // Use some chocolate (deduct from first box)
+      updateBoxQuantity('box_choc_1', 10);
+
+      // Finish first chocolate box
+      updateBoxQuantity('box_choc_1', 0);
+
+      // Verify final state
+      const state = getCurrentState();
+      expect(state.flavors).toHaveLength(3);
+      expect(state.boxes).toHaveLength(4);
+      expect(state.favoriteFlavorId).toBe('choc');
+      expect(state.flavors.find((f) => f.id === 'straw')?.excludeFromRandom).toBe(true);
+      expect(state.boxes.find((b) => b.id === 'box_choc_1')?.quantity).toBe(0);
+
+      // Verify persistence
+      const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const parsed = JSON.parse(stored!);
+      expect(parsed.flavors).toHaveLength(3);
+      expect(parsed.boxes).toHaveLength(4);
+      expect(parsed.favoriteFlavorId).toBe('choc');
+    });
+  });
 });
