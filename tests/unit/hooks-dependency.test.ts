@@ -64,6 +64,10 @@ describe('Dependency Update Hooks', () => {
         encoding: 'utf-8',
       });
 
+      // When package.json changes are detected, the script will run:
+      // 1. npm install (to update dependencies)
+      // 2. npm run prepare (to reinstall Husky hooks)
+      // This test verifies the detection logic; actual npm execution is tested implicitly
       // Check that the hook detected the change
       expect(result).not.toContain('No package changes detected');
 
@@ -85,6 +89,7 @@ describe('Dependency Update Hooks', () => {
         encoding: 'utf-8',
       });
 
+      // When package-lock.json changes are detected, npm install and npm run prepare will execute
       const gitDir = execSync('git rev-parse --git-dir', {
         encoding: 'utf-8',
       }).trim();
@@ -152,6 +157,7 @@ describe('Dependency Update Hooks', () => {
       execSync('git checkout -');
       execSync('git merge feature --no-edit');
 
+      // When post-merge detects package.json changes, it runs npm install + npm run prepare
       // Check that log shows post-merge hook ran
       const gitDir = execSync('git rev-parse --git-dir', {
         encoding: 'utf-8',
@@ -205,6 +211,7 @@ describe('Dependency Update Hooks', () => {
       // Switch back to main (triggers post-checkout)
       execSync('git checkout main');
 
+      // When post-checkout detects package changes during branch switch, it runs npm install + npm run prepare
       // Log should show post-checkout hook ran
       const gitDir = execSync('git rev-parse --git-dir', {
         encoding: 'utf-8',
@@ -229,6 +236,7 @@ describe('Dependency Update Hooks', () => {
       // Switch back to main
       execSync('git checkout main');
 
+      // When package changes are detected during checkout, npm install + npm run prepare execute automatically
       // Log should show package changes detected
       const gitDir = execSync('git rev-parse --git-dir', {
         encoding: 'utf-8',
