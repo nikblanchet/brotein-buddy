@@ -90,6 +90,7 @@
 
   /**
    * Navigate to individual box edit screen
+   * @param boxId - The unique identifier of the box to edit
    */
   function handleBoxClick(boxId: string) {
     push(ROUTES.INVENTORY_BOX_EDIT(boxId));
@@ -140,6 +141,7 @@
 
   /**
    * Handle table column header click for sorting
+   * @param column - The column to sort by ('flavor', 'quantity', or 'location')
    */
   function handleColumnClick(column: SortColumn) {
     if (sortColumn === column) {
