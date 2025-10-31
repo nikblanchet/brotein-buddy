@@ -61,27 +61,46 @@
   }
 
   /**
-   * Determine appropriate error message based on app state
+   * Determine appropriate error message based on app state.
+   * Provides specific, actionable guidance based on the exact issue.
    */
   function determineErrorMessage(): string {
     const { flavors, boxes } = $appState;
 
+    // Case 1: No flavors at all
     if (flavors.length === 0) {
-      return 'No flavors configured. Add some flavors in Inventory Management.';
+      return 'No flavors configured yet. Go to Inventory Management and tap "New Flavor" to add your first flavor.';
     }
 
+    // Case 2: All flavors excluded
     const availableFlavors = flavors.filter((f) => !f.excludeFromRandom);
     if (availableFlavors.length === 0) {
-      return 'All flavors are excluded from random selection. Update flavor preferences in Inventory Management.';
+      return `All ${flavors.length} flavor${flavors.length !== 1 ? 's are' : ' is'} excluded from random selection. Go to Inventory Management to update flavor preferences.`;
     }
 
+    // Case 3: No boxes at all
+    if (boxes.length === 0) {
+      return `You have ${availableFlavors.length} flavor${availableFlavors.length !== 1 ? 's' : ''} but no boxes in stock. Go to Inventory Management to add boxes.`;
+    }
+
+    // Case 4: Boxes exist but all empty
     const boxesWithQuantity = boxes.filter((b) => b.quantity > 0);
     if (boxesWithQuantity.length === 0) {
-      return 'No boxes in stock. Add inventory in Inventory Management.';
+      return `All ${boxes.length} box${boxes.length !== 1 ? 'es are' : ' is'} empty. Go to Inventory Management to add quantity to a box.`;
     }
 
-    // Flavors exist but none have quantity
-    return 'No flavors available with stock. Add more inventory or adjust exclusions.';
+    // Case 5: Edge case - flavors with quantity exist but are all excluded
+    // (This is the final fallback and indicates available flavors have no stock)
+    const flavorsWithStock = availableFlavors.filter((f) =>
+      boxesWithQuantity.some((b) => b.flavorId === f.id)
+    );
+
+    if (flavorsWithStock.length === 0) {
+      return `The ${availableFlavors.length} available flavor${availableFlavors.length !== 1 ? 's have' : ' has'} no stock. Add boxes for these flavors in Inventory Management.`;
+    }
+
+    // Should never reach here, but provide fallback
+    return 'Unable to select a flavor. Please check your inventory and try again.';
   }
 
   /**
