@@ -96,7 +96,10 @@
 
   // Perform selection automatically when component mounts
   onMount(() => {
-    performSelection();
+    // Wait briefly for store to be initialized from localStorage
+    setTimeout(() => {
+      performSelection();
+    }, 50);
   });
 </script>
 

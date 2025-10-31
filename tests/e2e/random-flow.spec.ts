@@ -102,7 +102,7 @@ test.describe('Random Selection Flow', () => {
         favoriteFlavorId: null,
         settings: {},
       };
-      localStorage.setItem('broteinbuddy-state', JSON.stringify(testState));
+      localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(testState));
     });
 
     // Navigate to home screen
@@ -134,7 +134,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(emptyState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(emptyState));
       });
 
       await page.goto('/#/');
@@ -171,7 +171,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(excludedState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(excludedState));
       });
 
       await page.goto('/#/');
@@ -194,7 +194,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(noStockState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(noStockState));
       });
 
       await page.goto('/#/');
@@ -255,7 +255,7 @@ test.describe('Random Selection Flow', () => {
     test('confirms selection and returns to home', async ({ page }) => {
       // Get initial state from localStorage
       const initialState = await page.evaluate(() => {
-        const stored = localStorage.getItem('broteinbuddy-state');
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
         return stored ? JSON.parse(stored) : null;
       });
 
@@ -276,7 +276,7 @@ test.describe('Random Selection Flow', () => {
 
       // Verify state was updated (quantity decreased by 1)
       const updatedState = await page.evaluate(() => {
-        const stored = localStorage.getItem('broteinbuddy-state');
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
         return stored ? JSON.parse(stored) : null;
       });
 
@@ -293,7 +293,7 @@ test.describe('Random Selection Flow', () => {
     test('cancels selection without updating state', async ({ page }) => {
       // Get initial state
       const initialState = await page.evaluate(() => {
-        const stored = localStorage.getItem('broteinbuddy-state');
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
         return stored ? JSON.parse(stored) : null;
       });
 
@@ -309,7 +309,7 @@ test.describe('Random Selection Flow', () => {
 
       // Verify state was NOT updated
       const updatedState = await page.evaluate(() => {
-        const stored = localStorage.getItem('broteinbuddy-state');
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
         return stored ? JSON.parse(stored) : null;
       });
 
@@ -361,7 +361,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(lowQuantityState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(lowQuantityState));
       });
 
       await page.goto('/#/');
@@ -433,7 +433,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(singleFlavorState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleFlavorState));
       });
 
       await page.goto('/#/');
@@ -467,7 +467,7 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('broteinbuddy-state', JSON.stringify(singleBoxState));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleBoxState));
       });
 
       await page.goto('/#/');
