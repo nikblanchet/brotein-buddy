@@ -33,34 +33,31 @@
 
   /**
    * Perform random flavor selection
-   * Called automatically on component mount or when "Try Again" is clicked
+   * Called automatically when store is ready or when "Try Again" is clicked
    */
   function performSelection() {
     isSelecting = true;
     errorMessage = null;
 
-    // Small delay for better UX (shows loading state)
-    setTimeout(() => {
-      try {
-        const flavor = selectRandomFlavor($appState, excludeLastPick);
+    try {
+      const flavor = selectRandomFlavor($appState, excludeLastPick);
 
-        if (flavor === null) {
-          // No valid flavors available
-          errorMessage = determineErrorMessage();
-          isSelecting = false;
-        } else {
-          // Success! Navigate to confirmation with selected flavor
-          // Store selected flavor ID in sessionStorage for confirmation screen
-          sessionStorage.setItem('selectedFlavorId', flavor.id);
-          push(ROUTES.RANDOM_CONFIRM);
-        }
-      } catch (error) {
-        // Unexpected error during selection
-        errorMessage = 'An unexpected error occurred during selection.';
+      if (flavor === null) {
+        // No valid flavors available
+        errorMessage = determineErrorMessage();
         isSelecting = false;
-        console.error('Random selection error:', error);
+      } else {
+        // Success! Navigate to confirmation with selected flavor
+        // Store selected flavor ID in sessionStorage for confirmation screen
+        sessionStorage.setItem('selectedFlavorId', flavor.id);
+        push(ROUTES.RANDOM_CONFIRM);
       }
-    }, 100);
+    } catch (error) {
+      // Unexpected error during selection
+      errorMessage = 'An unexpected error occurred during selection.';
+      isSelecting = false;
+      console.error('Random selection error:', error);
+    }
   }
 
   /**
@@ -96,10 +93,13 @@
 
   // Perform selection automatically when component mounts
   onMount(() => {
-    // Wait briefly for store to be initialized from localStorage
+    // Clear any stale sessionStorage from previous sessions
+    sessionStorage.removeItem('selectedFlavorId');
+
+    // Minimal delay to ensure store is initialized
     setTimeout(() => {
       performSelection();
-    }, 50);
+    }, 10);
   });
 </script>
 
