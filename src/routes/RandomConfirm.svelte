@@ -165,7 +165,14 @@
         <h2>Use This Box</h2>
         <div class="box-card priority-box">
           <div class="box-info">
-            <span class="quantity" class:low-quantity={isLowQuantity(priorityBox)}>
+            <span
+              class="quantity"
+              class:low-quantity={isLowQuantity(priorityBox)}
+              aria-live="polite"
+              aria-label={isLowQuantity(priorityBox)
+                ? `Low quantity: ${priorityBox.quantity} shake${priorityBox.quantity !== 1 ? 's' : ''} remaining`
+                : undefined}
+            >
               {priorityBox.quantity} shake{priorityBox.quantity !== 1 ? 's' : ''}
             </span>
             <span class="location">{formatLocation(priorityBox)}</span>
