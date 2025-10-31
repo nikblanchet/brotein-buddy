@@ -1,6 +1,62 @@
 import { describe, it, expect } from 'vitest';
-import { selectPriorityBox } from '../../src/lib/box-selection';
+import { selectPriorityBox, compareBoxPriority } from '../../src/lib/box-selection';
 import type { Box } from '../../src/types/models';
+
+describe('compareBoxPriority', () => {
+  const createBox = (
+    id: string,
+    flavorId: string,
+    quantity: number,
+    isOpen: boolean,
+    location = { stack: 1, height: 0 }
+  ): Box => ({
+    id,
+    flavorId,
+    quantity,
+    isOpen,
+    location,
+  });
+
+  it('prioritizes open over unopened', () => {
+    const openBox = createBox('1', 'choc', 5, true);
+    const unopenedBox = createBox('2', 'choc', 5, false);
+
+    expect(compareBoxPriority(openBox, unopenedBox)).toBeLessThan(0);
+    expect(compareBoxPriority(unopenedBox, openBox)).toBeGreaterThan(0);
+  });
+
+  it('prioritizes lower quantity when both same open state', () => {
+    const lowQty = createBox('1', 'choc', 3, true);
+    const highQty = createBox('2', 'choc', 8, true);
+
+    expect(compareBoxPriority(lowQty, highQty)).toBeLessThan(0);
+    expect(compareBoxPriority(highQty, lowQty)).toBeGreaterThan(0);
+  });
+
+  it('prioritizes higher height when same open state and quantity', () => {
+    const high = createBox('1', 'choc', 5, true, { stack: 1, height: 2 });
+    const low = createBox('2', 'choc', 5, true, { stack: 1, height: 0 });
+
+    expect(compareBoxPriority(high, low)).toBeLessThan(0);
+    expect(compareBoxPriority(low, high)).toBeGreaterThan(0);
+  });
+
+  it('returns 0 when boxes have equal priority', () => {
+    const box1 = createBox('1', 'choc', 5, true, { stack: 1, height: 2 });
+    const box2 = createBox('2', 'choc', 5, true, { stack: 2, height: 2 });
+
+    expect(compareBoxPriority(box1, box2)).toBe(0);
+  });
+
+  it('applies priority rules in correct order (open > quantity > height)', () => {
+    // Unopened with perfect quantity/height vs open with worse quantity/height
+    const unopenedPerfect = createBox('1', 'choc', 1, false, { stack: 1, height: 10 });
+    const openImperfect = createBox('2', 'choc', 12, true, { stack: 1, height: 0 });
+
+    // Open box should win despite worse quantity and height
+    expect(compareBoxPriority(openImperfect, unopenedPerfect)).toBeLessThan(0);
+  });
+});
 
 describe('selectPriorityBox', () => {
   describe('basic functionality', () => {
