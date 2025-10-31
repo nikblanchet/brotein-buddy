@@ -69,7 +69,7 @@
    * Reactive: Group boxes by stack for visual view
    * Returns Map<stack, Box[]> sorted by height within each stack
    */
-  let boxesByStack = $derived(() => groupBoxesByStack(boxesWithFlavors));
+  let boxesByStack = $derived(groupBoxesByStack(boxesWithFlavors));
 
   /**
    * Reactive: Get flavors with zero inventory for out-of-stock section
@@ -79,7 +79,7 @@
   /**
    * Reactive: Sorted table data based on current sort column and direction
    */
-  let sortedTableData = $derived(() => sortBoxes(boxesWithFlavors, sortColumn, sortDirection));
+  let sortedTableData = $derived(sortBoxes(boxesWithFlavors, sortColumn, sortDirection));
 
   /**
    * Toggle between visual and table view
@@ -172,14 +172,14 @@
   <!-- Visual View -->
   {#if viewMode === 'visual'}
     <div class="visual-view">
-      {#if boxesByStack().size === 0}
+      {#if boxesByStack.size === 0}
         <div class="empty-state">
           <p>No boxes in inventory</p>
           <p class="empty-hint">Add a new flavor to get started</p>
         </div>
       {:else}
         <div class="stacks-container">
-          {#each [...boxesByStack().entries()] as [stackNum, boxes]}
+          {#each [...boxesByStack.entries()] as [stackNum, boxes]}
             <div class="stack" data-stack={stackNum}>
               <div class="stack-label">Stack {stackNum}</div>
               <div class="stack-boxes">
@@ -275,7 +275,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each sortedTableData() as { box, flavor }}
+            {#each sortedTableData as { box, flavor }}
               <tr class="table-row" onclick={() => handleBoxClick(box.id)}>
                 <td class="flavor-cell">
                   <span
