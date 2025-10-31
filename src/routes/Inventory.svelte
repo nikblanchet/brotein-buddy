@@ -19,6 +19,15 @@
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
   import type { Flavor } from '../types/models';
+  import {
+    groupBoxesByStack,
+    getOutOfStockFlavors,
+    sortBoxes,
+    getFlavorColor,
+    formatLocation,
+    type SortColumn,
+    type SortDirection,
+  } from '$lib/inventory-utils';
 
   /**
    * View mode state
@@ -39,8 +48,8 @@
    * sortColumn: which column to sort by
    * sortDirection: 'asc' or 'desc'
    */
-  let sortColumn = $state<'flavor' | 'quantity' | 'location'>('flavor');
-  let sortDirection = $state<'asc' | 'desc'>('asc');
+  let sortColumn = $state<SortColumn>('flavor');
+  let sortDirection = $state<SortDirection>('asc');
 
   /**
    * Reactive: Get all boxes with their flavor information
@@ -59,72 +68,17 @@
    * Reactive: Group boxes by stack for visual view
    * Returns Map<stack, Box[]> sorted by height within each stack
    */
-  let boxesByStack = $derived(() => {
-    const grouped = new Map<number, typeof boxesWithFlavors>();
-
-    boxesWithFlavors.forEach((item) => {
-      const stack = item.box.location.stack;
-      if (!grouped.has(stack)) {
-        grouped.set(stack, []);
-      }
-      grouped.get(stack)!.push(item);
-    });
-
-    // Sort each stack by height (0 at bottom)
-    grouped.forEach((boxes) => {
-      boxes.sort((a, b) => a.box.location.height - b.box.location.height);
-    });
-
-    // Sort stacks by stack number
-    return new Map([...grouped.entries()].sort((a, b) => a[0] - b[0]));
-  });
+  let boxesByStack = $derived(() => groupBoxesByStack(boxesWithFlavors));
 
   /**
    * Reactive: Get flavors with zero inventory for out-of-stock section
    */
-  let outOfStockFlavors = $derived(
-    $appState.flavors.filter((flavor) => {
-      const totalQuantity = $appState.boxes
-        .filter((box) => box.flavorId === flavor.id)
-        .reduce((sum, box) => sum + box.quantity, 0);
-      return totalQuantity === 0;
-    })
-  );
+  let outOfStockFlavors = $derived(getOutOfStockFlavors($appState.flavors, $appState.boxes));
 
   /**
    * Reactive: Sorted table data based on current sort column and direction
    */
-  let sortedTableData = $derived(() => {
-    const data = [...boxesWithFlavors];
-
-    data.sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortColumn) {
-        case 'flavor': {
-          const nameA = a.flavor?.name || 'Unknown';
-          const nameB = b.flavor?.name || 'Unknown';
-          comparison = nameA.localeCompare(nameB);
-          break;
-        }
-        case 'quantity':
-          comparison = a.box.quantity - b.box.quantity;
-          break;
-
-        case 'location':
-          // Sort by stack first, then height
-          comparison = a.box.location.stack - b.box.location.stack;
-          if (comparison === 0) {
-            comparison = a.box.location.height - b.box.location.height;
-          }
-          break;
-      }
-
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
-
-    return data;
-  });
+  let sortedTableData = $derived(() => sortBoxes(boxesWithFlavors, sortColumn, sortDirection));
 
   /**
    * Toggle between visual and table view
@@ -189,7 +143,7 @@
   /**
    * Handle table column header click for sorting
    */
-  function handleColumnClick(column: 'flavor' | 'quantity' | 'location') {
+  function handleColumnClick(column: SortColumn) {
     if (sortColumn === column) {
       // Toggle direction if same column
       sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -198,29 +152,6 @@
       sortColumn = column;
       sortDirection = 'asc';
     }
-  }
-
-  /**
-   * Get color for a flavor
-   * Uses a simple hash to generate consistent colors
-   */
-  function getFlavorColor(flavorId: string): string {
-    // Simple hash function
-    let hash = 0;
-    for (let i = 0; i < flavorId.length; i++) {
-      hash = flavorId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate HSL color with good saturation and lightness
-    const hue = Math.abs(hash % 360);
-    return `hsl(${hue}, 65%, 55%)`;
-  }
-
-  /**
-   * Format location for display
-   */
-  function formatLocation(stack: number, height: number): string {
-    return `Stack ${stack}, Height ${height}`;
   }
 </script>
 
