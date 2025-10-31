@@ -13,7 +13,7 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, updateBoxQuantity } from '$lib/stores';
-  import { selectPriorityBox } from '$lib/box-selection';
+  import { selectPriorityBox, compareBoxPriority } from '$lib/box-selection';
   import { maybeGetFlavor } from '$lib/utils/flavor';
   import type { Flavor, Box } from '../types/models';
   import { onMount } from 'svelte';
@@ -67,12 +67,7 @@
     // Get alternative boxes (other boxes of same flavor, sorted by priority)
     const allFlavorBoxes = $appState.boxes
       .filter((b) => b.flavorId === selectedFlavorId && b.id !== priorityBox?.id)
-      .sort((a, b) => {
-        // Same sorting logic as selectPriorityBox
-        if (a.isOpen !== b.isOpen) return a.isOpen ? -1 : 1;
-        if (a.quantity !== b.quantity) return a.quantity - b.quantity;
-        return b.location.height - a.location.height;
-      });
+      .sort(compareBoxPriority);
 
     alternativeBoxes = allFlavorBoxes;
     errorMessage = null;
