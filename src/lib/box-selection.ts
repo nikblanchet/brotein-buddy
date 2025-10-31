@@ -11,6 +11,45 @@
 import type { Box } from '../types/models';
 
 /**
+ * Comparator function for sorting boxes by priority.
+ *
+ * Priority order:
+ * 1. Open boxes before unopened
+ * 2. Lower quantity before higher
+ * 3. Higher stack position before lower
+ *
+ * @param a - First box to compare
+ * @param b - Second box to compare
+ * @returns Negative if a has higher priority, positive if b has higher priority, 0 if equal
+ *
+ * @example
+ * ```typescript
+ * const sortedBoxes = boxes
+ *   .filter(b => b.flavorId === 'chocolate')
+ *   .sort(compareBoxPriority);
+ * ```
+ */
+export function compareBoxPriority(a: Box, b: Box): number {
+  // Rule 1: Open boxes before unopened
+  // isOpen: true should come before isOpen: false
+  // Convert boolean to number: true = 1, false = 0
+  // Sort descending (1 before 0), so b - a
+  if (a.isOpen !== b.isOpen) {
+    return (b.isOpen ? 1 : 0) - (a.isOpen ? 1 : 0);
+  }
+
+  // Rule 2: Lower quantity before higher
+  // Sort ascending (smaller numbers first)
+  if (a.quantity !== b.quantity) {
+    return a.quantity - b.quantity;
+  }
+
+  // Rule 3: Higher stack position before lower
+  // Sort descending (higher numbers first)
+  return b.location.height - a.location.height;
+}
+
+/**
  * Selects the highest priority box for a given flavor.
  *
  * When multiple boxes of the same flavor exist, this function determines which
@@ -91,26 +130,8 @@ export function selectPriorityBox(boxes: Box[], flavorId: string): Box | null {
     return null;
   }
 
-  // Sort by priority rules
-  const sortedBoxes = matchingBoxes.sort((a, b) => {
-    // Rule 1: Open boxes before unopened
-    // isOpen: true should come before isOpen: false
-    // Convert boolean to number: true = 1, false = 0
-    // Sort descending (1 before 0), so b - a
-    if (a.isOpen !== b.isOpen) {
-      return (b.isOpen ? 1 : 0) - (a.isOpen ? 1 : 0);
-    }
-
-    // Rule 2: Lower quantity before higher
-    // Sort ascending (smaller numbers first)
-    if (a.quantity !== b.quantity) {
-      return a.quantity - b.quantity;
-    }
-
-    // Rule 3: Higher stack position before lower
-    // Sort descending (higher numbers first)
-    return b.location.height - a.location.height;
-  });
+  // Sort by priority rules using the shared comparator
+  const sortedBoxes = matchingBoxes.sort(compareBoxPriority);
 
   // Return the highest priority box (first in sorted list)
   return sortedBoxes[0];
