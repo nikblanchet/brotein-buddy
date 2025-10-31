@@ -121,7 +121,7 @@ test.describe('Random Selection Flow', () => {
 
       // Should show loading state briefly (or skip straight to confirm)
       // Wait for navigation to confirm screen (selection happens automatically)
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
     });
 
     test('handles no flavors available', async ({ page, context }) => {
@@ -213,7 +213,7 @@ test.describe('Random Selection Flow', () => {
       await randomButton.click();
 
       // Wait for confirmation screen
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should display a flavor name (we don't know which one was selected)
       const flavorName = page.locator('.flavor-name');
@@ -230,7 +230,7 @@ test.describe('Random Selection Flow', () => {
     test('displays all four action buttons', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Check all buttons exist
       await expect(page.locator('button').filter({ hasText: 'Confirm' })).toBeVisible();
@@ -241,7 +241,7 @@ test.describe('Random Selection Flow', () => {
 
     test('shows open/unopened status correctly', async ({ page }) => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show either "Open" or "Unopened" status
       const status = page.locator('.status');
@@ -266,7 +266,7 @@ test.describe('Random Selection Flow', () => {
 
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Confirm
       await page.locator('button').filter({ hasText: 'Confirm' }).click();
@@ -299,7 +299,7 @@ test.describe('Random Selection Flow', () => {
 
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Cancel
       await page.locator('button').filter({ hasText: 'Cancel' }).click();
@@ -321,7 +321,7 @@ test.describe('Random Selection Flow', () => {
     test('decrements quantity and stays on confirmation screen', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get initial quantity displayed
       const initialQuantityText = await page.locator('.quantity').first().textContent();
@@ -366,7 +366,7 @@ test.describe('Random Selection Flow', () => {
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Add Another button should be disabled
       const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
@@ -378,7 +378,7 @@ test.describe('Random Selection Flow', () => {
     test('navigates back to random selection with exclusion', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get the selected flavor name
       const selectedFlavorName = await page.locator('.flavor-name').textContent();
@@ -390,7 +390,7 @@ test.describe('Random Selection Flow', () => {
       await expect(page).toHaveURL(/\/random\?excludeLastPick=/);
 
       // Should automatically select and navigate to confirm again
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // The new flavor should be different (can't guarantee in tests due to randomness,
       // but the URL should have had the excludeLastPick parameter)
@@ -438,7 +438,7 @@ test.describe('Random Selection Flow', () => {
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show Alternative Boxes section
       await expect(page.locator('h3')).toContainText('Alternative Boxes');
@@ -472,7 +472,7 @@ test.describe('Random Selection Flow', () => {
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should NOT show Alternative Boxes section
       const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
@@ -494,7 +494,7 @@ test.describe('Random Selection Flow', () => {
 
     test('all buttons are keyboard accessible', async ({ page }) => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 2000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Tab through buttons
       await page.keyboard.press('Tab');

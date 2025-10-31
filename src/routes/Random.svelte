@@ -14,6 +14,7 @@
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
   import { selectRandomFlavor } from '$lib/random-selection';
+  import { onMount } from 'svelte';
 
   /**
    * Parse query parameters to check if we should exclude the last pick
@@ -59,7 +60,7 @@
         isSelecting = false;
         console.error('Random selection error:', error);
       }
-    }, 300);
+    }, 100);
   }
 
   /**
@@ -94,7 +95,7 @@
   }
 
   // Perform selection automatically when component mounts
-  $effect(() => {
+  onMount(() => {
     performSelection();
   });
 </script>
