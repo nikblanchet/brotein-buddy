@@ -184,13 +184,19 @@
               <div class="stack-label">Stack {stackNum}</div>
               <div class="stack-boxes">
                 {#each boxes as { box, flavor }}
-                  <!-- svelte-ignore a11y_click_events_have_key_events -->
-                  <!-- svelte-ignore a11y_no_static_element_interactions -->
                   <div
                     class="box-visual"
                     class:box-open={box.isOpen}
                     style="background-color: {getFlavorColor(box.flavorId)};"
+                    role="button"
+                    tabindex="0"
                     onclick={() => handleBoxClick(box.id)}
+                    onkeydown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleBoxClick(box.id);
+                      }
+                    }}
                   >
                     <div class="box-flavor">{flavor?.name || 'Unknown'}</div>
                     <div class="box-quantity">{box.quantity} bottles</div>
