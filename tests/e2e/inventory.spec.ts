@@ -53,7 +53,8 @@ function createTestState(): AppState {
 
 test.describe('Inventory Screen', () => {
   test.beforeEach(async ({ page, context }) => {
-    // Set up test state with boxes and flavors
+    // Set up localStorage with test state using addInitScript
+    // This ensures localStorage is populated BEFORE the page/modules load
     await context.addInitScript(() => {
       const state = {
         version: 1,
@@ -89,10 +90,10 @@ test.describe('Inventory Screen', () => {
         favoriteFlavorId: null,
         settings: {},
       };
-      localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
+      localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
     });
 
-    // Navigate to inventory screen
+    // Navigate directly to inventory screen
     await page.goto('/#/inventory');
 
     // Wait for inventory screen to be fully loaded
@@ -240,10 +241,13 @@ test.describe('Inventory Screen', () => {
     test('sorts by flavor when flavor header clicked', async ({ page }) => {
       const flavorHeader = page.locator('.inventory-table th').filter({ hasText: 'Flavor' });
 
-      // Click to sort ascending
+      // Table starts with Flavor sorted ascending (default state)
+      // First click toggles to descending
       await flavorHeader.click();
+      await expect(flavorHeader).toContainText('↓');
 
-      // Check sort indicator
+      // Second click toggles back to ascending
+      await flavorHeader.click();
       await expect(flavorHeader).toContainText('↑');
 
       // Verify order (alphabetical ascending)
@@ -256,19 +260,23 @@ test.describe('Inventory Screen', () => {
     test('toggles sort direction when same header clicked twice', async ({ page }) => {
       const flavorHeader = page.locator('.inventory-table th').filter({ hasText: 'Flavor' });
 
-      // Click once for ascending
-      await flavorHeader.click();
+      // Table starts with Flavor sorted ascending (default state shows ↑)
+      // Verify initial state
       await expect(flavorHeader).toContainText('↑');
 
-      // Click again for descending
+      // Click once for descending
       await flavorHeader.click();
       await expect(flavorHeader).toContainText('↓');
 
-      // Verify order (alphabetical descending)
+      // Click again toggles back to ascending
+      await flavorHeader.click();
+      await expect(flavorHeader).toContainText('↑');
+
+      // Verify order (alphabetical ascending)
       const rows = page.locator('.inventory-table tbody tr');
-      await expect(rows.nth(0)).toContainText('Vanilla');
+      await expect(rows.nth(0)).toContainText('Chocolate');
       await expect(rows.nth(1)).toContainText('Strawberry');
-      await expect(rows.nth(2)).toContainText('Chocolate');
+      await expect(rows.nth(2)).toContainText('Vanilla');
     });
 
     test('sorts by quantity', async ({ page }) => {
@@ -417,7 +425,7 @@ test.describe('Inventory Screen', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
       });
 
       await page.goto('/#/inventory');
