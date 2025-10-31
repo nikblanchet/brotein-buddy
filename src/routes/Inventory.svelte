@@ -28,6 +28,7 @@
     type SortColumn,
     type SortDirection,
   } from '$lib/inventory-utils';
+  import { generateFlavorId } from '$lib/utils/id';
 
   /**
    * View mode state
@@ -127,11 +128,8 @@
       return;
     }
 
-    // Generate a simple ID
-    const flavorId = `flavor_${Date.now()}`;
-
     const newFlavor: Flavor = {
-      id: flavorId,
+      id: generateFlavorId(),
       name: newFlavorName.trim(),
       excludeFromRandom: newFlavorExcludeFromRandom,
     };

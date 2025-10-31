@@ -10,6 +10,21 @@
 import type { Box, Flavor } from '../types/models';
 
 /**
+ * Maximum hue value for HSL color generation (degrees in color wheel)
+ */
+const COLOR_HUE_MAX = 360;
+
+/**
+ * Saturation percentage for generated flavor colors
+ */
+const COLOR_SATURATION = 65;
+
+/**
+ * Lightness percentage for generated flavor colors
+ */
+const COLOR_LIGHTNESS = 55;
+
+/**
  * Box with flavor information attached
  */
 export interface BoxWithFlavor {
@@ -172,8 +187,8 @@ export function getFlavorColor(flavorId: string): string {
   }
 
   // Generate HSL color with good saturation and lightness
-  const hue = Math.abs(hash % 360);
-  return `hsl(${hue}, 65%, 55%)`;
+  const hue = Math.abs(hash % COLOR_HUE_MAX);
+  return `hsl(${hue}, ${COLOR_SATURATION}%, ${COLOR_LIGHTNESS}%)`;
 }
 
 /**
