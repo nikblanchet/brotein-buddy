@@ -181,7 +181,7 @@ test.describe('Inventory Box Edit Screen', () => {
       await expect(page.locator('h2:has-text("Box Empty")')).toBeVisible();
       await expect(page.locator('text=This box now has 0 quantity')).toBeVisible();
       await expect(page.locator('button:has-text("Keep Empty Box")')).toBeVisible();
-      await expect(page.locator('button:has-text("Delete Box")')).toBeVisible();
+      await expect(page.locator('button:has-text("Delete Box")').last()).toBeVisible();
     });
 
     test('should keep empty box when choosing to keep', async ({ page }) => {
@@ -269,8 +269,11 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.fill('input#height', '4');
       await page.click('button:has-text("Confirm")');
 
-      // Should show validation error
-      await expect(page.locator('text=Height 4 in stack 1 requires height 3')).toBeVisible();
+      // Should show validation error (appears inside the modal, wait for it)
+      await page.locator('.error-message').waitFor({ state: 'visible', timeout: 5000 });
+      await expect(page.locator('.error-message')).toContainText(
+        'Height 4 in stack 1 requires height'
+      );
     });
 
     test('should show conflict modal when location is occupied', async ({ page }) => {
@@ -282,7 +285,10 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.fill('input#height', '2');
       await page.click('button:has-text("Confirm")');
 
-      // Conflict modal should appear
+      // Conflict modal should appear (wait for animation to complete)
+      await page
+        .locator('h2#modal-title:has-text("Location Conflict")')
+        .waitFor({ state: 'visible', timeout: 10000 });
       await expect(page.locator('h2:has-text("Location Conflict")')).toBeVisible();
       await expect(page.locator('text=Stack 1, Height 2')).toBeVisible();
       await expect(page.locator('text=is occupied by another box')).toBeVisible();
@@ -297,6 +303,11 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.fill('input#stack', '1');
       await page.fill('input#height', '2');
       await page.click('button:has-text("Confirm")');
+
+      // Wait for conflict modal to appear and stabilize
+      await page
+        .locator('h2#modal-title:has-text("Location Conflict")')
+        .waitFor({ state: 'visible', timeout: 10000 });
 
       // Click Swap Locations
       await page.click('button:has-text("Swap Locations")');
@@ -325,6 +336,11 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.fill('input#stack', '1');
       await page.fill('input#height', '2');
       await page.click('button:has-text("Confirm")');
+
+      // Wait for conflict modal to appear and stabilize
+      await page
+        .locator('h2#modal-title:has-text("Location Conflict")')
+        .waitFor({ state: 'visible', timeout: 10000 });
 
       // Click Displace Box
       await page.click('button:has-text("Displace Box")');

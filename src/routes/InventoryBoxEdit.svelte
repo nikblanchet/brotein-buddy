@@ -176,14 +176,8 @@
   function handleConfirmLocationChange() {
     if (!box || newStack === null || newHeight === null) return;
 
-    // Validate location (no gaps)
-    const validation = validateLocationNoGaps(newStack, newHeight, $appState.boxes, boxId);
-    if (!validation.isValid) {
-      locationError = validation.error || 'Invalid location';
-      return;
-    }
-
-    // Check for conflicts
+    // Check for conflicts FIRST (before validation)
+    // If there's a conflict, user can swap or displace to resolve any gap issues
     const conflict = getLocationConflict(newStack, newHeight, $appState.boxes, boxId);
     if (conflict) {
       conflictingBoxId = conflict.id;
@@ -192,7 +186,14 @@
       return;
     }
 
-    // No conflict, update location
+    // Validate location (no gaps) only if no conflict
+    const validation = validateLocationNoGaps(newStack, newHeight, $appState.boxes, boxId);
+    if (!validation.isValid) {
+      locationError = validation.error || 'Invalid location';
+      return;
+    }
+
+    // No conflict and valid, update location
     updateBoxLocation(boxId, { stack: newStack, height: newHeight });
     showLocationModal = false;
   }
