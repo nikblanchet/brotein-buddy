@@ -9,6 +9,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { STORAGE_KEY } from '../../src/lib/storage';
 
 test.describe('Home Screen', () => {
   test.describe('Basic Rendering', () => {
@@ -101,7 +102,7 @@ test.describe('Home Screen', () => {
   test.describe('Favorite Flavor Feature', () => {
     test('displays "Set Favorite" when no favorite configured', async ({ page, context }) => {
       // Set up localStorage without favorite flavor
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const state = {
           version: 1,
           boxes: [],
@@ -109,8 +110,8 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
-      });
+        localStorage.setItem(key, JSON.stringify(state));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
 
@@ -124,7 +125,7 @@ test.describe('Home Screen', () => {
 
     test('displays favorite flavor name when configured', async ({ page, context }) => {
       // Set up localStorage with favorite flavor
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const state = {
           version: 1,
           boxes: [],
@@ -135,8 +136,8 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: 'choc_001',
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
-      });
+        localStorage.setItem(key, JSON.stringify(state));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
 
@@ -149,7 +150,7 @@ test.describe('Home Screen', () => {
 
     test('favorite button is clickable when favorite configured', async ({ page, context }) => {
       // Set up localStorage with favorite flavor
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const state = {
           version: 1,
           boxes: [],
@@ -157,8 +158,8 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: 'straw_003',
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
-      });
+        localStorage.setItem(key, JSON.stringify(state));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
 

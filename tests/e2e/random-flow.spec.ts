@@ -11,6 +11,7 @@
 
 import { test, expect } from '@playwright/test';
 import type { AppState } from '../../src/types/models';
+import { STORAGE_KEY } from '../../src/lib/storage';
 
 /**
  * Helper function to create a sample app state for testing
@@ -63,7 +64,7 @@ function createTestState(): AppState {
 test.describe('Random Selection Flow', () => {
   test.beforeEach(async ({ page, context }) => {
     // Set up localStorage with test state
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       const testState: AppState = {
         version: 1,
         flavors: [
@@ -104,8 +105,8 @@ test.describe('Random Selection Flow', () => {
         favoriteFlavorId: null,
         settings: {},
       };
-      localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(testState));
-    });
+      localStorage.setItem(key, JSON.stringify(testState));
+    }, STORAGE_KEY);
 
     // Navigate to home screen
     await page.goto('/#/');
@@ -128,7 +129,7 @@ test.describe('Random Selection Flow', () => {
 
     test.skip('handles no flavors available', async ({ page, context }) => {
       // Set up state with no flavors
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const emptyState: AppState = {
           version: 1,
           flavors: [],
@@ -136,8 +137,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(emptyState));
-      });
+        localStorage.setItem(key, JSON.stringify(emptyState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
@@ -154,7 +155,7 @@ test.describe('Random Selection Flow', () => {
 
     test.skip('handles all flavors excluded', async ({ page, context }) => {
       // Set up state with all flavors excluded
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const excludedState: AppState = {
           version: 1,
           flavors: [
@@ -173,8 +174,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(excludedState));
-      });
+        localStorage.setItem(key, JSON.stringify(excludedState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
@@ -188,7 +189,7 @@ test.describe('Random Selection Flow', () => {
 
     test.skip('handles no boxes in stock', async ({ page, context }) => {
       // Set up state with flavors but no boxes
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const noStockState: AppState = {
           version: 1,
           flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
@@ -196,8 +197,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(noStockState));
-      });
+        localStorage.setItem(key, JSON.stringify(noStockState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
@@ -256,10 +257,10 @@ test.describe('Random Selection Flow', () => {
   test.describe('Confirm Action', () => {
     test('confirms selection and returns to home', async ({ page }) => {
       // Get initial state from localStorage
-      const initialState = await page.evaluate(() => {
-        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const initialState = await page.evaluate((key) => {
+        const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : null;
-      });
+      }, STORAGE_KEY);
 
       const initialTotalQuantity = initialState.boxes.reduce(
         (sum: number, box: { quantity: number }) => sum + box.quantity,
@@ -277,10 +278,10 @@ test.describe('Random Selection Flow', () => {
       await expect(page).toHaveURL(/#\/$/);
 
       // Verify state was updated (quantity decreased by 1)
-      const updatedState = await page.evaluate(() => {
-        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const updatedState = await page.evaluate((key) => {
+        const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : null;
-      });
+      }, STORAGE_KEY);
 
       const updatedTotalQuantity = updatedState.boxes.reduce(
         (sum: number, box: { quantity: number }) => sum + box.quantity,
@@ -294,10 +295,10 @@ test.describe('Random Selection Flow', () => {
   test.describe('Cancel Action', () => {
     test('cancels selection without updating state', async ({ page }) => {
       // Get initial state
-      const initialState = await page.evaluate(() => {
-        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const initialState = await page.evaluate((key) => {
+        const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : null;
-      });
+      }, STORAGE_KEY);
 
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
@@ -310,10 +311,10 @@ test.describe('Random Selection Flow', () => {
       await expect(page).toHaveURL(/#\/$/);
 
       // Verify state was NOT updated
-      const updatedState = await page.evaluate(() => {
-        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+      const updatedState = await page.evaluate((key) => {
+        const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : null;
-      });
+      }, STORAGE_KEY);
 
       expect(JSON.stringify(updatedState)).toBe(JSON.stringify(initialState));
     });
@@ -347,7 +348,7 @@ test.describe('Random Selection Flow', () => {
 
     test.skip('disables Add Another button when quantity is 1', async ({ page, context }) => {
       // Set up state with a box that has quantity 1
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const lowQuantityState: AppState = {
           version: 1,
           flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
@@ -363,8 +364,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(lowQuantityState));
-      });
+        localStorage.setItem(key, JSON.stringify(lowQuantityState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
@@ -406,7 +407,7 @@ test.describe('Random Selection Flow', () => {
     test.skip('shows alternative boxes when multiple boxes exist', async ({ page, context }) => {
       // Ensure chocolate has multiple boxes (it does in our default state)
       // Force selection of chocolate by making it the only available flavor
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const singleFlavorState: AppState = {
           version: 1,
           flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
@@ -436,8 +437,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleFlavorState));
-      });
+        localStorage.setItem(key, JSON.stringify(singleFlavorState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
@@ -457,7 +458,7 @@ test.describe('Random Selection Flow', () => {
       context,
     }) => {
       // Set up state with only one box per flavor
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         const singleBoxState: AppState = {
           version: 1,
           flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
@@ -473,8 +474,8 @@ test.describe('Random Selection Flow', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleBoxState));
-      });
+        localStorage.setItem(key, JSON.stringify(singleBoxState));
+      }, STORAGE_KEY);
 
       await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
