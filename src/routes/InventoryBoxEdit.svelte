@@ -18,7 +18,7 @@
     removeBox,
   } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
-  import { getFlavorColor } from '$lib/utils/inventory-utils';
+  import { getFlavorColor } from '$lib/inventory-utils';
   import {
     validateLocationNoGaps,
     getLocationConflict,
@@ -29,8 +29,8 @@
   import NumberPad from '$lib/components/NumberPad.svelte';
   import Modal from '$lib/components/Modal.svelte';
 
-  // Route params
-  export let params: Record<string, string> = {};
+  // Route params (Svelte 5 syntax)
+  const { params = {} }: { params?: Record<string, string> } = $props();
 
   // Extract boxId from route params
   const boxId = params.boxId || '';
