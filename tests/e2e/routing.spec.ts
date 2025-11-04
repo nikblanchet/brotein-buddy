@@ -147,7 +147,7 @@ test.describe('Routing - Button Navigation', () => {
     await page.goto('/#/inventory/rearrange');
     await expect(page.locator('h1')).toContainText('Rearrange Boxes');
 
-    await page.click('text=Back to Inventory');
+    await page.click('text=Cancel');
 
     await expect(page).toHaveURL(/#\/inventory$/);
     await expect(page.locator('h1')).toContainText('Inventory');
