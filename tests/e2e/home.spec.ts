@@ -11,15 +11,14 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Home Screen', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to home screen
-    await page.goto('/#/');
-
-    // Wait for home screen to be fully loaded
-    await expect(page.locator('h1')).toContainText('Protein Buddy');
-  });
-
   test.describe('Basic Rendering', () => {
+    test.beforeEach(async ({ page }) => {
+      // Navigate to home screen
+      await page.goto('/#/');
+
+      // Wait for home screen to be fully loaded
+      await expect(page.locator('h1')).toContainText('Protein Buddy');
+    });
     test('renders the app title and subtitle', async ({ page }) => {
       // Check title
       const title = page.locator('h1');
@@ -67,6 +66,11 @@ test.describe('Home Screen', () => {
   });
 
   test.describe('Navigation', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/#/');
+      await expect(page.locator('h1')).toContainText('Protein Buddy');
+    });
+
     test('random button navigates to /random route', async ({ page }) => {
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
@@ -105,7 +109,7 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: null,
           settings: {},
         };
-        localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
       });
 
       await page.goto('/#/');
@@ -131,7 +135,7 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: 'choc_001',
           settings: {},
         };
-        localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
       });
 
       await page.goto('/#/');
@@ -153,7 +157,7 @@ test.describe('Home Screen', () => {
           favoriteFlavorId: 'straw_003',
           settings: {},
         };
-        localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
+        localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
       });
 
       await page.goto('/#/');
@@ -218,6 +222,11 @@ test.describe('Home Screen', () => {
   });
 
   test.describe('Accessibility', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/#/');
+      await expect(page.locator('h1')).toContainText('Protein Buddy');
+    });
+
     test('all buttons have accessible text', async ({ page }) => {
       const buttons = page.locator('button');
 
@@ -258,6 +267,11 @@ test.describe('Home Screen', () => {
   });
 
   test.describe('Visual Polish', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/#/');
+      await expect(page.locator('h1')).toContainText('Protein Buddy');
+    });
+
     test('page has proper spacing and layout', async ({ page }) => {
       // Header should be centered
       const header = page.locator('.home-header');
