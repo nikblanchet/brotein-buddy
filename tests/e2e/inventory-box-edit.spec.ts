@@ -133,13 +133,14 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.click('button:has-text("5")');
       await page.click('text=Confirm');
 
-      // Should show alert
-      page.on('dialog', async (dialog) => {
-        expect(dialog.message()).toContain('cannot exceed 12');
-        await dialog.accept();
-      });
+      // Should show error modal
+      await expect(page.locator('text=Invalid Input')).toBeVisible();
+      await expect(page.locator('text=Quantity cannot exceed 12')).toBeVisible();
 
-      // Quantity should still be 8
+      // Dismiss error modal
+      await page.click('button:has-text("OK")');
+
+      // Modal should close and quantity should still be 8
       await expect(page.locator('.value:has-text("8")')).toBeVisible();
     });
   });

@@ -1,12 +1,37 @@
 <script lang="ts">
   /**
-   * Box Edit Screen
+   * Individual Box Edit Screen
    *
-   * Screen for editing individual box properties: quantity, location, open/closed status.
-   * Supports adding/removing quantity, changing location with conflict resolution,
-   * toggling open/closed status, and deleting boxes.
+   * Provides a comprehensive interface for editing box properties including:
+   * - Add/remove quantity via NumberPad (1-12 range with validation)
+   * - Change location with conflict resolution (swap/displace options)
+   * - Toggle open/closed status
+   * - Delete box with confirmation (automatic prompt when quantity reaches 0)
+   *
+   * All quantity changes validate against a maximum of 12 bottles per box.
+   * Location changes validate against the "no gaps" rule to maintain inventory
+   * integrity. When conflicts occur, users can choose to swap locations with
+   * the conflicting box or displace it to orphan status.
    *
    * @component
+   *
+   * @route /inventory/:boxId/edit
+   *
+   * @example
+   * ```typescript
+   * // Navigate to box edit screen
+   * import { push } from 'svelte-spa-router';
+   * import { ROUTES } from '$lib/router/routes';
+   *
+   * push(ROUTES.INVENTORY_BOX_EDIT('box_123'));
+   * ```
+   *
+   * @remarks
+   * - Location changes validate using the location-validation utility (shared with Task 2.7)
+   * - All state changes auto-save to LocalStorage via stores
+   * - Modal-based workflow prevents accidental data loss
+   * - Error messages use Modal components for consistent UX
+   * - E2E tested across Desktop Chrome and Mobile Safari
    */
 
   import { push } from 'svelte-spa-router';
@@ -42,6 +67,8 @@
   let showDeleteConfirmModal = $state(false);
   let showConflictModal = $state(false);
   let showAutoDeleteModal = $state(false);
+  let showErrorModal = $state(false);
+  let errorMessage = $state('');
 
   // NumberPad state
   let pendingQuantityChange = $state<number | null>(null);
@@ -72,7 +99,8 @@
 
     const newQuantity = box.quantity + pendingQuantityChange;
     if (newQuantity > 12) {
-      alert('Quantity cannot exceed 12');
+      errorMessage = 'Quantity cannot exceed 12. Maximum quantity per box is 12.';
+      showErrorModal = true;
       return;
     }
 
@@ -97,7 +125,8 @@
     const newQuantity = box.quantity - pendingQuantityChange;
 
     if (newQuantity < 0) {
-      alert('Quantity cannot be negative');
+      errorMessage = `Cannot remove ${pendingQuantityChange} bottles. Current quantity is only ${box.quantity}.`;
+      showErrorModal = true;
       return;
     }
 
@@ -390,6 +419,17 @@
       <div class="delete-actions">
         <Button variant="secondary" onclick={() => (showDeleteConfirmModal = false)}>Cancel</Button>
         <Button variant="danger" onclick={handleDeleteBox}>Delete Box</Button>
+      </div>
+    </div>
+  </Modal>
+
+  <!-- Error Modal -->
+  <Modal open={showErrorModal} title="Invalid Input" onclose={() => (showErrorModal = false)}>
+    <div class="error-modal-content">
+      <p>{errorMessage}</p>
+
+      <div class="modal-actions">
+        <Button variant="primary" onclick={() => (showErrorModal = false)}>OK</Button>
       </div>
     </div>
   </Modal>
