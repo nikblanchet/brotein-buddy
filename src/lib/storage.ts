@@ -12,8 +12,9 @@ import { type AppState, isAppState, createDefaultAppState } from '../types/model
 /**
  * LocalStorage key for storing application state.
  * Namespaced to avoid conflicts with other applications.
+ * Exported for use in E2E tests to ensure consistency.
  */
-const STORAGE_KEY = 'BROTEINBUDDY_APP_STATE';
+export const STORAGE_KEY = 'BROTEINBUDDY_APP_STATE';
 
 /**
  * Loads application state from localStorage.
