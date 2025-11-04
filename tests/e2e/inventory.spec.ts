@@ -94,7 +94,7 @@ test.describe('Inventory Screen', () => {
     });
 
     // Navigate directly to inventory screen
-    await page.goto('/inventory');
+    await page.goto('/#/inventory');
 
     // Wait for inventory screen to be fully loaded
     await expect(page.locator('h1')).toContainText('Inventory');
@@ -169,7 +169,7 @@ test.describe('Inventory Screen', () => {
       await chocolateBox.click();
 
       // Should navigate to box edit screen
-      await expect(page).toHaveURL(/\/inventory\/box_1\/edit/);
+      await expect(page).toHaveURL(/#\/inventory\/box_1\/edit/);
     });
 
     test('boxes have color-coded backgrounds', async ({ page }) => {
@@ -235,7 +235,7 @@ test.describe('Inventory Screen', () => {
       await chocolateRow.click();
 
       // Should navigate to box edit screen
-      await expect(page).toHaveURL(/\/inventory\/box_1\/edit/);
+      await expect(page).toHaveURL(/#\/inventory\/box_1\/edit/);
     });
 
     test('sorts by flavor when flavor header clicked', async ({ page }) => {
@@ -339,7 +339,7 @@ test.describe('Inventory Screen', () => {
 
       await rearrangeButton.click();
 
-      await expect(page).toHaveURL(/\/inventory\/rearrange/);
+      await expect(page).toHaveURL(/#\/inventory\/rearrange/);
     });
   });
 
@@ -428,7 +428,7 @@ test.describe('Inventory Screen', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(state));
       });
 
-      await page.goto('/inventory');
+      await page.goto('/#/inventory');
 
       // Should show empty state message
       await expect(page.locator('.empty-state')).toBeVisible();
@@ -449,7 +449,7 @@ test.describe('Inventory Screen', () => {
       await page.keyboard.press('Enter');
 
       // Should navigate to edit screen
-      await expect(page).toHaveURL(/\/edit/);
+      await expect(page).toHaveURL(/#\/inventory\/.*\/edit/);
     });
 
     test('can activate box with Space key', async ({ page }) => {
@@ -460,7 +460,7 @@ test.describe('Inventory Screen', () => {
       await page.keyboard.press('Space');
 
       // Should navigate to edit screen
-      await expect(page).toHaveURL(/\/edit/);
+      await expect(page).toHaveURL(/#\/inventory\/.*\/edit/);
     });
 
     test('can tab through boxes in visual view', async ({ page }) => {
