@@ -57,7 +57,7 @@ export function reorderBoxesAfterMove(boxes: Box[], boxId: string, newLocation: 
  * // Returns: ['box-1']
  * ```
  */
-export function getAffectedBoxes(boxes: Box[], boxId: string, newLocation: Location): string[] {
+export function getAffectedBoxes(boxes: Box[], boxId: string, _newLocation: Location): string[] {
   // For simple moves, only the moved box is affected
   // Future enhancement: if we add cascading rearrangements, this would include displaced boxes
   return [boxId];
