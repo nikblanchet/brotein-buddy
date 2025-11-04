@@ -19,6 +19,7 @@
 
   interface Props extends ButtonProps {
     children?: Snippet;
+    testId?: string;
   }
 
   let {
@@ -29,12 +30,13 @@
     type = 'button',
     onclick,
     children,
+    testId,
   }: Props = $props();
 
   const buttonClasses = $derived(getButtonClasses(variant, size, fullWidth));
 </script>
 
-<button class={buttonClasses} {type} {disabled} {onclick}>
+<button class={buttonClasses} {type} {disabled} {onclick} data-testid={testId}>
   {@render children?.()}
 </button>
 
@@ -149,7 +151,7 @@
   }
 
   .button--base {
-    min-height: 40px;
+    min-height: 44px;
     padding: var(--space-2) var(--space-4);
     font-size: var(--font-size-base);
   }
@@ -165,6 +167,7 @@
      ======================================== */
 
   .button--full-width {
+    display: flex;
     width: 100%;
   }
 </style>
