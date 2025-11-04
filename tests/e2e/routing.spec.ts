@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { AppState } from '../../src/types/models';
 
 /**
  * E2E tests for client-side routing
@@ -9,6 +10,69 @@ import { test, expect } from '@playwright/test';
  * These tests run in a mobile viewport (iPhone 13 Pro) to match
  * the PWA's primary use case.
  */
+
+test.beforeEach(async ({ page }) => {
+  // Set up test data for box edit routing tests
+  await page.goto('/#/');
+  await page.evaluate(() => {
+    const testState: AppState = {
+      version: 1,
+      boxes: [
+        {
+          id: 'test-box-123',
+          flavorId: 'flavor_chocolate',
+          quantity: 5,
+          location: { stack: 1, height: 1 },
+          isOpen: false,
+        },
+        {
+          id: 'box-123',
+          flavorId: 'flavor_vanilla',
+          quantity: 3,
+          location: { stack: 1, height: 2 },
+          isOpen: true,
+        },
+        {
+          id: 'box-abc',
+          flavorId: 'flavor_strawberry',
+          quantity: 8,
+          location: { stack: 2, height: 1 },
+          isOpen: false,
+        },
+        {
+          id: 'direct-link-box',
+          flavorId: 'flavor_chocolate',
+          quantity: 4,
+          location: { stack: 2, height: 2 },
+          isOpen: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          flavorId: 'flavor_vanilla',
+          quantity: 6,
+          location: { stack: 3, height: 1 },
+          isOpen: true,
+        },
+        {
+          id: 'box-123_test-ABC',
+          flavorId: 'flavor_strawberry',
+          quantity: 7,
+          location: { stack: 3, height: 2 },
+          isOpen: false,
+        },
+      ],
+      flavors: [
+        { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
+        { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
+        { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: false },
+      ],
+      favoriteFlavorId: null,
+      settings: {},
+    };
+    localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(testState));
+  });
+  await page.reload();
+});
 
 test.describe('Routing - Basic Navigation', () => {
   test('home page loads at root path', async ({ page }) => {
@@ -73,7 +137,7 @@ test.describe('Routing - Button Navigation', () => {
     await page.goto('/#/inventory/box-123/edit');
     await expect(page.locator('h1')).toContainText('Edit Box');
 
-    await page.click('text=Back to Inventory');
+    await page.click('text=← Back');
 
     await expect(page).toHaveURL(/#\/inventory$/);
     await expect(page.locator('h1')).toContainText('Inventory');
