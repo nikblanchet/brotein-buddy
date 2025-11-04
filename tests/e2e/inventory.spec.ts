@@ -13,7 +13,9 @@ import type { AppState } from '../../src/types/models';
 
 /**
  * Helper function to create a test app state with boxes and flavors
+ * Currently unused - will be needed when skipped empty state test is re-enabled
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createTestState(): AppState {
   return {
     version: 1,

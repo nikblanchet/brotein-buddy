@@ -14,7 +14,9 @@ import type { AppState } from '../../src/types/models';
 
 /**
  * Helper function to create a sample app state for testing
+ * Currently unused - will be needed when skipped tests are re-enabled
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createTestState(): AppState {
   return {
     version: 1,
@@ -380,7 +382,8 @@ test.describe('Random Selection Flow', () => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
-      // Get the selected flavor name
+      // Get the selected flavor name (will be used to verify exclusion when test is re-enabled)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const selectedFlavorName = await page.locator('.flavor-name').textContent();
 
       // Click Different Choice
