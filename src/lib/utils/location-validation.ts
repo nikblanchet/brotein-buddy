@@ -1,4 +1,4 @@
-import type { Box, Location } from '$lib/types/models';
+import type { Box, Location } from '../../types/models';
 
 /**
  * Validates that a location has no gaps in stacks or heights.
