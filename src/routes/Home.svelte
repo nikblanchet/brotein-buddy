@@ -84,6 +84,7 @@
       fullWidth={true}
       disabled={!favoriteFlavor}
       onclick={handleFavoriteClick}
+      testId="favorite-button"
     >
       {favoriteButtonLabel}
     </Button>
