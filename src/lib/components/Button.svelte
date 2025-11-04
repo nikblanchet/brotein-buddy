@@ -167,7 +167,7 @@
      ======================================== */
 
   .button--full-width {
-    display: flex;
+    display: flex; /* Override inline-flex from base for full-width layout */
     width: 100%;
   }
 </style>
