@@ -107,7 +107,7 @@ test.describe('Random Selection Flow', () => {
 
     // Navigate to home screen
     await page.goto('/#/');
-    await expect(page.locator('h1')).toContainText('Protein Buddy');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test.describe('Random Selection Screen', () => {
