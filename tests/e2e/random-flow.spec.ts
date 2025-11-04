@@ -106,7 +106,7 @@ test.describe('Random Selection Flow', () => {
     });
 
     // Navigate to home screen
-    await page.goto('/');
+    await page.goto('/#/');
     await expect(page.locator('h1')).toContainText('Protein Buddy');
   });
 
@@ -117,11 +117,11 @@ test.describe('Random Selection Flow', () => {
       await randomButton.click();
 
       // Should navigate to random route
-      await expect(page).toHaveURL(/\/random/);
+      await expect(page).toHaveURL(/#\/random/);
 
       // Should show loading state briefly (or skip straight to confirm)
       // Wait for navigation to confirm screen (selection happens automatically)
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
     });
 
     test('handles no flavors available', async ({ page, context }) => {
@@ -137,7 +137,7 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(emptyState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -174,7 +174,7 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(excludedState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -197,7 +197,7 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(noStockState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -213,7 +213,7 @@ test.describe('Random Selection Flow', () => {
       await randomButton.click();
 
       // Wait for confirmation screen
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should display a flavor name (we don't know which one was selected)
       const flavorName = page.locator('.flavor-name');
@@ -230,7 +230,7 @@ test.describe('Random Selection Flow', () => {
     test('displays all four action buttons', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Check all buttons exist
       await expect(page.locator('button').filter({ hasText: 'Confirm' })).toBeVisible();
@@ -241,7 +241,7 @@ test.describe('Random Selection Flow', () => {
 
     test('shows open/unopened status correctly', async ({ page }) => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show either "Open" or "Unopened" status
       const status = page.locator('.status');
@@ -266,13 +266,13 @@ test.describe('Random Selection Flow', () => {
 
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Confirm
       await page.locator('button').filter({ hasText: 'Confirm' }).click();
 
       // Should return to home
-      await expect(page).toHaveURL(/^\/$/);
+      await expect(page).toHaveURL(/#\/$/);
 
       // Verify state was updated (quantity decreased by 1)
       const updatedState = await page.evaluate(() => {
@@ -299,13 +299,13 @@ test.describe('Random Selection Flow', () => {
 
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Cancel
       await page.locator('button').filter({ hasText: 'Cancel' }).click();
 
       // Should return to home
-      await expect(page).toHaveURL(/^\/$/);
+      await expect(page).toHaveURL(/#\/$/);
 
       // Verify state was NOT updated
       const updatedState = await page.evaluate(() => {
@@ -321,7 +321,7 @@ test.describe('Random Selection Flow', () => {
     test('decrements quantity and stays on confirmation screen', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get initial quantity displayed
       const initialQuantityText = await page.locator('.quantity').first().textContent();
@@ -331,7 +331,7 @@ test.describe('Random Selection Flow', () => {
       await page.locator('button').filter({ hasText: 'Add Another' }).click();
 
       // Should stay on confirmation screen
-      await expect(page).toHaveURL(/\/random\/confirm/);
+      await expect(page).toHaveURL(/#\/random\/confirm/);
 
       // Wait a brief moment for state to update
       await page.waitForTimeout(100);
@@ -364,9 +364,9 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(lowQuantityState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Add Another button should be disabled
       const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
@@ -378,7 +378,7 @@ test.describe('Random Selection Flow', () => {
     test('navigates back to random selection with exclusion', async ({ page }) => {
       // Navigate through random flow
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get the selected flavor name
       const selectedFlavorName = await page.locator('.flavor-name').textContent();
@@ -387,10 +387,10 @@ test.describe('Random Selection Flow', () => {
       await page.locator('button').filter({ hasText: 'Different Choice' }).click();
 
       // Should navigate back to random route with query param
-      await expect(page).toHaveURL(/\/random\?excludeLastPick=/);
+      await expect(page).toHaveURL(/#\/random\?excludeLastPick=/);
 
       // Should automatically select and navigate to confirm again
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // The new flavor should be different (can't guarantee in tests due to randomness,
       // but the URL should have had the excludeLastPick parameter)
@@ -436,9 +436,9 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleFlavorState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show Alternative Boxes section
       await expect(page.locator('h3')).toContainText('Alternative Boxes');
@@ -470,9 +470,9 @@ test.describe('Random Selection Flow', () => {
         localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(singleBoxState));
       });
 
-      await page.goto('/');
+      await page.goto('/#/');
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should NOT show Alternative Boxes section
       const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
@@ -483,7 +483,7 @@ test.describe('Random Selection Flow', () => {
   test.describe('Accessibility', () => {
     test('loading spinner has aria-label', async ({ page }) => {
       // Navigate to random (might catch loading state briefly)
-      await page.goto('/random');
+      await page.goto('/#/random');
 
       // If spinner appears, it should have aria-label
       const spinner = page.locator('.spinner');
@@ -494,7 +494,7 @@ test.describe('Random Selection Flow', () => {
 
     test('all buttons are keyboard accessible', async ({ page }) => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/\/random\/confirm/, { timeout: 3000 });
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Tab through buttons
       await page.keyboard.press('Tab');
