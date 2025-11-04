@@ -185,6 +185,7 @@
               <div class="stack-boxes">
                 {#each boxes as { box, flavor }}
                   <div
+                    data-testid="box-{box.id}"
                     class="box-visual"
                     class:box-open={box.isOpen}
                     style="background-color: {getFlavorColor(box.flavorId)};"

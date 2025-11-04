@@ -243,6 +243,48 @@ export function updateBoxLocation(boxId: string, location: Location): void {
 }
 
 /**
+ * Updates the open/closed status of a box.
+ *
+ * @param boxId - The ID of the box to update
+ * @param isOpen - The new open/closed status
+ * @throws {Error} If box not found
+ *
+ * @example
+ * ```typescript
+ * // Mark box as open
+ * updateBoxIsOpen('box_001', true);
+ *
+ * // Mark box as closed
+ * updateBoxIsOpen('box_001', false);
+ * ```
+ *
+ * @remarks
+ * - Box must exist (error thrown if not found)
+ * - State update and auto-save happen immediately
+ * - Changes persist to LocalStorage automatically
+ */
+export function updateBoxIsOpen(boxId: string, isOpen: boolean): void {
+  appState.update((state) => {
+    const boxIndex = state.boxes.findIndex((b) => b.id === boxId);
+    if (boxIndex === -1) {
+      throw new Error(`Box with ID "${boxId}" not found`);
+    }
+
+    // Create new state with updated box
+    const updatedBoxes = [...state.boxes];
+    updatedBoxes[boxIndex] = {
+      ...updatedBoxes[boxIndex],
+      isOpen,
+    };
+
+    return {
+      ...state,
+      boxes: updatedBoxes,
+    };
+  });
+}
+
+/**
  * Adds a new flavor to the application.
  *
  * The flavor must have a unique ID. If a flavor with the same ID already exists,

@@ -14,6 +14,7 @@ import {
   removeBox,
   updateBoxQuantity,
   updateBoxLocation,
+  updateBoxIsOpen,
   addFlavor,
   updateFlavor,
   setFavoriteFlavor,
@@ -463,6 +464,66 @@ describe('stores', () => {
         const state = getCurrentState();
         expect(state.boxes[0].location).toEqual({ stack: 1, height: 0 });
         expect(state.boxes[1].location).toEqual({ stack: 1, height: 0 });
+      });
+    });
+
+    describe('updateBoxIsOpen', () => {
+      it('should update box open status from false to true', () => {
+        const box = createTestBox({ id: 'box_toggle', isOpen: false });
+        addBox(box);
+
+        updateBoxIsOpen('box_toggle', true);
+
+        const state = getCurrentState();
+        expect(state.boxes[0].isOpen).toBe(true);
+      });
+
+      it('should update box open status from true to false', () => {
+        const box = createTestBox({ id: 'box_toggle', isOpen: true });
+        addBox(box);
+
+        updateBoxIsOpen('box_toggle', false);
+
+        const state = getCurrentState();
+        expect(state.boxes[0].isOpen).toBe(false);
+      });
+
+      it('should throw error if box not found', () => {
+        expect(() => updateBoxIsOpen('nonexistent', true)).toThrow(
+          'Box with ID "nonexistent" not found'
+        );
+      });
+
+      it('should not modify other box properties', () => {
+        const box = createTestBox({
+          id: 'box_props',
+          quantity: 8,
+          flavorId: 'flavor_xyz',
+          location: { stack: 2, height: 3 },
+          isOpen: false,
+        });
+        addBox(box);
+
+        updateBoxIsOpen('box_props', true);
+
+        const state = getCurrentState();
+        const updated = state.boxes[0];
+        expect(updated.isOpen).toBe(true);
+        expect(updated.quantity).toBe(8);
+        expect(updated.flavorId).toBe('flavor_xyz');
+        expect(updated.location).toEqual({ stack: 2, height: 3 });
+      });
+
+      it('should persist to LocalStorage', () => {
+        const box = createTestBox({ id: 'box_persist', isOpen: false });
+        addBox(box);
+
+        updateBoxIsOpen('box_persist', true);
+
+        const stored = localStorage.getItem('BROTEINBUDDY_APP_STATE');
+        expect(stored).toBeTruthy();
+        const parsed = JSON.parse(stored!);
+        expect(parsed.boxes[0].isOpen).toBe(true);
       });
     });
   });

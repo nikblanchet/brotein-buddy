@@ -1,38 +1,450 @@
 <script lang="ts">
   /**
-   * Box Edit Screen - Placeholder
+   * Individual Box Edit Screen
    *
-   * Screen for editing individual box properties: quantity, location, open/closed status.
-   * This is a placeholder implementation that will be replaced
-   * in task 2.6 with the full box editing functionality.
+   * Provides a comprehensive interface for editing box properties including:
+   * - Add/remove quantity via NumberPad (1-12 range with validation)
+   * - Change location with conflict resolution (swap/displace options)
+   * - Toggle open/closed status
+   * - Delete box with confirmation (automatic prompt when quantity reaches 0)
+   *
+   * All quantity changes validate against a maximum of 12 bottles per box.
+   * Location changes validate against the "no gaps" rule to maintain inventory
+   * integrity. When conflicts occur, users can choose to swap locations with
+   * the conflicting box or displace it to orphan status.
    *
    * @component
+   *
+   * @route /inventory/:boxId/edit
+   *
+   * @example
+   * ```typescript
+   * // Navigate to box edit screen
+   * import { push } from 'svelte-spa-router';
+   * import { ROUTES } from '$lib/router/routes';
+   *
+   * push(ROUTES.INVENTORY_BOX_EDIT('box_123'));
+   * ```
+   *
+   * @remarks
+   * - Location changes validate using the location-validation utility (shared with Task 2.7)
+   * - All state changes auto-save to LocalStorage via stores
+   * - Modal-based workflow prevents accidental data loss
+   * - Error messages use Modal components for consistent UX
+   * - E2E tested across Desktop Chrome and Mobile Safari
    */
 
-  import Button from '$lib/components/Button.svelte';
   import { push } from 'svelte-spa-router';
+  import {
+    appState,
+    updateBoxQuantity,
+    updateBoxLocation,
+    updateBoxIsOpen,
+    removeBox,
+  } from '$lib/stores';
+  import { maybeGetFlavor } from '$lib/utils/flavor';
+  import { getFlavorColor } from '$lib/inventory-utils';
+  import {
+    validateLocationNoGaps,
+    getLocationConflict,
+    formatLocation,
+  } from '$lib/utils/location-validation';
   import { ROUTES } from '$lib/router/routes';
+  import Button from '$lib/components/Button.svelte';
+  import NumberPad from '$lib/components/NumberPad.svelte';
+  import Modal from '$lib/components/Modal.svelte';
 
-  // In the real implementation, this will extract boxId from route params
-  // For now, it's just a placeholder
+  // Route params (Svelte 5 syntax)
+  const { params = {} }: { params?: Record<string, string> } = $props();
+
+  // Extract boxId from route params
+  const boxId = params.boxId || '';
+
+  // Modal states
+  let showAddQuantityModal = $state(false);
+  let showRemoveQuantityModal = $state(false);
+  let showLocationModal = $state(false);
+  let showDeleteConfirmModal = $state(false);
+  let showConflictModal = $state(false);
+  let showAutoDeleteModal = $state(false);
+  let showErrorModal = $state(false);
+  let errorMessage = $state('');
+
+  // NumberPad state
+  let pendingQuantityChange = $state<number | null>(null);
+
+  // Location change state
+  let newStack = $state<number | null>(null);
+  let newHeight = $state<number | null>(null);
+  let locationError = $state<string | null>(null);
+  let conflictingBoxId = $state<string | null>(null);
+
+  // Derived state
+  const box = $derived($appState.boxes.find((b) => b.id === boxId));
+  const flavor = $derived(box ? maybeGetFlavor(box.flavorId, $appState.flavors) : null);
+  const boxColor = $derived(box && flavor ? getFlavorColor(flavor.id) : '#cccccc');
+
+  // Handler: NumberPad selection for adding quantity
+  function handleAddQuantitySelect(value: number | 'keyboard') {
+    if (value === 'keyboard') {
+      // TODO: Future enhancement - show keyboard input
+      return;
+    }
+    pendingQuantityChange = value;
+  }
+
+  // Handler: Confirm add quantity
+  function handleConfirmAddQuantity() {
+    if (!box || pendingQuantityChange === null) return;
+
+    const newQuantity = box.quantity + pendingQuantityChange;
+    if (newQuantity > 12) {
+      errorMessage = 'Quantity cannot exceed 12. Maximum quantity per box is 12.';
+      showErrorModal = true;
+      return;
+    }
+
+    updateBoxQuantity(boxId, newQuantity);
+    showAddQuantityModal = false;
+    pendingQuantityChange = null;
+  }
+
+  // Handler: NumberPad selection for removing quantity
+  function handleRemoveQuantitySelect(value: number | 'keyboard') {
+    if (value === 'keyboard') {
+      // TODO: Future enhancement - show keyboard input
+      return;
+    }
+    pendingQuantityChange = value;
+  }
+
+  // Handler: Confirm remove quantity
+  function handleConfirmRemoveQuantity() {
+    if (!box || pendingQuantityChange === null) return;
+
+    const newQuantity = box.quantity - pendingQuantityChange;
+
+    if (newQuantity < 0) {
+      errorMessage = `Cannot remove ${pendingQuantityChange} bottles. Current quantity is only ${box.quantity}.`;
+      showErrorModal = true;
+      return;
+    }
+
+    if (newQuantity === 0) {
+      // Auto-show delete prompt when quantity reaches 0
+      updateBoxQuantity(boxId, 0);
+      showRemoveQuantityModal = false;
+      showAutoDeleteModal = true;
+    } else {
+      updateBoxQuantity(boxId, newQuantity);
+      showRemoveQuantityModal = false;
+    }
+
+    pendingQuantityChange = null;
+  }
+
+  // Handler: Cancel quantity change
+  function handleCancelQuantityChange() {
+    pendingQuantityChange = null;
+    showAddQuantityModal = false;
+    showRemoveQuantityModal = false;
+  }
+
+  // Handler: Keep empty box (from auto-delete prompt)
+  function handleKeepEmptyBox() {
+    showAutoDeleteModal = false;
+  }
+
+  // Handler: Delete box (from auto-delete or manual delete)
+  function handleDeleteBox() {
+    removeBox(boxId);
+    showAutoDeleteModal = false;
+    showDeleteConfirmModal = false;
+    push(ROUTES.INVENTORY);
+  }
+
+  // Handler: Start location change
+  function handleOpenLocationModal() {
+    if (!box) return;
+    newStack = box.location.stack;
+    newHeight = box.location.height;
+    locationError = null;
+    showLocationModal = true;
+  }
+
+  // Handler: Confirm location change
+  function handleConfirmLocationChange() {
+    if (!box || newStack === null || newHeight === null) return;
+
+    // Check for conflicts FIRST (before validation)
+    // If there's a conflict, user can swap or displace to resolve any gap issues
+    const conflict = getLocationConflict(newStack, newHeight, $appState.boxes, boxId);
+    if (conflict) {
+      conflictingBoxId = conflict.id;
+      showLocationModal = false;
+      showConflictModal = true;
+      return;
+    }
+
+    // Validate location (no gaps) only if no conflict
+    const validation = validateLocationNoGaps(newStack, newHeight, $appState.boxes, boxId);
+    if (!validation.isValid) {
+      locationError = validation.error || 'Invalid location';
+      return;
+    }
+
+    // No conflict and valid, update location
+    updateBoxLocation(boxId, { stack: newStack, height: newHeight });
+    showLocationModal = false;
+  }
+
+  // Handler: Swap locations (conflict resolution)
+  function handleSwapLocations() {
+    if (!box || !conflictingBoxId || newStack === null || newHeight === null) return;
+
+    const conflictingBox = $appState.boxes.find((b) => b.id === conflictingBoxId);
+    if (!conflictingBox) return;
+
+    // Swap: move conflicting box to current box's location, then move current box
+    updateBoxLocation(conflictingBoxId, { ...box.location });
+    updateBoxLocation(boxId, { stack: newStack, height: newHeight });
+
+    showConflictModal = false;
+    conflictingBoxId = null;
+  }
+
+  // Handler: Displace box (conflict resolution)
+  function handleDisplaceBox() {
+    if (!box || !conflictingBoxId || newStack === null || newHeight === null) return;
+
+    // Displace: remove conflicting box's location (orphan it), then move current box
+    updateBoxLocation(conflictingBoxId, { stack: 0, height: 0 }); // Orphaned state
+    updateBoxLocation(boxId, { stack: newStack, height: newHeight });
+
+    showConflictModal = false;
+    conflictingBoxId = null;
+  }
+
+  // Handler: Toggle open/closed
+  function handleToggleOpenClosed() {
+    if (!box) return;
+    updateBoxIsOpen(boxId, !box.isOpen);
+  }
 </script>
 
-<div class="placeholder-screen">
-  <h1>Edit Box</h1>
-  <p class="status">Coming soon</p>
-  <p class="description">
-    The box edit screen will allow users to add or remove quantities using the number pad, change
-    the box location with conflict resolution, and toggle the open/closed status. Changes will be
-    saved to the application state.
-  </p>
-
-  <div class="actions">
+{#if !box}
+  <div class="error-screen">
+    <h1>Box Not Found</h1>
+    <p>The box you are looking for does not exist.</p>
     <Button variant="secondary" onclick={() => push(ROUTES.INVENTORY)}>Back to Inventory</Button>
   </div>
-</div>
+{:else if !flavor}
+  <div class="error-screen">
+    <h1>Flavor Not Found</h1>
+    <p>This box's flavor information is missing.</p>
+    <Button variant="secondary" onclick={() => push(ROUTES.INVENTORY)}>Back to Inventory</Button>
+  </div>
+{:else}
+  <div class="box-edit-screen">
+    <!-- Header -->
+    <header class="header">
+      <Button variant="ghost" size="sm" onclick={() => push(ROUTES.INVENTORY)}>← Back</Button>
+      <h1>Edit Box</h1>
+    </header>
+
+    <!-- Visual Box Representation -->
+    <div class="box-visual-container">
+      <div class="box-visual" style="background-color: {boxColor}">
+        <div class="box-label">{flavor.name}</div>
+      </div>
+    </div>
+
+    <!-- Box Details -->
+    <div class="box-details">
+      <div class="detail-item">
+        <span class="label">Quantity:</span>
+        <span class="value">{box.quantity}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Location:</span>
+        <span class="value">{formatLocation(box.location.stack, box.location.height)}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Status:</span>
+        <span class="value status-badge" class:open={box.isOpen} class:closed={!box.isOpen}>
+          {box.isOpen ? 'Open' : 'Closed'}
+        </span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <Button variant="primary" onclick={() => (showAddQuantityModal = true)}>Add Quantity</Button>
+
+      <Button variant="primary" onclick={() => (showRemoveQuantityModal = true)}>
+        Remove Quantity
+      </Button>
+
+      <Button variant="secondary" onclick={handleOpenLocationModal}>Change Location</Button>
+
+      <Button variant="secondary" onclick={handleToggleOpenClosed}>
+        Toggle {box.isOpen ? 'Closed' : 'Open'}
+      </Button>
+
+      <Button variant="danger" onclick={() => (showDeleteConfirmModal = true)}>Delete Box</Button>
+    </div>
+  </div>
+
+  <!-- Add Quantity Modal -->
+  <Modal open={showAddQuantityModal} title="Add Quantity" onclose={handleCancelQuantityChange}>
+    <NumberPad max={12} onselect={handleAddQuantitySelect} />
+
+    <div class="modal-actions">
+      <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
+      <Button
+        variant="primary"
+        onclick={handleConfirmAddQuantity}
+        disabled={pendingQuantityChange === null}
+      >
+        Confirm
+      </Button>
+    </div>
+  </Modal>
+
+  <!-- Remove Quantity Modal -->
+  <Modal
+    open={showRemoveQuantityModal}
+    title="Remove Quantity"
+    onclose={handleCancelQuantityChange}
+  >
+    <NumberPad max={box.quantity} onselect={handleRemoveQuantitySelect} />
+
+    <div class="modal-actions">
+      <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
+      <Button
+        variant="primary"
+        onclick={handleConfirmRemoveQuantity}
+        disabled={pendingQuantityChange === null}
+      >
+        Confirm
+      </Button>
+    </div>
+  </Modal>
+
+  <!-- Change Location Modal -->
+  <Modal
+    open={showLocationModal}
+    title="Change Location"
+    onclose={() => (showLocationModal = false)}
+  >
+    <div class="location-form">
+      <div class="form-group">
+        <label for="stack">Stack (Column):</label>
+        <input
+          id="stack"
+          type="number"
+          min="1"
+          bind:value={newStack}
+          placeholder="Enter stack number"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="height">Height (Row):</label>
+        <input
+          id="height"
+          type="number"
+          min="1"
+          bind:value={newHeight}
+          placeholder="Enter height number"
+        />
+      </div>
+
+      {#if locationError}
+        <p class="error-message">{locationError}</p>
+      {/if}
+
+      <div class="modal-actions">
+        <Button variant="secondary" onclick={() => (showLocationModal = false)}>Cancel</Button>
+        <Button variant="primary" onclick={handleConfirmLocationChange}>Confirm</Button>
+      </div>
+    </div>
+  </Modal>
+
+  <!-- Location Conflict Modal -->
+  <Modal
+    open={showConflictModal}
+    title="Location Conflict"
+    onclose={() => (showConflictModal = false)}
+  >
+    {#if newStack !== null && newHeight !== null}
+      <div class="conflict-content">
+        <p class="conflict-message">
+          Location {formatLocation(newStack, newHeight)} is occupied by another box.
+        </p>
+        <p class="conflict-question">How would you like to resolve this?</p>
+
+        <div class="conflict-actions">
+          <Button variant="primary" onclick={handleSwapLocations}>Swap Locations</Button>
+          <Button variant="danger" onclick={handleDisplaceBox}>Displace Box</Button>
+          <Button variant="secondary" onclick={() => (showConflictModal = false)}>Cancel</Button>
+        </div>
+      </div>
+    {/if}
+  </Modal>
+
+  <!-- Auto-Delete Prompt Modal (when quantity reaches 0) -->
+  <Modal open={showAutoDeleteModal} title="Box Empty" onclose={() => (showAutoDeleteModal = false)}>
+    <div class="delete-prompt">
+      <p>
+        This box now has 0 quantity. Would you like to delete it or keep it for future inventory?
+      </p>
+
+      <div class="delete-actions">
+        <Button variant="secondary" onclick={handleKeepEmptyBox}>Keep Empty Box</Button>
+        <Button variant="danger" onclick={handleDeleteBox}>Delete Box</Button>
+      </div>
+    </div>
+  </Modal>
+
+  <!-- Manual Delete Confirmation Modal -->
+  <Modal
+    open={showDeleteConfirmModal}
+    title="Delete Box"
+    onclose={() => (showDeleteConfirmModal = false)}
+  >
+    <div class="delete-confirm">
+      <p>Delete this box of {flavor.name}?</p>
+      <p class="warning">This action cannot be undone.</p>
+
+      <div class="delete-actions">
+        <Button variant="secondary" onclick={() => (showDeleteConfirmModal = false)}>Cancel</Button>
+        <Button variant="danger" onclick={handleDeleteBox}>Delete Box</Button>
+      </div>
+    </div>
+  </Modal>
+
+  <!-- Error Modal -->
+  <Modal open={showErrorModal} title="Invalid Input" onclose={() => (showErrorModal = false)}>
+    <div class="error-modal-content">
+      <p>{errorMessage}</p>
+
+      <div class="modal-actions">
+        <Button variant="primary" onclick={() => (showErrorModal = false)}>OK</Button>
+      </div>
+    </div>
+  </Modal>
+{/if}
 
 <style>
-  .placeholder-screen {
+  .box-edit-screen {
+    min-height: 100vh;
+    padding: var(--space-4);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .error-screen {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,28 +455,176 @@
     gap: var(--space-4);
   }
 
-  h1 {
-    font-size: var(--font-size-2xl);
+  .header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .header h1 {
+    font-size: var(--font-size-xl);
     color: var(--color-text-primary);
     margin: 0;
   }
 
-  .status {
-    font-size: var(--font-size-lg);
-    color: var(--color-primary);
-    font-weight: var(--font-weight-medium);
-    margin: 0;
+  .box-visual-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-6);
   }
 
-  .description {
-    font-size: var(--font-size-base);
+  .box-visual {
+    width: 150px;
+    height: 150px;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    border: 3px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .box-label {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: rgba(0, 0, 0, 0.7);
+    text-align: center;
+    padding: var(--space-2);
+  }
+
+  .box-details {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .label {
+    font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
-    max-width: 600px;
-    margin: 0;
-    line-height: 1.6;
+  }
+
+  .value {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .status-badge {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .status-badge.open {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+  }
+
+  .status-badge.closed {
+    background-color: var(--color-neutral-light);
+    color: var(--color-neutral-dark);
   }
 
   .actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  /* Location Form Styles */
+  .location-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .form-group label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+
+  .form-group input {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-base);
+  }
+
+  .error-message {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+    margin: 0;
+  }
+
+  .modal-actions,
+  .conflict-actions,
+  .delete-actions {
+    display: flex;
+    gap: var(--space-2);
     margin-top: var(--space-4);
+  }
+
+  .conflict-actions {
+    flex-direction: column;
+  }
+
+  .conflict-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .conflict-message {
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .conflict-question {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .delete-prompt,
+  .delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .delete-prompt p,
+  .delete-confirm p {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .warning {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+  }
+
+  @media (min-width: 768px) {
+    .modal-actions,
+    .delete-actions {
+      justify-content: flex-end;
+    }
   }
 </style>
