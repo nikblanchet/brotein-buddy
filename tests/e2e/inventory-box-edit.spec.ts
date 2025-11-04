@@ -4,7 +4,7 @@ import type { AppState } from '../../src/types/models';
 test.describe('Inventory Box Edit Screen', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to home and set up test data
-    await page.goto('/');
+    await page.goto('/#/');
 
     // Set up test data via localStorage
     await page.evaluate(() => {
@@ -52,11 +52,11 @@ test.describe('Inventory Box Edit Screen', () => {
     test('should navigate from inventory to box edit', async ({ page }) => {
       // Go to inventory
       await page.click('text=Inventory Management');
-      await expect(page).toHaveURL('/inventory');
+      await expect(page).toHaveURL('/#/inventory');
 
       // Click on first box
       await page.click('[data-testid="box-box_test_1"]');
-      await expect(page).toHaveURL('/inventory/box_test_1/edit');
+      await expect(page).toHaveURL('/#/inventory/box_test_1/edit');
 
       // Verify box details are displayed
       await expect(page.locator('h1')).toContainText('Edit Box');
@@ -66,14 +66,14 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should display error for invalid box ID', async ({ page }) => {
-      await page.goto('/inventory/invalid_box_id/edit');
+      await page.goto('/#/inventory/invalid_box_id/edit');
 
       await expect(page.locator('text=Box Not Found')).toBeVisible();
       await expect(page.locator('text=The box you are looking for does not exist')).toBeVisible();
     });
 
     test('should display box details correctly', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Check all details are present
       await expect(page.locator('text=Chocolate')).toBeVisible();
@@ -86,16 +86,16 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should navigate back to inventory when clicking back button', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('text=← Back');
-      await expect(page).toHaveURL('/inventory');
+      await expect(page).toHaveURL('/#/inventory');
     });
   });
 
   test.describe('Add Quantity', () => {
     test('should add quantity using NumberPad', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Initial quantity is 5
       await expect(page.locator('text=5')).toBeVisible();
@@ -123,7 +123,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should not allow quantity to exceed 12', async ({ page }) => {
-      await page.goto('/inventory/box_test_3/edit');
+      await page.goto('/#/inventory/box_test_3/edit');
 
       // Current quantity is 8
       await expect(page.locator('.value:has-text("8")')).toBeVisible();
@@ -147,7 +147,7 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('Remove Quantity', () => {
     test('should remove quantity using NumberPad', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Initial quantity is 5
       await expect(page.locator('.value:has-text("5")')).toBeVisible();
@@ -170,7 +170,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should show auto-delete prompt when quantity reaches 0', async ({ page }) => {
-      await page.goto('/inventory/box_test_2/edit');
+      await page.goto('/#/inventory/box_test_2/edit');
 
       // Current quantity is 3
       await page.click('text=Remove Quantity');
@@ -185,7 +185,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should keep empty box when choosing to keep', async ({ page }) => {
-      await page.goto('/inventory/box_test_2/edit');
+      await page.goto('/#/inventory/box_test_2/edit');
 
       await page.click('text=Remove Quantity');
       await page.click('button:has-text("3")');
@@ -195,12 +195,12 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.click('text=Keep Empty Box');
 
       // Should stay on edit screen with quantity 0
-      await expect(page).toHaveURL('/inventory/box_test_2/edit');
+      await expect(page).toHaveURL('/#/inventory/box_test_2/edit');
       await expect(page.locator('.value:has-text("0")')).toBeVisible();
     });
 
     test('should delete box when choosing to delete from auto-prompt', async ({ page }) => {
-      await page.goto('/inventory/box_test_2/edit');
+      await page.goto('/#/inventory/box_test_2/edit');
 
       await page.click('text=Remove Quantity');
       await page.click('button:has-text("3")');
@@ -210,7 +210,7 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.click('button:has-text("Delete Box")').last();
 
       // Should navigate back to inventory
-      await expect(page).toHaveURL('/inventory');
+      await expect(page).toHaveURL('/#/inventory');
 
       // Box should be removed from state
       const state = await page.evaluate<AppState>(() =>
@@ -222,7 +222,7 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('Change Location', () => {
     test('should change location without conflict', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Current location is Stack 1, Height 1
       await expect(page.locator('text=Stack 1, Height 1')).toBeVisible();
@@ -247,7 +247,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should show error for invalid location (gaps)', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Try to move to Stack 5, Height 1 (stack 2,3,4 don't exist - gaps!)
       await page.click('text=Change Location');
@@ -261,7 +261,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should show error for height gaps', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Try to move to Stack 1, Height 4 (height 3 doesn't exist)
       await page.click('text=Change Location');
@@ -274,7 +274,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should show conflict modal when location is occupied', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Try to move to Stack 1, Height 2 (occupied by box_test_2)
       await page.click('text=Change Location');
@@ -291,7 +291,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should swap locations when choosing swap', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('text=Change Location');
       await page.fill('input#stack', '1');
@@ -319,7 +319,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should displace box when choosing displace', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('text=Change Location');
       await page.fill('input#stack', '1');
@@ -345,7 +345,7 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('Toggle Open/Closed', () => {
     test('should toggle box from closed to open', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Initially closed
       await expect(page.locator('.status-badge.closed')).toBeVisible();
@@ -366,7 +366,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should toggle box from open to closed', async ({ page }) => {
-      await page.goto('/inventory/box_test_2/edit');
+      await page.goto('/#/inventory/box_test_2/edit');
 
       // Initially open
       await expect(page.locator('.status-badge.open')).toBeVisible();
@@ -387,7 +387,7 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('Manual Delete', () => {
     test('should show delete confirmation when clicking delete button', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('button:has-text("Delete Box")');
 
@@ -397,24 +397,24 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should cancel delete when clicking cancel', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('button:has-text("Delete Box")');
       await page.click('button:has-text("Cancel")');
 
       // Should still be on edit screen
-      await expect(page).toHaveURL('/inventory/box_test_1/edit');
+      await expect(page).toHaveURL('/#/inventory/box_test_1/edit');
       await expect(page.locator('text=Chocolate')).toBeVisible();
     });
 
     test('should delete box when confirming delete', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('button:has-text("Delete Box")');
       await page.click('button:has-text("Delete Box")').last();
 
       // Should navigate back to inventory
-      await expect(page).toHaveURL('/inventory');
+      await expect(page).toHaveURL('/#/inventory');
 
       // Box should be removed from state
       const state = await page.evaluate<AppState>(() =>
@@ -426,14 +426,14 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('Accessibility', () => {
     test('should have proper heading structure', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       const h1 = await page.locator('h1');
       await expect(h1).toHaveText('Edit Box');
     });
 
     test('should have labels for form inputs', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       await page.click('text=Change Location');
 
@@ -445,7 +445,7 @@ test.describe('Inventory Box Edit Screen', () => {
     });
 
     test('should support keyboard navigation for buttons', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Focus on first button
       await page.keyboard.press('Tab');
@@ -461,7 +461,7 @@ test.describe('Inventory Box Edit Screen', () => {
 
   test.describe('State Persistence', () => {
     test('should persist all changes to localStorage', async ({ page }) => {
-      await page.goto('/inventory/box_test_1/edit');
+      await page.goto('/#/inventory/box_test_1/edit');
 
       // Make multiple changes
       // 1. Add quantity
