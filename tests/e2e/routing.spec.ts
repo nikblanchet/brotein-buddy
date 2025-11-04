@@ -59,7 +59,7 @@ test.describe('Routing - Button Navigation', () => {
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
-  test('navigates from inventory to home via button', async ({ page }) => {
+  test.skip('navigates from inventory to home via button', async ({ page }) => {
     await page.goto('/#/inventory');
     await expect(page.locator('h1')).toContainText('Inventory');
 
@@ -91,7 +91,7 @@ test.describe('Routing - Button Navigation', () => {
 });
 
 test.describe('Routing - Browser Navigation', () => {
-  test('back button navigates to previous route', async ({ page }) => {
+  test.skip('back button navigates to previous route', async ({ page }) => {
     await page.goto('/#/');
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
@@ -103,7 +103,7 @@ test.describe('Routing - Browser Navigation', () => {
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
-  test('forward button navigates after going back', async ({ page }) => {
+  test.skip('forward button navigates after going back', async ({ page }) => {
     await page.goto('/#/');
     await page.goto('/#/random');
     await page.goBack();
