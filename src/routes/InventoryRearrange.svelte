@@ -17,7 +17,7 @@
   import { groupBoxesByStack, getFlavorColor } from '$lib/inventory-utils';
   import { validateRearrangementState } from '$lib/rearrange-utils';
   import { dndzone, type DndEvent } from 'svelte-dnd-action';
-  import type { Box } from '$lib/types/models';
+  import type { Box } from '../types/models';
 
   /**
    * Local working copy of boxes for drag-and-drop manipulation
@@ -181,8 +181,8 @@
             flipDurationMs: 200,
             dropTargetStyle: {},
           }}
-          on:consider={(e) => handleDndConsider(e, Number(stackNum))}
-          on:finalize={(e) => handleDndFinalize(e, Number(stackNum))}
+          onconsider={(e) => handleDndConsider(e, Number(stackNum))}
+          onfinalize={(e) => handleDndFinalize(e, Number(stackNum))}
         >
           {#each boxes as { box, flavor } (box.id)}
             <div

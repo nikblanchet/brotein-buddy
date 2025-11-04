@@ -1,4 +1,4 @@
-import type { Box, Location } from './types/models';
+import type { Box, Location } from '../types/models';
 import { validateLocationNoGaps } from './utils/location-validation';
 
 /**
