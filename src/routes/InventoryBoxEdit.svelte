@@ -235,7 +235,7 @@
   </div>
 
   <!-- Add Quantity Modal -->
-  <Modal bind:isOpen={showAddQuantityModal} title="Add Quantity">
+  <Modal bind:open={showAddQuantityModal} title="Add Quantity">
     <NumberPad
       max={12}
       onConfirm={handleAddQuantity}
@@ -244,7 +244,7 @@
   </Modal>
 
   <!-- Remove Quantity Modal -->
-  <Modal bind:isOpen={showRemoveQuantityModal} title="Remove Quantity">
+  <Modal bind:open={showRemoveQuantityModal} title="Remove Quantity">
     <NumberPad
       max={box.quantity}
       onConfirm={handleRemoveQuantity}
@@ -253,7 +253,7 @@
   </Modal>
 
   <!-- Change Location Modal -->
-  <Modal bind:isOpen={showLocationModal} title="Change Location">
+  <Modal bind:open={showLocationModal} title="Change Location">
     <div class="location-form">
       <div class="form-group">
         <label for="stack">Stack (Column):</label>
@@ -289,7 +289,7 @@
   </Modal>
 
   <!-- Location Conflict Modal -->
-  <Modal bind:isOpen={showConflictModal} title="Location Conflict">
+  <Modal bind:open={showConflictModal} title="Location Conflict">
     {#if newStack !== null && newHeight !== null}
       <div class="conflict-content">
         <p class="conflict-message">
@@ -307,7 +307,7 @@
   </Modal>
 
   <!-- Auto-Delete Prompt Modal (when quantity reaches 0) -->
-  <Modal bind:isOpen={showAutoDeleteModal} title="Box Empty">
+  <Modal bind:open={showAutoDeleteModal} title="Box Empty">
     <div class="delete-prompt">
       <p>
         This box now has 0 quantity. Would you like to delete it or keep it for future inventory?
@@ -321,7 +321,7 @@
   </Modal>
 
   <!-- Manual Delete Confirmation Modal -->
-  <Modal bind:isOpen={showDeleteConfirmModal} title="Delete Box">
+  <Modal bind:open={showDeleteConfirmModal} title="Delete Box">
     <div class="delete-confirm">
       <p>Delete this box of {flavor.name}?</p>
       <p class="warning">This action cannot be undone.</p>
