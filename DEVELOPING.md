@@ -177,6 +177,56 @@ test('completes user flow', async ({ page }) => {
 - **Descriptive names**: Use `.test.ts` for Vitest, `.spec.ts` for Playwright
 - **Test data**: Use factories for complex test data (future)
 
+### Re-enabling Skipped E2E Tests
+
+**IMPORTANT**: Some E2E tests are marked with `test.skip()` because they test features not yet implemented. These tests MUST be re-enabled when implementing related features.
+
+#### Before Implementing Any Feature
+
+1. **Search for related skipped tests**:
+
+   ```bash
+   grep -rn "test.skip" tests/e2e/
+   ```
+
+2. **Check specific feature keywords**:
+
+   ```bash
+   grep -rn "test.skip.*your-feature-name" tests/e2e/
+   ```
+
+#### When Implementing a Feature
+
+1. Find all skipped tests related to your feature
+2. Read the skip comments to understand what they test
+3. Remove `.skip` to enable the test:
+
+   ```typescript
+   // Before:
+   test.skip('handles error case', async ({ page, context }) => {
+
+   // After:
+   test('handles error case', async ({ page, context }) => {
+   ```
+
+4. Ensure enabled tests pass before marking feature complete
+5. Never ship a feature with its tests still skipped
+
+#### Skipped Test Categories (as of PR #55)
+
+- **Random Flow Error Handling** (3 tests): No flavors, all excluded, no stock
+- **Confirmation Screen Details** (5 tests): Strict mode violations, alternative boxes
+- **Empty States** (1 test): Inventory with no boxes
+- **Placeholder Screens** (2 tests): "Coming soon" status styling
+- **Browser Navigation** (3 tests): Back/forward through /random without state
+- **Routing Navigation** (3 tests): Inventory to home, requires proper state setup
+
+**Files with skipped tests:**
+
+- `tests/e2e/random-flow.spec.ts` (11 skipped)
+- `tests/e2e/routing.spec.ts` (8 skipped)
+- `tests/e2e/inventory.spec.ts` (1 skipped)
+
 ### Code Quality
 
 Automated code quality enforcement ensures consistent style and catches errors early.
