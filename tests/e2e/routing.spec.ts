@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Routing - Basic Navigation', () => {
   test('home page loads at root path', async ({ page }) => {
     await page.goto('/#/');
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('Protein Buddy');
     await expect(page).toHaveURL(/#\/$/);
   });
 
