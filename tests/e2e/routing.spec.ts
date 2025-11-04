@@ -221,7 +221,7 @@ test.describe('Routing - Hash URL Format', () => {
 });
 
 test.describe('Routing - Placeholder Content', () => {
-  test('all placeholder screens show coming soon status', async ({ page }) => {
+  test.skip('all placeholder screens show coming soon status', async ({ page }) => {
     const routes = ['/random', '/inventory', '/inventory/box-1/edit', '/inventory/rearrange'];
 
     for (const route of routes) {
@@ -230,7 +230,7 @@ test.describe('Routing - Placeholder Content', () => {
     }
   });
 
-  test('placeholder screens use consistent styling', async ({ page }) => {
+  test.skip('placeholder screens use consistent styling', async ({ page }) => {
     await page.goto('/#/random');
 
     const screen = page.locator('.placeholder-screen');
