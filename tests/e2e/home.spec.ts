@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Home Screen', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to home screen
-    await page.goto('/#/');
+    await page.goto('/');
 
     // Wait for home screen to be fully loaded
     await expect(page.locator('h1')).toContainText('Protein Buddy');
@@ -72,7 +72,7 @@ test.describe('Home Screen', () => {
       await randomButton.click();
 
       // Should navigate to random selection route
-      await expect(page).toHaveURL(/#\/random/);
+      await expect(page).toHaveURL(/\/random/);
     });
 
     test('inventory button navigates to /inventory route', async ({ page }) => {
@@ -82,7 +82,7 @@ test.describe('Home Screen', () => {
       await inventoryButton.click();
 
       // Should navigate to inventory route
-      await expect(page).toHaveURL(/#\/inventory/);
+      await expect(page).toHaveURL(/\/inventory/);
     });
 
     test('manual selection button navigates (placeholder)', async ({ page }) => {
@@ -90,7 +90,7 @@ test.describe('Home Screen', () => {
       await manualButton.click();
 
       // Currently navigates to inventory as placeholder
-      await expect(page).toHaveURL(/#\/inventory/);
+      await expect(page).toHaveURL(/\/inventory/);
     });
   });
 
@@ -108,7 +108,7 @@ test.describe('Home Screen', () => {
         localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
       });
 
-      await page.goto('/#/');
+      await page.goto('/');
 
       // Favorite button should show "Set Favorite"
       const favoriteButton = page.locator('button').filter({ hasText: 'Set Favorite' });
@@ -134,7 +134,7 @@ test.describe('Home Screen', () => {
         localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
       });
 
-      await page.goto('/#/');
+      await page.goto('/');
 
       // Favorite button should display the flavor name
       const favoriteButton = page.locator('button').filter({ hasText: 'Chocolate' });
@@ -155,14 +155,14 @@ test.describe('Home Screen', () => {
         localStorage.setItem('brotein-buddy-state', JSON.stringify(state));
       });
 
-      await page.goto('/#/');
+      await page.goto('/');
 
       // Click favorite button
       const favoriteButton = page.locator('button').filter({ hasText: 'Strawberry' });
       await favoriteButton.click();
 
       // Should navigate somewhere (currently /random, will be /random/confirm in 2.4)
-      await expect(page).toHaveURL(/#\/random/);
+      await expect(page).toHaveURL(/\/random/);
     });
   });
 
@@ -170,7 +170,7 @@ test.describe('Home Screen', () => {
     test('layout works on mobile viewport (375px)', async ({ page }) => {
       // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
-      await page.goto('/#/');
+      await page.goto('/');
 
       // All buttons should be visible and stacked vertically
       const buttons = page.locator('button');
@@ -190,7 +190,7 @@ test.describe('Home Screen', () => {
     test('layout works on tablet viewport (768px)', async ({ page }) => {
       // Set tablet viewport
       await page.setViewportSize({ width: 768, height: 1024 });
-      await page.goto('/#/');
+      await page.goto('/');
 
       // All buttons should still be visible
       const buttons = page.locator('button');
@@ -204,7 +204,7 @@ test.describe('Home Screen', () => {
     test('layout works on desktop viewport (1024px)', async ({ page }) => {
       // Set desktop viewport
       await page.setViewportSize({ width: 1024, height: 768 });
-      await page.goto('/#/');
+      await page.goto('/');
 
       // All buttons should be visible
       const buttons = page.locator('button');
