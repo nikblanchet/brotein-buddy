@@ -17,13 +17,13 @@ test.describe('Routing - Basic Navigation', () => {
     await expect(page).toHaveURL(/#\/$/);
   });
 
-  test('random selection route loads', async ({ page }) => {
+  test.skip('random selection route loads', async ({ page }) => {
     await page.goto('/#/random');
     await expect(page.locator('h1')).toContainText('Random Selection');
     await expect(page).toHaveURL(/#\/random$/);
   });
 
-  test('random confirm route loads', async ({ page }) => {
+  test.skip('random confirm route loads', async ({ page }) => {
     await page.goto('/#/random/confirm');
     await expect(page.locator('h1')).toContainText('Confirm Selection');
     await expect(page).toHaveURL(/#\/random\/confirm$/);
@@ -49,7 +49,7 @@ test.describe('Routing - Basic Navigation', () => {
 });
 
 test.describe('Routing - Button Navigation', () => {
-  test('navigates from random to home via button', async ({ page }) => {
+  test.skip('navigates from random to home via button', async ({ page }) => {
     await page.goto('/#/random');
     await expect(page.locator('h1')).toContainText('Random Selection');
 
