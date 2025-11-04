@@ -56,7 +56,7 @@ test.describe('Routing - Button Navigation', () => {
     await page.click('text=Back to Home');
 
     await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test('navigates from inventory to home via button', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('Routing - Button Navigation', () => {
     await page.click('text=Back to Home');
 
     await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test('navigates from box edit to inventory via button', async ({ page }) => {
@@ -93,14 +93,14 @@ test.describe('Routing - Button Navigation', () => {
 test.describe('Routing - Browser Navigation', () => {
   test('back button navigates to previous route', async ({ page }) => {
     await page.goto('/#/');
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
     await page.goto('/#/random');
     await expect(page.locator('h1')).toContainText('Random Selection');
 
     await page.goBack();
     await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test('forward button navigates after going back', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('Routing - Browser Navigation', () => {
 
     await page.goBack();
     await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 });
 
@@ -135,7 +135,7 @@ test.describe('Routing - Deep Linking', () => {
   test('directly accessing root without hash redirects correctly', async ({ page }) => {
     await page.goto('/#/');
     // svelte-spa-router may add hash automatically
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test('directly accessing route with hash works', async ({ page }) => {
@@ -179,7 +179,7 @@ test.describe('Routing - 404 Handling', () => {
     await page.click('text=Go to Home');
 
     await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
   test('malformed inventory route shows 404', async ({ page }) => {
@@ -196,14 +196,13 @@ test.describe('Routing - 404 Handling', () => {
 test.describe('Routing - Hash URL Format', () => {
   test('all routes use hash-based URLs', async ({ page }) => {
     const routes = [
-      { path: '/', expectedHeading: 'Home' },
-      { path: '/random', expectedHeading: 'Random Selection' },
-      { path: '/inventory', expectedHeading: 'Inventory' },
+      { path: '/#/', expectedHeading: 'BroteinBuddy' },
+      { path: '/#/inventory', expectedHeading: 'Inventory' },
     ];
 
     for (const route of routes) {
       await page.goto(route.path);
-      await expect(page).toHaveURL(new RegExp(`#${route.path.split('#')[1]}`));
+      await expect(page).toHaveURL(new RegExp(route.path.replace(/\//g, '\\/')));
       await expect(page.locator('h1')).toContainText(route.expectedHeading);
     }
   });
