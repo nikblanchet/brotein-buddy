@@ -1,12 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { STORAGE_KEY } from '../../src/lib/storage';
 
 test.describe('Inventory Rearrange', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to home
-    await page.goto('http://localhost:5173/#/');
-
-    // Set up test data via localStorage
-    await page.evaluate(() => {
+  test.beforeEach(async ({ page, context }) => {
+    // Set up test data via localStorage BEFORE navigation
+    await context.addInitScript((key) => {
       const testState = {
         version: 1,
         boxes: [
@@ -40,11 +38,11 @@ test.describe('Inventory Rearrange', () => {
         favoriteFlavorId: null,
         settings: {},
       };
-      localStorage.setItem('broteinbuddy-state', JSON.stringify(testState));
-    });
+      localStorage.setItem(key, JSON.stringify(testState));
+    }, STORAGE_KEY);
 
-    // Reload to apply state
-    await page.reload();
+    // Navigate to home
+    await page.goto('/#/');
   });
 
   test('should navigate to rearrange screen from inventory', async ({ page }) => {
@@ -60,7 +58,7 @@ test.describe('Inventory Rearrange', () => {
   });
 
   test('should display all stacks and boxes', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     // Check stacks exist
     await expect(page.locator('text=Stack 1')).toBeVisible();
@@ -73,14 +71,14 @@ test.describe('Inventory Rearrange', () => {
   });
 
   test('should show confirm and cancel buttons', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     await expect(page.getByRole('button', { name: /confirm/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /cancel/i })).toBeVisible();
   });
 
   test('should navigate back on cancel', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     await page.click('button:has-text("Cancel")');
 
@@ -89,7 +87,7 @@ test.describe('Inventory Rearrange', () => {
   });
 
   test('should confirm valid rearrangement', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     // Confirm button should be enabled for valid state
     const confirmButton = page.getByRole('button', { name: /confirm/i });
@@ -104,7 +102,7 @@ test.describe('Inventory Rearrange', () => {
 
   test('should work on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     // Verify responsive layout
     await expect(page.locator('.stacks-container')).toBeVisible();
@@ -116,7 +114,7 @@ test.describe('Inventory Rearrange', () => {
   });
 
   test('should show boxes with correct quantities', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     // Verify quantities shown
     await expect(page.locator('text=12 bottles')).toBeVisible();
@@ -125,7 +123,7 @@ test.describe('Inventory Rearrange', () => {
   });
 
   test('should display header and instructions', async ({ page }) => {
-    await page.goto('http://localhost:5173/#/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
 
     await expect(page.locator('h1')).toHaveText('Rearrange Boxes');
     await expect(page.locator('text=Drag boxes to reorder')).toBeVisible();
