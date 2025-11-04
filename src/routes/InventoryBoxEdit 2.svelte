@@ -18,7 +18,7 @@
     removeBox,
   } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
-  import { getFlavorColor } from '$lib/inventory-utils';
+  import { getFlavorColor } from '$lib/utils/inventory-utils';
   import {
     validateLocationNoGaps,
     getLocationConflict,
@@ -29,8 +29,8 @@
   import NumberPad from '$lib/components/NumberPad.svelte';
   import Modal from '$lib/components/Modal.svelte';
 
-  // Route params (Svelte 5 syntax)
-  const { params = {} }: { params?: Record<string, string> } = $props();
+  // Route params
+  export let params: Record<string, string> = {};
 
   // Extract boxId from route params
   const boxId = params.boxId || '';
@@ -43,9 +43,6 @@
   let showConflictModal = $state(false);
   let showAutoDeleteModal = $state(false);
 
-  // NumberPad state
-  let pendingQuantityChange = $state<number | null>(null);
-
   // Location change state
   let newStack = $state<number | null>(null);
   let newHeight = $state<number | null>(null);
@@ -57,20 +54,11 @@
   const flavor = $derived(box ? maybeGetFlavor(box.flavorId, $appState.flavors) : null);
   const boxColor = $derived(box && flavor ? getFlavorColor(flavor.id) : '#cccccc');
 
-  // Handler: NumberPad selection for adding quantity
-  function handleAddQuantitySelect(value: number | 'keyboard') {
-    if (value === 'keyboard') {
-      // TODO: Future enhancement - show keyboard input
-      return;
-    }
-    pendingQuantityChange = value;
-  }
+  // Handler: Add Quantity
+  function handleAddQuantity(amount: number) {
+    if (!box) return;
 
-  // Handler: Confirm add quantity
-  function handleConfirmAddQuantity() {
-    if (!box || pendingQuantityChange === null) return;
-
-    const newQuantity = box.quantity + pendingQuantityChange;
+    const newQuantity = box.quantity + amount;
     if (newQuantity > 12) {
       alert('Quantity cannot exceed 12');
       return;
@@ -78,23 +66,13 @@
 
     updateBoxQuantity(boxId, newQuantity);
     showAddQuantityModal = false;
-    pendingQuantityChange = null;
   }
 
-  // Handler: NumberPad selection for removing quantity
-  function handleRemoveQuantitySelect(value: number | 'keyboard') {
-    if (value === 'keyboard') {
-      // TODO: Future enhancement - show keyboard input
-      return;
-    }
-    pendingQuantityChange = value;
-  }
+  // Handler: Remove Quantity
+  function handleRemoveQuantity(amount: number) {
+    if (!box) return;
 
-  // Handler: Confirm remove quantity
-  function handleConfirmRemoveQuantity() {
-    if (!box || pendingQuantityChange === null) return;
-
-    const newQuantity = box.quantity - pendingQuantityChange;
+    const newQuantity = box.quantity - amount;
 
     if (newQuantity < 0) {
       alert('Quantity cannot be negative');
@@ -110,15 +88,6 @@
       updateBoxQuantity(boxId, newQuantity);
       showRemoveQuantityModal = false;
     }
-
-    pendingQuantityChange = null;
-  }
-
-  // Handler: Cancel quantity change
-  function handleCancelQuantityChange() {
-    pendingQuantityChange = null;
-    showAddQuantityModal = false;
-    showRemoveQuantityModal = false;
   }
 
   // Handler: Keep empty box (from auto-delete prompt)
@@ -218,7 +187,7 @@
   <div class="box-edit-screen">
     <!-- Header -->
     <header class="header">
-      <Button variant="ghost" size="sm" onclick={() => push(ROUTES.INVENTORY)}>← Back</Button>
+      <Button variant="ghost" size="small" onclick={() => push(ROUTES.INVENTORY)}>← Back</Button>
       <h1>Edit Box</h1>
     </header>
 
@@ -266,47 +235,25 @@
   </div>
 
   <!-- Add Quantity Modal -->
-  <Modal open={showAddQuantityModal} title="Add Quantity" onclose={handleCancelQuantityChange}>
-    <NumberPad max={12} onselect={handleAddQuantitySelect} />
-
-    <div class="modal-actions">
-      <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
-      <Button
-        variant="primary"
-        onclick={handleConfirmAddQuantity}
-        disabled={pendingQuantityChange === null}
-      >
-        Confirm
-      </Button>
-    </div>
+  <Modal bind:isOpen={showAddQuantityModal} title="Add Quantity">
+    <NumberPad
+      max={12}
+      onConfirm={handleAddQuantity}
+      onCancel={() => (showAddQuantityModal = false)}
+    />
   </Modal>
 
   <!-- Remove Quantity Modal -->
-  <Modal
-    open={showRemoveQuantityModal}
-    title="Remove Quantity"
-    onclose={handleCancelQuantityChange}
-  >
-    <NumberPad max={box.quantity} onselect={handleRemoveQuantitySelect} />
-
-    <div class="modal-actions">
-      <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
-      <Button
-        variant="primary"
-        onclick={handleConfirmRemoveQuantity}
-        disabled={pendingQuantityChange === null}
-      >
-        Confirm
-      </Button>
-    </div>
+  <Modal bind:isOpen={showRemoveQuantityModal} title="Remove Quantity">
+    <NumberPad
+      max={box.quantity}
+      onConfirm={handleRemoveQuantity}
+      onCancel={() => (showRemoveQuantityModal = false)}
+    />
   </Modal>
 
   <!-- Change Location Modal -->
-  <Modal
-    open={showLocationModal}
-    title="Change Location"
-    onclose={() => (showLocationModal = false)}
-  >
+  <Modal bind:isOpen={showLocationModal} title="Change Location">
     <div class="location-form">
       <div class="form-group">
         <label for="stack">Stack (Column):</label>
@@ -342,11 +289,7 @@
   </Modal>
 
   <!-- Location Conflict Modal -->
-  <Modal
-    open={showConflictModal}
-    title="Location Conflict"
-    onclose={() => (showConflictModal = false)}
-  >
+  <Modal bind:isOpen={showConflictModal} title="Location Conflict">
     {#if newStack !== null && newHeight !== null}
       <div class="conflict-content">
         <p class="conflict-message">
@@ -356,7 +299,7 @@
 
         <div class="conflict-actions">
           <Button variant="primary" onclick={handleSwapLocations}>Swap Locations</Button>
-          <Button variant="danger" onclick={handleDisplaceBox}>Displace Box</Button>
+          <Button variant="warning" onclick={handleDisplaceBox}>Displace Box</Button>
           <Button variant="secondary" onclick={() => (showConflictModal = false)}>Cancel</Button>
         </div>
       </div>
@@ -364,7 +307,7 @@
   </Modal>
 
   <!-- Auto-Delete Prompt Modal (when quantity reaches 0) -->
-  <Modal open={showAutoDeleteModal} title="Box Empty" onclose={() => (showAutoDeleteModal = false)}>
+  <Modal bind:isOpen={showAutoDeleteModal} title="Box Empty">
     <div class="delete-prompt">
       <p>
         This box now has 0 quantity. Would you like to delete it or keep it for future inventory?
@@ -378,11 +321,7 @@
   </Modal>
 
   <!-- Manual Delete Confirmation Modal -->
-  <Modal
-    open={showDeleteConfirmModal}
-    title="Delete Box"
-    onclose={() => (showDeleteConfirmModal = false)}
-  >
+  <Modal bind:isOpen={showDeleteConfirmModal} title="Delete Box">
     <div class="delete-confirm">
       <p>Delete this box of {flavor.name}?</p>
       <p class="warning">This action cannot be undone.</p>
