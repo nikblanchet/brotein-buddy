@@ -67,7 +67,7 @@
 
 <div class="home-screen">
   <header class="home-header">
-    <h1>Protein Buddy</h1>
+    <h1>BroteinBuddy</h1>
     <p class="subtitle">Track & Pick Your Shakes</p>
   </header>
 

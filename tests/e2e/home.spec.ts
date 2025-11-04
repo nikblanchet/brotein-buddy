@@ -17,13 +17,13 @@ test.describe('Home Screen', () => {
       await page.goto('/#/');
 
       // Wait for home screen to be fully loaded
-      await expect(page.locator('h1')).toContainText('Protein Buddy');
+      await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
     test('renders the app title and subtitle', async ({ page }) => {
       // Check title
       const title = page.locator('h1');
       await expect(title).toBeVisible();
-      await expect(title).toHaveText('Protein Buddy');
+      await expect(title).toHaveText('BroteinBuddy');
 
       // Check subtitle
       const subtitle = page.locator('.subtitle');
@@ -68,7 +68,7 @@ test.describe('Home Screen', () => {
   test.describe('Navigation', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
-      await expect(page.locator('h1')).toContainText('Protein Buddy');
+      await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
     test('random button navigates to /random route', async ({ page }) => {
@@ -224,7 +224,7 @@ test.describe('Home Screen', () => {
   test.describe('Accessibility', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
-      await expect(page.locator('h1')).toContainText('Protein Buddy');
+      await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
     test('all buttons have accessible text', async ({ page }) => {
@@ -269,7 +269,7 @@ test.describe('Home Screen', () => {
   test.describe('Visual Polish', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
-      await expect(page.locator('h1')).toContainText('Protein Buddy');
+      await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
     test('page has proper spacing and layout', async ({ page }) => {
