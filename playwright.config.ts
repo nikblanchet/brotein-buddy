@@ -11,6 +11,11 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',
   },
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+    },
+  },
   projects: [
     {
       name: 'Mobile Safari',

@@ -126,6 +126,93 @@ npm run test:e2e          # Run Playwright tests
 npm run test:e2e:ui       # Run Playwright with UI mode
 ```
 
+#### Visual Regression Testing (Local Development Only)
+
+BroteinBuddy uses Playwright screenshot assertions to detect visual regressions in UI components. This catches unintended styling changes, layout shifts, and rendering bugs across browsers.
+
+> [!NOTE]
+> Visual regression tests currently run **locally only** (not in CI) due to platform-specific font rendering differences between macOS and Linux. See "Platform Limitation" section below for details.
+
+**What is visual regression testing?**
+
+Visual regression tests capture screenshots of components in various states and compare them against baseline images. If pixels differ beyond a configured threshold, the test fails.
+
+**Running visual regression tests:**
+
+```bash
+# Run all E2E tests (includes visual regression)
+npm run test:e2e
+
+# Run only button visual regression tests
+npx playwright test button.spec.ts
+
+# Run with UI mode to see screenshots side-by-side
+npx playwright test button.spec.ts --ui
+```
+
+**When snapshots fail:**
+
+When a visual test fails, Playwright generates comparison artifacts:
+
+```
+tests/e2e/
+  button.spec.ts-snapshots/          # Baseline snapshots (committed)
+    button-variants-Desktop-Chrome-darwin.png
+    button-variants-Mobile-Safari-darwin.png
+    ...
+  __diff_output__/                   # Diff images (not committed)
+    button-variants-Desktop-Chrome-diff.png
+    button-variants-Desktop-Chrome-actual.png
+```
+
+**How to review diffs:**
+
+1. Look at the test output to see which snapshots failed
+2. Check `__diff_output__/` for visual diffs (highlighted in red)
+3. Compare actual screenshots against baseline snapshots
+4. Determine if the difference is:
+   - **Intentional** (design update) → update baselines
+   - **Unintentional** (regression) → fix the CSS/component
+
+**Updating baseline snapshots:**
+
+If visual changes are intentional (e.g., design system update):
+
+```bash
+# Update all baseline snapshots
+npx playwright test button.spec.ts --update-snapshots
+
+# Review the new snapshots before committing
+ls tests/e2e/button.spec.ts-snapshots/
+
+# Commit updated baselines
+git add tests/e2e/button.spec.ts-snapshots/
+git commit -m "Update button visual regression baselines for design update"
+```
+
+**Snapshot tolerance:**
+
+Minor anti-aliasing differences between test runs are allowed via `maxDiffPixels: 100` threshold in `playwright.config.ts`. This prevents flaky tests from sub-pixel rendering differences while still catching real regressions.
+
+**Browser coverage:**
+
+Visual regression tests run on:
+
+- **Desktop Chrome**: Full coverage including hover states
+- **Mobile Safari (iPhone 13 Pro)**: Touch-optimized rendering validation
+
+Hover state tests automatically skip on Mobile Safari since mobile devices don't have hover interactions.
+
+**Component Demo page:**
+
+Visit `/#/component-demo` during development to interactively review component states before running visual regression tests. This page displays all component variants, sizes, and states.
+
+**Platform Limitation:**
+
+Visual regression tests currently skip in CI environments due to platform-specific font rendering differences. macOS and Linux render text at different widths (e.g., buttons render 404px wide on macOS vs 395px on Linux), causing snapshots to fail even though the visual appearance is functionally identical.
+
+The tests work perfectly during local development with platform-specific baselines (`*-darwin.png`). This provides immediate value for catching regressions during development while we work on cross-platform support via Docker-generated Linux baselines.
+
 #### Writing Tests
 
 **Unit Test Example:**
