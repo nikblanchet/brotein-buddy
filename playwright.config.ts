@@ -16,6 +16,7 @@ export default defineConfig({
       maxDiffPixels: 100,
     },
   },
+  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}',
   projects: [
     {
       name: 'Mobile Safari',
