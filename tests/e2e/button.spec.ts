@@ -65,4 +65,63 @@ test.describe('Button Component Visual Regression', () => {
       expect(bbox?.height).toBeGreaterThanOrEqual(44);
     });
   });
+
+  test.describe('Interactive States - Hover (Desktop Only)', () => {
+    test.skip(({ browserName }) => browserName !== 'chromium', 'Hover only works on desktop');
+
+    test('primary button hover state', async ({ page }) => {
+      const primaryButton = page.locator('button').filter({ hasText: 'Primary' }).first();
+      await primaryButton.hover();
+      await expect(primaryButton).toHaveScreenshot('button-hover-primary.png');
+    });
+
+    test('secondary button hover state', async ({ page }) => {
+      const secondaryButton = page.locator('button').filter({ hasText: 'Secondary' }).first();
+      await secondaryButton.hover();
+      await expect(secondaryButton).toHaveScreenshot('button-hover-secondary.png');
+    });
+
+    test('danger button hover state', async ({ page }) => {
+      const dangerButton = page.locator('button').filter({ hasText: 'Danger' }).first();
+      await dangerButton.hover();
+      await expect(dangerButton).toHaveScreenshot('button-hover-danger.png');
+    });
+
+    test('ghost button hover state', async ({ page }) => {
+      const ghostButton = page.locator('button').filter({ hasText: 'Ghost' }).first();
+      await ghostButton.hover();
+      await expect(ghostButton).toHaveScreenshot('button-hover-ghost.png');
+    });
+  });
+
+  test.describe('Interactive States - Focus', () => {
+    test('button focus state via keyboard navigation', async ({ page }) => {
+      // Tab to the first button
+      await page.keyboard.press('Tab');
+
+      const focusedButton = page.locator('button:focus');
+      await expect(focusedButton).toBeFocused();
+      await expect(focusedButton).toHaveScreenshot('button-focus.png');
+    });
+
+    test('focus visible outline meets accessibility standards', async ({ page }) => {
+      // Tab to the first button
+      await page.keyboard.press('Tab');
+
+      const focusedButton = page.locator('button:focus');
+
+      // Verify focus-visible outline is present and visible
+      const outlineColor = await focusedButton.evaluate((el) => {
+        return window.getComputedStyle(el).getPropertyValue('outline-color');
+      });
+
+      const outlineWidth = await focusedButton.evaluate((el) => {
+        return window.getComputedStyle(el).getPropertyValue('outline-width');
+      });
+
+      // Outline should be visible (not 'none' or '0px')
+      expect(outlineWidth).not.toBe('0px');
+      expect(outlineColor).not.toBe('');
+    });
+  });
 });
