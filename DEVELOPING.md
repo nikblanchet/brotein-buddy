@@ -126,9 +126,12 @@ npm run test:e2e          # Run Playwright tests
 npm run test:e2e:ui       # Run Playwright with UI mode
 ```
 
-#### Visual Regression Testing
+#### Visual Regression Testing (Local Development Only)
 
 BroteinBuddy uses Playwright screenshot assertions to detect visual regressions in UI components. This catches unintended styling changes, layout shifts, and rendering bugs across browsers.
+
+> [!NOTE]
+> Visual regression tests currently run **locally only** (not in CI) due to platform-specific font rendering differences between macOS and Linux. See "Platform Limitation" section below for details.
 
 **What is visual regression testing?**
 
@@ -203,6 +206,12 @@ Hover state tests automatically skip on Mobile Safari since mobile devices don't
 **Component Demo page:**
 
 Visit `/#/component-demo` during development to interactively review component states before running visual regression tests. This page displays all component variants, sizes, and states.
+
+**Platform Limitation:**
+
+Visual regression tests currently skip in CI environments due to platform-specific font rendering differences. macOS and Linux render text at different widths (e.g., buttons render 404px wide on macOS vs 395px on Linux), causing snapshots to fail even though the visual appearance is functionally identical.
+
+The tests work perfectly during local development with platform-specific baselines (`*-darwin.png`). This provides immediate value for catching regressions during development while we work on cross-platform support via Docker-generated Linux baselines.
 
 #### Writing Tests
 
