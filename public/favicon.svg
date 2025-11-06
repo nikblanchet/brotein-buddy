@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="favicon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="32" height="32" rx="7" fill="url(#favicon-gradient)"/>
+
+  <!-- BB text -->
+  <text x="16" y="22"
+        font-family="system-ui, -apple-system, sans-serif"
+        font-size="18"
+        font-weight="900"
+        fill="#FFF"
+        text-anchor="middle">BB</text>
+</svg>
