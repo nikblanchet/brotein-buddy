@@ -63,3 +63,4 @@ tests/e2e/**/__diff_output__/
 # OS
 .DS_Store
 Thumbs.db
+.scratch/
