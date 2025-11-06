@@ -10,10 +10,12 @@
    */
 
   import Button from '$lib/components/Button.svelte';
+  import Modal from '$lib/components/Modal.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
+  import type { Flavor } from '../types/models';
 
   /**
    * Reactive: Get the user's favorite flavor (if configured)
@@ -30,6 +32,11 @@
   );
 
   /**
+   * State for flavor picker modal
+   */
+  let showFlavorPicker = $state(false);
+
+  /**
    * Navigate to random flavor selection screen
    */
   function handleRandomClick() {
@@ -38,23 +45,40 @@
 
   /**
    * Navigate to favorite flavor quick-pick
-   * Currently disabled if no favorite is configured
-   * TODO: In 2.4, implement direct navigation to confirm screen with pre-selected flavor
+   * Navigates directly to confirmation with favorite flavor pre-selected
+   *
+   * Uses sessionStorage for cross-route state passing because:
+   * - svelte-spa-router doesn't support navigation state in push()
+   * - Preserves state across browser refresh (better UX)
+   * - sessionStorage auto-clears when tab closes (no long-term storage)
+   *
+   * Pattern: Store minimal data (just ID) → navigate → destination retrieves and validates
    */
   function handleFavoriteClick() {
-    // For now, navigate to random selection
-    // Will be enhanced in 2.4 with pre-selected flavor
-    push(ROUTES.RANDOM);
+    if (favoriteFlavor) {
+      sessionStorage.setItem('selectedFlavorId', favoriteFlavor.id);
+      push(ROUTES.RANDOM_CONFIRM);
+    }
   }
 
   /**
-   * Navigate to manual flavor selection
-   * TODO: Create dedicated manual selection route in 2.6
-   * Currently navigates to inventory as placeholder
+   * Show flavor picker modal for manual selection
    */
   function handleManualClick() {
-    // Placeholder: navigate to inventory until manual selection implemented
-    push(ROUTES.INVENTORY);
+    showFlavorPicker = true;
+  }
+
+  /**
+   * Handle flavor selection from picker
+   * Navigates to confirmation screen with selected flavor
+   *
+   * Uses sessionStorage for cross-route state passing (same pattern as handleFavoriteClick).
+   * The destination route (RandomConfirm) retrieves selectedFlavorId and validates the flavor exists.
+   */
+  function handleFlavorSelect(flavor: Flavor) {
+    sessionStorage.setItem('selectedFlavorId', flavor.id);
+    showFlavorPicker = false;
+    push(ROUTES.RANDOM_CONFIRM);
   }
 
   /**
@@ -100,6 +124,26 @@
     </Button>
   </div>
 </div>
+
+<!-- Flavor Picker Modal -->
+<Modal open={showFlavorPicker} title="Choose a Flavor" onclose={() => (showFlavorPicker = false)}>
+  {#if $appState.flavors.length === 0}
+    <div class="empty-state">
+      <p>No flavors available. Add flavors in Inventory Management first.</p>
+    </div>
+  {:else}
+    <div class="flavor-list">
+      {#each $appState.flavors as flavor (flavor.id)}
+        <button class="flavor-item" onclick={() => handleFlavorSelect(flavor)} type="button">
+          <span class="flavor-name">{flavor.name}</span>
+          {#if flavor.excludeFromRandom}
+            <span class="excluded-badge">Excluded from Random</span>
+          {/if}
+        </button>
+      {/each}
+    </div>
+  {/if}
+</Modal>
 
 <style>
   /**
@@ -173,5 +217,65 @@
       gap: var(--space-6);
       max-width: 480px;
     }
+  }
+
+  /**
+   * Flavor Picker Modal Styles
+   */
+  .empty-state {
+    padding: var(--space-6);
+    text-align: center;
+  }
+
+  .empty-state p {
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .flavor-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .flavor-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+  }
+
+  .flavor-item:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  .flavor-item:active {
+    transform: translateY(0);
+  }
+
+  .flavor-name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .excluded-badge {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    background: var(--color-surface-secondary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
   }
 </style>

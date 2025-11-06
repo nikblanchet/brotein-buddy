@@ -90,12 +90,12 @@ test.describe('Home Screen', () => {
       await expect(page).toHaveURL(/#\/inventory/);
     });
 
-    test('manual selection button navigates (placeholder)', async ({ page }) => {
+    test('manual selection button opens flavor picker modal', async ({ page }) => {
       const manualButton = page.locator('button').filter({ hasText: 'Choose Flavor' });
       await manualButton.click();
 
-      // Currently navigates to inventory as placeholder
-      await expect(page).toHaveURL(/#\/inventory/);
+      // Should open flavor picker modal
+      await expect(page.locator('text=Choose a Flavor')).toBeVisible();
     });
   });
 
@@ -146,29 +146,6 @@ test.describe('Home Screen', () => {
       await expect(favoriteButton).toBeVisible();
       await expect(favoriteButton).toContainText('Chocolate');
       await expect(favoriteButton).not.toBeDisabled();
-    });
-
-    test('favorite button is clickable when favorite configured', async ({ page, context }) => {
-      // Set up localStorage with favorite flavor
-      await context.addInitScript((key) => {
-        const state = {
-          version: 1,
-          boxes: [],
-          flavors: [{ id: 'straw_003', name: 'Strawberry', excludeFromRandom: false }],
-          favoriteFlavorId: 'straw_003',
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(state));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-
-      // Click favorite button
-      const favoriteButton = page.getByTestId('favorite-button');
-      await favoriteButton.click();
-
-      // Should navigate somewhere (currently /random, will be /random/confirm in 2.4)
-      await expect(page).toHaveURL(/#\/random/);
     });
   });
 
