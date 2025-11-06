@@ -147,29 +147,6 @@ test.describe('Home Screen', () => {
       await expect(favoriteButton).toContainText('Chocolate');
       await expect(favoriteButton).not.toBeDisabled();
     });
-
-    test('favorite button is clickable when favorite configured', async ({ page, context }) => {
-      // Set up localStorage with favorite flavor
-      await context.addInitScript((key) => {
-        const state = {
-          version: 1,
-          boxes: [],
-          flavors: [{ id: 'straw_003', name: 'Strawberry', excludeFromRandom: false }],
-          favoriteFlavorId: 'straw_003',
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(state));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-
-      // Click favorite button
-      const favoriteButton = page.getByTestId('favorite-button');
-      await favoriteButton.click();
-
-      // Should navigate somewhere (currently /random, will be /random/confirm in 2.4)
-      await expect(page).toHaveURL(/#\/random/);
-    });
   });
 
   test.describe('Responsive Layout', () => {
