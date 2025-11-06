@@ -90,12 +90,12 @@ test.describe('Home Screen', () => {
       await expect(page).toHaveURL(/#\/inventory/);
     });
 
-    test('manual selection button navigates (placeholder)', async ({ page }) => {
+    test('manual selection button opens flavor picker modal', async ({ page }) => {
       const manualButton = page.locator('button').filter({ hasText: 'Choose Flavor' });
       await manualButton.click();
 
-      // Currently navigates to inventory as placeholder
-      await expect(page).toHaveURL(/#\/inventory/);
+      // Should open flavor picker modal
+      await expect(page.locator('text=Choose a Flavor')).toBeVisible();
     });
   });
 
