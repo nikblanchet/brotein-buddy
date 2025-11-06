@@ -14,6 +14,7 @@ import Inventory from '../../routes/Inventory.svelte';
 import InventoryBoxEdit from '../../routes/InventoryBoxEdit.svelte';
 import InventoryRearrange from '../../routes/InventoryRearrange.svelte';
 import NotFound from '../../routes/NotFound.svelte';
+import ComponentDemo from '../ComponentDemo.svelte';
 
 /**
  * Route configuration for svelte-spa-router
@@ -28,6 +29,7 @@ export const routes = {
   '/inventory': Inventory,
   '/inventory/:boxId/edit': InventoryBoxEdit,
   '/inventory/rearrange': InventoryRearrange,
+  '/component-demo': ComponentDemo,
   '*': NotFound,
 };
 
@@ -78,6 +80,9 @@ export const ROUTES = {
 
   /** Drag-and-drop box rearrangement screen */
   INVENTORY_REARRANGE: '/inventory/rearrange',
+
+  /** Component demo page for development and visual testing */
+  COMPONENT_DEMO: '/component-demo',
 } as const;
 
 /**
