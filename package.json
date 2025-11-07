@@ -44,11 +44,13 @@
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0",
+    "pwa-asset-generator": "^8.1.2",
     "svelte": "^5.39.6",
     "svelte-check": "^4.3.2",
     "svelte-eslint-parser": "^1.4.0",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
+    "vite-plugin-pwa": "^1.1.0",
     "vitest": "^4.0.3"
   },
   "lint-staged": {

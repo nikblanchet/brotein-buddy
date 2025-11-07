@@ -934,6 +934,117 @@ npm run build
 # Outputs to dist/
 ```
 
+### Testing PWA Functionality
+
+BroteinBuddy is a Progressive Web App (PWA) with offline support and iOS installation capabilities. PWA features are only active in production builds.
+
+#### Local PWA Testing
+
+Service workers and manifest files are generated during the build process:
+
+```bash
+# Build the production version
+npm run build
+
+# Run preview server to test PWA features
+npm run preview
+```
+
+The preview server runs on http://localhost:4173/ and includes:
+
+- Service worker registration
+- Web app manifest (manifest.webmanifest)
+- Offline asset caching
+- Auto-update on reload
+
+#### Testing PWA Installation (iOS)
+
+On iOS devices (iPhone/iPad):
+
+1. Open the preview URL or production URL in Safari
+2. Tap the Share button
+3. Select "Add to Home Screen"
+4. Verify the app icon appears correctly
+5. Launch the app from the home screen
+6. Verify standalone mode (no Safari chrome)
+7. Verify status bar styling (black-translucent)
+
+#### Testing Offline Functionality
+
+```bash
+# Start preview server
+npm run preview
+
+# In browser DevTools:
+# 1. Open Application tab (Chrome) or Storage tab (Firefox)
+# 2. Navigate to Service Workers section
+# 3. Verify service worker is registered and activated
+# 4. Enable "Offline" mode in Network tab
+# 5. Reload page - app should load from cache
+# 6. Test core functionality (random selection, inventory)
+```
+
+#### PWA Audit with Lighthouse
+
+Run Lighthouse to verify PWA compliance:
+
+```bash
+# Build production version
+npm run build
+npm run preview
+
+# In Chrome DevTools:
+# 1. Open Lighthouse tab
+# 2. Select "Progressive Web App" category
+# 3. Run audit
+
+# Target scores:
+# - Progressive Web App: 90+
+# - Performance: 90+
+# - Accessibility: 90+
+```
+
+#### Service Worker Debugging
+
+Service workers cache assets for offline use. To clear cache during development:
+
+**Chrome/Edge:**
+
+1. DevTools → Application → Service Workers
+2. Click "Unregister" next to the service worker
+3. Application → Storage → Clear site data
+4. Reload page
+
+**Safari (iOS):**
+
+1. Settings → Safari → Advanced → Website Data
+2. Find localhost or your domain
+3. Swipe left and delete
+4. Close all Safari tabs
+
+**Firefox:**
+
+1. DevTools → Storage → Service Workers
+2. Click "Unregister"
+3. Storage → Cache Storage → Delete all
+4. Reload page
+
+#### Icon Generation
+
+App icons are auto-generated from SVG sources:
+
+- Source: `public/icon-512.svg` (master icon)
+- Generated: PNG icons in multiple sizes (192x192, 512x512, etc.)
+- Tool: `pwa-asset-generator` (dev dependency)
+
+To regenerate icons after design changes:
+
+```bash
+npx pwa-asset-generator public/icon-512.svg public --icon-only --background transparent
+```
+
+See [ADR-007: PWA Implementation](docs/adr/007-pwa-implementation.md) for complete configuration details.
+
 ## Troubleshooting
 
 ### Symlinks not working
