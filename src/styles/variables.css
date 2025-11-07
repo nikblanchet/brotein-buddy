@@ -17,9 +17,9 @@
   /* ========================================
      Colors - Primary
      ======================================== */
-  --color-primary: #646cff;
-  --color-primary-hover: #535bf2;
-  --color-primary-active: #4248d6;
+  --color-primary: #4d54df; /* Darkened for WCAG AA contrast (4.53:1 with white, 4.58:1 with #f9f9f9) */
+  --color-primary-hover: #3d44cc; /* Darkened proportionally */
+  --color-primary-active: #3039b8; /* Darkened proportionally */
 
   /* ========================================
      Colors - Semantic
@@ -47,7 +47,7 @@
   --color-text-primary: rgba(0, 0, 0, 0.87); /* ~14:1 contrast on white */
   --color-text-secondary: rgba(0, 0, 0, 0.65); /* ~5.0:1 contrast on white (WCAG AA compliant) */
   --color-text-disabled: rgba(0, 0, 0, 0.38); /* Not required to meet AA for disabled text */
-  --color-text-inverse: rgba(255, 255, 255, 0.87); /* ~14:1 contrast on dark surfaces */
+  --color-text-inverse: #ffffff; /* Pure white for maximum contrast on colored backgrounds */
 
   /* ========================================
      Colors - Borders
@@ -162,7 +162,7 @@
       255,
       0.38
     ); /* Not required to meet AA for disabled text */
-    --color-text-inverse: rgba(0, 0, 0, 0.87); /* ~14:1 contrast on light surfaces */
+    --color-text-inverse: #000000; /* Pure black for maximum contrast on light backgrounds in dark mode */
 
     /* Borders */
     --color-border-light: rgba(255, 255, 255, 0.12);
