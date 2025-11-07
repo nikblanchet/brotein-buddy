@@ -159,7 +159,7 @@
 
   <!-- Global Errors -->
   {#if globalErrors.length > 0}
-    <div class="error-banner">
+    <div class="error-banner" role="alert" aria-live="assertive">
       <h3>Validation Errors:</h3>
       <ul>
         {#each globalErrors as error}
