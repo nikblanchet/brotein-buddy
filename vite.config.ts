@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 import dotenv from 'dotenv';
 
@@ -72,6 +73,13 @@ export default defineConfig({
         ],
       },
     }),
+    // Bundle size visualization (only in build mode)
+    visualizer({
+      filename: 'dist/stats.html',
+      open: false, // Set to true to auto-open after build
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
   server: {
     port: parseInt(process.env.VITE_PORT || '5173'),
@@ -80,5 +88,23 @@ export default defineConfig({
     alias: {
       $lib: path.resolve('./src/lib'),
     },
+  },
+  build: {
+    // Code splitting configuration
+    rollupOptions: {
+      output: {
+        // Manual chunks for better code splitting
+        manualChunks: {
+          // Vendor chunk for node_modules dependencies
+          vendor: ['svelte', 'svelte-spa-router'],
+          // DnD library separate chunk (only used on rearrange screen)
+          dnd: ['svelte-dnd-action'],
+        },
+      },
+    },
+    // Chunk size warnings
+    chunkSizeWarningLimit: 250, // Target: < 250KB per chunk (relaxed budget)
+    // Source maps for debugging (can be disabled in production for smaller builds)
+    sourcemap: false,
   },
 });
