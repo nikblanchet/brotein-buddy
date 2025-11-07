@@ -20,6 +20,7 @@
   interface Props extends ButtonProps {
     children?: Snippet;
     testId?: string;
+    ariaLabel?: string;
   }
 
   let {
@@ -31,12 +32,20 @@
     onclick,
     children,
     testId,
+    ariaLabel,
   }: Props = $props();
 
   const buttonClasses = $derived(getButtonClasses(variant, size, fullWidth));
 </script>
 
-<button class={buttonClasses} {type} {disabled} {onclick} data-testid={testId}>
+<button
+  class={buttonClasses}
+  {type}
+  {disabled}
+  {onclick}
+  data-testid={testId}
+  aria-label={ariaLabel}
+>
   {@render children?.()}
 </button>
 

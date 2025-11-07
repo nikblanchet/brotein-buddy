@@ -297,7 +297,12 @@
 
   <!-- Add Quantity Modal -->
   <Modal open={showAddQuantityModal} title="Add Quantity" onclose={handleCancelQuantityChange}>
-    <NumberPad max={12} onselect={handleAddQuantitySelect} />
+    <div class="numberpad-container">
+      <label id="add-quantity-label" class="numberpad-label">
+        Select number of bottles to add (current: {box.quantity}):
+      </label>
+      <NumberPad max={12} onselect={handleAddQuantitySelect} ariaLabelledBy="add-quantity-label" />
+    </div>
 
     <div class="modal-actions">
       <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
@@ -317,7 +322,16 @@
     title="Remove Quantity"
     onclose={handleCancelQuantityChange}
   >
-    <NumberPad max={box.quantity} onselect={handleRemoveQuantitySelect} />
+    <div class="numberpad-container">
+      <label id="remove-quantity-label" class="numberpad-label">
+        Select number of bottles to remove (current: {box.quantity}):
+      </label>
+      <NumberPad
+        max={box.quantity}
+        onselect={handleRemoveQuantitySelect}
+        ariaLabelledBy="remove-quantity-label"
+      />
+    </div>
 
     <div class="modal-actions">
       <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
@@ -564,6 +578,20 @@
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-base);
+  }
+
+  /* NumberPad Label Styles */
+  .numberpad-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .numberpad-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    display: block;
   }
 
   .error-message {
