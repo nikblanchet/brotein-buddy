@@ -159,7 +159,7 @@ test.describe('Routing - Button Navigation', () => {
 });
 
 test.describe('Routing - Browser Navigation', () => {
-  test.skip('back button navigates to previous route', async ({ page }) => {
+  test('back button navigates to previous route', async ({ page }) => {
     await page.goto('/#/');
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
@@ -171,7 +171,7 @@ test.describe('Routing - Browser Navigation', () => {
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
-  test.skip('forward button navigates after going back', async ({ page }) => {
+  test('forward button navigates after going back', async ({ page }) => {
     await page.goto('/#/');
     await page.goto('/#/random');
     await page.goBack();
