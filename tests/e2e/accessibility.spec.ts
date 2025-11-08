@@ -92,8 +92,22 @@ test.describe('Accessibility - Random Selection Flow', () => {
     await page.getByRole('button', { name: /random/i }).click();
     // Wait for random selection page first
     await page.waitForURL('/#/random');
-    // Wait longer for selection and navigation to confirm page (selection is async)
-    await page.waitForURL('/#/random/confirm', { timeout: 30000 });
+
+    // Wait for either success (confirm page) or error message
+    // This handles both paths and will fail with a clear message if neither happens
+    const result = await Promise.race([
+      page.waitForURL('/#/random/confirm', { timeout: 30000 }).then(() => 'success'),
+      page
+        .locator('.error-message')
+        .waitFor({ timeout: 30000 })
+        .then(() => 'error'),
+    ]);
+
+    // If we got an error, fail the test with the error message
+    if (result === 'error') {
+      const errorText = await page.locator('.error-message').textContent();
+      throw new Error(`Random selection failed: ${errorText}`);
+    }
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -301,7 +315,21 @@ test.describe('Accessibility - Color Contrast Verification', () => {
         await page.getByRole('button', { name: /random/i }).click();
         // Wait for random page first, then confirm page (selection is async, needs time)
         await page.waitForURL('/#/random');
-        await page.waitForURL('/#/random/confirm', { timeout: 30000 });
+
+        // Wait for either success (confirm page) or error message
+        const result = await Promise.race([
+          page.waitForURL('/#/random/confirm', { timeout: 30000 }).then(() => 'success'),
+          page
+            .locator('.error-message')
+            .waitFor({ timeout: 30000 })
+            .then(() => 'error'),
+        ]);
+
+        // If we got an error, fail the test with the error message
+        if (result === 'error') {
+          const errorText = await page.locator('.error-message').textContent();
+          throw new Error(`Random selection failed: ${errorText}`);
+        }
       } else {
         await page.goto(`/#${route}`);
       }
