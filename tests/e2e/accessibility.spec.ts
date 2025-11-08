@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { STORAGE_KEY } from '../../src/lib/storage';
 
 test.describe('Accessibility - Home Screen', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -22,7 +23,7 @@ test.describe('Accessibility - Home Screen', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
     await page.goto('/#/');
   });
 
@@ -57,9 +58,9 @@ test.describe('Accessibility - Home Screen', () => {
 
 test.describe('Accessibility - Random Selection Flow', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -76,7 +77,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
     await page.goto('/#/');
   });
 
@@ -125,9 +126,9 @@ test.describe('Accessibility - Random Selection Flow', () => {
 
 test.describe('Accessibility - Inventory Screen', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -154,7 +155,7 @@ test.describe('Accessibility - Inventory Screen', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
     await page.goto('/#/inventory');
   });
 
@@ -189,9 +190,9 @@ test.describe('Accessibility - Inventory Screen', () => {
 
 test.describe('Accessibility - Box Edit Screen', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -208,7 +209,7 @@ test.describe('Accessibility - Box Edit Screen', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
   });
 
   test('should not have accessibility issues on edit page', async ({ page }) => {
@@ -234,9 +235,9 @@ test.describe('Accessibility - Box Edit Screen', () => {
 
 test.describe('Accessibility - Rearrange Screen', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -263,7 +264,7 @@ test.describe('Accessibility - Rearrange Screen', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
     await page.goto('/#/inventory/rearrange');
   });
 
@@ -290,7 +291,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
     test(`should have WCAG AA color contrast on ${route}`, async ({ page, context }) => {
       await context.addInitScript(() => {
         localStorage.setItem(
-          'broteinbuddy-state',
+          STORAGE_KEY,
           JSON.stringify({
             version: 1,
             boxes: [
@@ -352,9 +353,9 @@ test.describe('Accessibility - Color Contrast Verification', () => {
 
 test.describe('Accessibility - Keyboard Navigation', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [
@@ -371,7 +372,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
   });
 
   // Skipped: Complex keyboard navigation patterns - See issue #68
@@ -416,9 +417,9 @@ test.describe('Accessibility - Keyboard Navigation', () => {
 
 test.describe('Accessibility - Modal Dialogs', () => {
   test.beforeEach(async ({ page, context }) => {
-    await context.addInitScript(() => {
+    await context.addInitScript((key) => {
       localStorage.setItem(
-        'broteinbuddy-state',
+        key,
         JSON.stringify({
           version: 1,
           boxes: [],
@@ -430,7 +431,7 @@ test.describe('Accessibility - Modal Dialogs', () => {
           settings: {},
         })
       );
-    });
+    }, STORAGE_KEY);
   });
 
   // Skipped: Advanced modal accessibility - See issue #68
