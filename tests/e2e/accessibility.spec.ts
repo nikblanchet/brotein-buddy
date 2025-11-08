@@ -358,15 +358,19 @@ test.describe('Accessibility - Keyboard Navigation', () => {
   test('should support Enter key on focused buttons', async ({ page }) => {
     await page.goto('/');
 
-    // Tab to first button and press Enter
-    await page.keyboard.press('Tab');
-    const focused = page.locator(':focus');
-    await focused.press('Enter');
+    // Focus first button directly (skip link focus varies by browser)
+    const randomButton = page.locator('button').filter({ hasText: /Random Pick/i });
+    await randomButton.focus();
+
+    const initialUrl = page.url();
+
+    // Press Enter on focused button
+    await randomButton.press('Enter');
 
     // Should navigate to another page
     await page.waitForTimeout(500);
-    const url = page.url();
-    expect(url).not.toBe(await page.evaluate(() => window.location.href));
+    const newUrl = page.url();
+    expect(newUrl).not.toBe(initialUrl);
   });
 });
 
