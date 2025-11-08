@@ -298,9 +298,9 @@
   <!-- Add Quantity Modal -->
   <Modal open={showAddQuantityModal} title="Add Quantity" onclose={handleCancelQuantityChange}>
     <div class="numberpad-container">
-      <label id="add-quantity-label" class="numberpad-label">
+      <div id="add-quantity-label" class="numberpad-label" role="group" aria-label="Add quantity">
         Select number of bottles to add (current: {box.quantity}):
-      </label>
+      </div>
       <NumberPad max={12} onselect={handleAddQuantitySelect} ariaLabelledBy="add-quantity-label" />
     </div>
 
@@ -323,9 +323,14 @@
     onclose={handleCancelQuantityChange}
   >
     <div class="numberpad-container">
-      <label id="remove-quantity-label" class="numberpad-label">
+      <div
+        id="remove-quantity-label"
+        class="numberpad-label"
+        role="group"
+        aria-label="Remove quantity"
+      >
         Select number of bottles to remove (current: {box.quantity}):
-      </label>
+      </div>
       <NumberPad
         max={box.quantity}
         onselect={handleRemoveQuantitySelect}
