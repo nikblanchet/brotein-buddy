@@ -23,7 +23,7 @@ test.describe('Accessibility - Home Screen', () => {
         })
       );
     });
-    await page.goto('/');
+    await page.goto('/#/');
   });
 
   test('should not have automatically detectable accessibility issues', async ({ page }) => {
@@ -77,12 +77,12 @@ test.describe('Accessibility - Random Selection Flow', () => {
         })
       );
     });
-    await page.goto('/');
+    await page.goto('/#/');
   });
 
   test('should not have accessibility issues on random page', async ({ page }) => {
     await page.getByRole('button', { name: /random/i }).click();
-    await page.waitForURL('/random');
+    await page.waitForURL('/#/random');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -90,7 +90,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
 
   test('should not have accessibility issues on confirm page', async ({ page }) => {
     await page.getByRole('button', { name: /random/i }).click();
-    await page.waitForURL('/random/confirm');
+    await page.waitForURL('/#/random/confirm');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -98,7 +98,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
 
   test('should have proper ARIA labels for loading states', async ({ page }) => {
     await page.getByRole('button', { name: /random/i }).click();
-    await page.waitForURL('/random');
+    await page.waitForURL('/#/random');
 
     // Check for aria-live region or aria-label on spinner
     const spinner = page.locator('[role="status"], [aria-live]').first();
@@ -138,7 +138,7 @@ test.describe('Accessibility - Inventory Screen', () => {
         })
       );
     });
-    await page.goto('/inventory');
+    await page.goto('/#/inventory');
   });
 
   test('should not have accessibility issues on inventory visual view', async ({ page }) => {
@@ -194,14 +194,14 @@ test.describe('Accessibility - Box Edit Screen', () => {
   });
 
   test('should not have accessibility issues on edit page', async ({ page }) => {
-    await page.goto('/inventory/box-1/edit');
+    await page.goto('/#/inventory/box-1/edit');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
   test('should have accessible form controls', async ({ page }) => {
-    await page.goto('/inventory/box-1/edit');
+    await page.goto('/#/inventory/box-1/edit');
 
     // Check that buttons have accessible names
     const addButton = page.getByRole('button', { name: /add/i });
@@ -244,7 +244,7 @@ test.describe('Accessibility - Rearrange Screen', () => {
         })
       );
     });
-    await page.goto('/inventory/rearrange');
+    await page.goto('/#/inventory/rearrange');
   });
 
   test('should not have accessibility issues on rearrange page', async ({ page }) => {
@@ -289,11 +289,11 @@ test.describe('Accessibility - Color Contrast Verification', () => {
 
       // Skip /random and go directly to /random/confirm for testing
       if (route === '/random/confirm') {
-        await page.goto('/');
+        await page.goto('/#/');
         await page.getByRole('button', { name: /random/i }).click();
-        await page.waitForURL('/random/confirm');
+        await page.waitForURL('/#/random/confirm');
       } else {
-        await page.goto(route);
+        await page.goto(`/#${route}`);
       }
 
       await page.waitForTimeout(1000); // Wait for page to fully render
@@ -339,7 +339,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
   test('should support tab navigation through all interactive elements on home', async ({
     page,
   }) => {
-    await page.goto('/');
+    await page.goto('/#/');
 
     // Tab through all interactive elements
     await page.keyboard.press('Tab');
@@ -356,7 +356,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
   });
 
   test('should support Enter key on focused buttons', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/');
 
     // Focus first button directly (skip link focus varies by browser)
     const randomButton = page.locator('button').filter({ hasText: /Random Pick/i });
@@ -394,7 +394,7 @@ test.describe('Accessibility - Modal Dialogs', () => {
   });
 
   test('should have proper modal accessibility attributes', async ({ page }) => {
-    await page.goto('/inventory');
+    await page.goto('/#/inventory');
 
     // Open new flavor modal
     await page.getByRole('button', { name: /new flavor/i }).click();
@@ -407,7 +407,7 @@ test.describe('Accessibility - Modal Dialogs', () => {
   });
 
   test('should trap focus within modal', async ({ page }) => {
-    await page.goto('/inventory');
+    await page.goto('/#/inventory');
 
     // Open new flavor modal
     await page.getByRole('button', { name: /new flavor/i }).click();
@@ -432,7 +432,7 @@ test.describe('Accessibility - Modal Dialogs', () => {
   });
 
   test('should close modal on Escape key', async ({ page }) => {
-    await page.goto('/inventory');
+    await page.goto('/#/inventory');
 
     // Open new flavor modal
     await page.getByRole('button', { name: /new flavor/i }).click();
