@@ -1045,6 +1045,108 @@ npx pwa-asset-generator public/icon-512.svg public --icon-only --background tran
 
 See [ADR-007: PWA Implementation](docs/adr/007-pwa-implementation.md) for complete configuration details.
 
+## Bundle Size Analysis
+
+BroteinBuddy uses `rollup-plugin-visualizer` to generate interactive bundle size visualizations. This helps identify optimization opportunities and prevent unexpected bundle growth.
+
+### When to Analyze Bundle Size
+
+Run bundle analysis when:
+
+- **Adding new dependencies** - Verify the size impact before merging
+- **Before major releases** - Ensure bundle stays within performance budgets
+- **Approaching bundle size budget** - Identify opportunities to reduce size
+- **Investigating performance issues** - Find unexpectedly large dependencies or duplicates
+
+### Generating Bundle Analysis
+
+```bash
+# Build production version (generates dist/stats.html automatically)
+npm run build
+
+# Open the bundle visualization
+open dist/stats.html
+```
+
+The visualization opens in your browser showing an interactive treemap of your bundle.
+
+### Interpreting stats.html
+
+The visualization shows:
+
+- **Treemap layout**: Each rectangle represents a file, sized proportionally to its contribution
+- **Color coding**: Different colors represent different chunks (vendor, main, lazy-loaded)
+- **File sizes**: Hover over rectangles to see actual, gzipped, and brotli sizes
+- **Nested structure**: Drill down to see how imports contribute to file size
+
+**What to look for:**
+
+1. **Unexpectedly large dependencies** - Libraries that seem too big for their functionality
+2. **Duplicate code** - Same library imported multiple times
+3. **Lazy loading opportunities** - Large features that could be code-split
+4. **Compression efficiency** - Compare gzip vs brotli ratios to identify poorly compressible files
+
+### Bundle Size Budget
+
+Current performance budgets (configured in `vite.config.ts`):
+
+- **Initial load target**: < 250 KB total (actual: 91 KB)
+- **Per-chunk warning threshold**: 250 KB
+- **Critical path**: Main + vendor chunks only (lazy chunks don't block initial render)
+
+**Current bundle breakdown:**
+
+```
+Main chunk:   49 KB (15 KB gzipped)  - Application code
+Vendor chunk: 42 KB (16 KB gzipped)  - Svelte + router
+DnD chunk:    32 KB (11 KB gzipped)  - Lazy-loaded drag-and-drop (rearrange screen only)
+```
+
+**When to take action:**
+
+- Total initial bundle > 200 KB → investigate before hitting 250 KB limit
+- Any chunk > 250 KB → consider code splitting
+- Total initial bundle > 250 KB → requires optimization before merge
+
+### Workflow Commands
+
+```bash
+# Full build and analysis workflow
+npm run build && open dist/stats.html
+
+# Check for oversized chunks quickly
+ls -lh dist/assets/*.js
+
+# Example output:
+# 49K  main-abc123.js
+# 42K  vendor-def456.js
+# 32K  dnd-ghi789.js (lazy-loaded)
+```
+
+### Maintaining Performance Over Time
+
+**Before adding dependencies:**
+
+1. Check package size on [Bundlephobia](https://bundlephobia.com/)
+2. Consider lighter alternatives
+3. Run bundle analysis after installation
+4. Document size impact in PR description
+
+**When bundle grows unexpectedly:**
+
+1. Run `npm run build && open dist/stats.html`
+2. Identify the culprit in the treemap
+3. Options to reduce size:
+   - Use lighter alternative library
+   - Lazy-load the feature
+   - Tree-shake unused exports
+   - Extract to separate chunk
+
+**See also:**
+
+- [ADR-008: Performance Optimization](docs/adr/008-performance-accessibility-optimization.md) - Bundle splitting strategy and performance budgets
+- [vite.config.ts](vite.config.ts) - Build configuration and chunk size warnings
+
 ## Troubleshooting
 
 ### Symlinks not working
