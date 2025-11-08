@@ -297,7 +297,12 @@
 
   <!-- Add Quantity Modal -->
   <Modal open={showAddQuantityModal} title="Add Quantity" onclose={handleCancelQuantityChange}>
-    <NumberPad max={12} onselect={handleAddQuantitySelect} />
+    <div class="numberpad-container">
+      <div id="add-quantity-label" class="numberpad-label" role="group" aria-label="Add quantity">
+        Select number of bottles to add (current: {box.quantity}):
+      </div>
+      <NumberPad max={12} onselect={handleAddQuantitySelect} ariaLabelledBy="add-quantity-label" />
+    </div>
 
     <div class="modal-actions">
       <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
@@ -317,7 +322,21 @@
     title="Remove Quantity"
     onclose={handleCancelQuantityChange}
   >
-    <NumberPad max={box.quantity} onselect={handleRemoveQuantitySelect} />
+    <div class="numberpad-container">
+      <div
+        id="remove-quantity-label"
+        class="numberpad-label"
+        role="group"
+        aria-label="Remove quantity"
+      >
+        Select number of bottles to remove (current: {box.quantity}):
+      </div>
+      <NumberPad
+        max={box.quantity}
+        onselect={handleRemoveQuantitySelect}
+        ariaLabelledBy="remove-quantity-label"
+      />
+    </div>
 
     <div class="modal-actions">
       <Button variant="secondary" onclick={handleCancelQuantityChange}>Cancel</Button>
@@ -488,9 +507,16 @@
   .box-label {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
-    color: rgba(0, 0, 0, 0.7);
+    color: #ffffff; /* White text for contrast */
     text-align: center;
     padding: var(--space-2);
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    border-radius: var(--radius-sm);
   }
 
   .box-details {
@@ -564,6 +590,20 @@
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-base);
+  }
+
+  /* NumberPad Label Styles */
+  .numberpad-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .numberpad-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    display: block;
   }
 
   .error-message {

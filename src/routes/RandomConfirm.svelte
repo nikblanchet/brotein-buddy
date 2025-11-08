@@ -342,12 +342,12 @@
 
   .status.open {
     background: var(--color-success-bg);
-    color: var(--color-success);
+    color: var(--color-success-dark);
   }
 
   .status.unopened {
     background: var(--color-info-bg);
-    color: var(--color-info);
+    color: var(--color-info-dark);
   }
 
   /**

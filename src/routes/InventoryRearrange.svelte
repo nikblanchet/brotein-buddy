@@ -159,7 +159,7 @@
 
   <!-- Global Errors -->
   {#if globalErrors.length > 0}
-    <div class="error-banner">
+    <div class="error-banner" role="alert" aria-live="assertive">
       <h3>Validation Errors:</h3>
       <ul>
         {#each globalErrors as error}
@@ -321,12 +321,30 @@
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-sm);
     margin-bottom: var(--space-1);
-    color: var(--color-text-primary);
+    color: #ffffff; /* White text for contrast */
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
   }
 
   .box-quantity {
     font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    color: #ffffff; /* White text for contrast */
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
   }
 
   .box-error {

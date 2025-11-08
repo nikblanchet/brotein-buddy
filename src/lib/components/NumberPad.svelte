@@ -49,9 +49,20 @@
      * @default false
      */
     disabled?: boolean;
+
+    /**
+     * ID of the element that labels this number pad (for accessibility)
+     *
+     * @example
+     * ```svelte
+     * <label id="quantity-label">Select quantity:</label>
+     * <NumberPad ariaLabelledBy="quantity-label" />
+     * ```
+     */
+    ariaLabelledBy?: string;
   }
 
-  let { onselect, min = 1, max = 12, disabled = false }: NumberPadProps = $props();
+  let { onselect, min = 1, max = 12, disabled = false, ariaLabelledBy }: NumberPadProps = $props();
 
   const numbers = $derived(generateNumberRange(min, max));
 
@@ -68,7 +79,7 @@
   }
 </script>
 
-<div class="numberpad">
+<div class="numberpad" role="group" aria-labelledby={ariaLabelledBy}>
   <!-- Number grid -->
   <div class="numberpad-grid">
     {#each numbers as number}
@@ -77,6 +88,7 @@
         class="numberpad-button"
         {disabled}
         onclick={() => handleNumberClick(number)}
+        aria-label="Select {number}"
       >
         {number}
       </button>
@@ -89,6 +101,7 @@
     class="numberpad-button numberpad-button--keyboard"
     {disabled}
     onclick={handleKeyboardClick}
+    aria-label="Use keyboard to enter number"
   >
     Use Keyboard
   </button>

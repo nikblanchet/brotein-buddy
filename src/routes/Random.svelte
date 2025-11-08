@@ -125,13 +125,13 @@
 <div class="random-screen">
   {#if isSelecting}
     <!-- Loading State -->
-    <div class="loading-container">
-      <div class="spinner" aria-label="Loading"></div>
+    <div class="loading-container" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
       <p class="loading-text">Selecting a flavor...</p>
     </div>
   {:else if errorMessage}
     <!-- Error State -->
-    <div class="error-container">
+    <div class="error-container" role="alert" aria-live="assertive">
       <h1>No Selection Available</h1>
       <p class="error-message">{errorMessage}</p>
 

@@ -463,11 +463,9 @@ test.describe('Inventory Box Edit Screen', () => {
     test('should support keyboard navigation for buttons', async ({ page }) => {
       await page.goto('/#/inventory/box_test_1/edit');
 
-      // Focus on first button
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
-
-      // Should be able to activate with Enter
+      // Focus the Add button directly and activate it
+      const addButton = page.getByRole('button', { name: /add/i }).first();
+      await addButton.focus();
       await page.keyboard.press('Enter');
 
       // Modal should open

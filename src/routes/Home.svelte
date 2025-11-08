@@ -97,7 +97,13 @@
 
   <div class="buttons-container">
     <!-- Button 1: Random Selection (Most Prominent) -->
-    <Button variant="primary" size="lg" fullWidth={true} onclick={handleRandomClick}>
+    <Button
+      variant="primary"
+      size="lg"
+      fullWidth={true}
+      onclick={handleRandomClick}
+      ariaLabel="Random Pick"
+    >
       🎲 Random Pick
     </Button>
 
@@ -109,17 +115,32 @@
       disabled={!favoriteFlavor}
       onclick={handleFavoriteClick}
       testId="favorite-button"
+      ariaLabel={favoriteFlavor
+        ? `Quick-pick favorite flavor: ${favoriteFlavor.name}`
+        : 'Set Favorite Flavor'}
     >
       {favoriteButtonLabel}
     </Button>
 
     <!-- Button 3: Manual Flavor Selection (Third Prominence) -->
-    <Button variant="secondary" size="base" fullWidth={true} onclick={handleManualClick}>
+    <Button
+      variant="secondary"
+      size="base"
+      fullWidth={true}
+      onclick={handleManualClick}
+      ariaLabel="Choose Flavor Manually"
+    >
       📋 Choose Flavor
     </Button>
 
     <!-- Button 4: Inventory Management (Fourth Prominence) -->
-    <Button variant="ghost" size="base" fullWidth={true} onclick={handleInventoryClick}>
+    <Button
+      variant="ghost"
+      size="base"
+      fullWidth={true}
+      onclick={handleInventoryClick}
+      ariaLabel="Manage Inventory"
+    >
       📦 Manage Inventory
     </Button>
   </div>
