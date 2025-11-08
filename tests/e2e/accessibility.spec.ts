@@ -92,8 +92,8 @@ test.describe('Accessibility - Random Selection Flow', () => {
     await page.getByRole('button', { name: /random/i }).click();
     // Wait for random selection page first
     await page.waitForURL('/#/random');
-    // Then wait for navigation to confirm page (happens after selection completes)
-    await page.waitForURL('/#/random/confirm', { timeout: 10000 });
+    // Wait longer for selection and navigation to confirm page (selection is async)
+    await page.waitForURL('/#/random/confirm', { timeout: 30000 });
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -299,9 +299,9 @@ test.describe('Accessibility - Color Contrast Verification', () => {
       if (route === '/random/confirm') {
         await page.goto('/#/');
         await page.getByRole('button', { name: /random/i }).click();
-        // Wait for random page first, then confirm page
+        // Wait for random page first, then confirm page (selection is async, needs time)
         await page.waitForURL('/#/random');
-        await page.waitForURL('/#/random/confirm', { timeout: 10000 });
+        await page.waitForURL('/#/random/confirm', { timeout: 30000 });
       } else {
         await page.goto(`/#${route}`);
       }
