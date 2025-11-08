@@ -8,12 +8,25 @@
    * Also manages:
    * - Dynamic page titles per route (for screen readers and browser tabs)
    * - Skip-to-main-content link (for keyboard navigation accessibility)
+   * - Welcome modal for first-time users
    *
    * Global styles are defined in app.css and imported in main.ts.
    */
 
   import Router, { location } from 'svelte-spa-router';
   import { routes } from './lib/router/routes';
+  import WelcomeModal from './lib/components/WelcomeModal.svelte';
+  import { onMount } from 'svelte';
+
+  /**
+   * localStorage key for tracking whether welcome modal has been shown
+   */
+  const WELCOME_SHOWN_KEY = 'broteinbuddy_welcome_shown';
+
+  /**
+   * State for welcome modal visibility
+   */
+  let showWelcomeModal = $state(false);
 
   /**
    * Map routes to page titles
@@ -25,6 +38,25 @@
     '/inventory': 'Inventory',
     '/inventory/rearrange': 'Rearrange Inventory',
   };
+
+  /**
+   * Check if this is the first visit and show welcome modal
+   */
+  onMount(() => {
+    const hasSeenWelcome = localStorage.getItem(WELCOME_SHOWN_KEY);
+    if (!hasSeenWelcome) {
+      showWelcomeModal = true;
+    }
+  });
+
+  /**
+   * Handle welcome modal close
+   * Mark as shown in localStorage so it doesn't appear again
+   */
+  function handleWelcomeClose() {
+    localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
+    showWelcomeModal = false;
+  }
 
   /**
    * Update page title whenever location changes
@@ -58,6 +90,9 @@
 <main id="main-content">
   <Router {routes} />
 </main>
+
+<!-- Welcome Modal (first-time users) -->
+<WelcomeModal open={showWelcomeModal} onclose={handleWelcomeClose} />
 
 <style>
   /**
