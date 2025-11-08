@@ -90,7 +90,10 @@ test.describe('Accessibility - Random Selection Flow', () => {
 
   test('should not have accessibility issues on confirm page', async ({ page }) => {
     await page.getByRole('button', { name: /random/i }).click();
-    await page.waitForURL('/#/random/confirm');
+    // Wait for random selection page first
+    await page.waitForURL('/#/random');
+    // Then wait for navigation to confirm page (happens after selection completes)
+    await page.waitForURL('/#/random/confirm', { timeout: 10000 });
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -147,7 +150,8 @@ test.describe('Accessibility - Inventory Screen', () => {
   });
 
   test('should not have accessibility issues on inventory table view', async ({ page }) => {
-    await page.getByRole('button', { name: /table/i }).click();
+    // Click the view toggle button (starts as "View: Visual", toggles to table mode)
+    await page.getByRole('button', { name: /view:/i }).click();
     await page.waitForTimeout(500); // Wait for view switch
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
@@ -291,11 +295,13 @@ test.describe('Accessibility - Color Contrast Verification', () => {
         );
       });
 
-      // Skip /random and go directly to /random/confirm for testing
+      // Navigate to /random/confirm via random selection flow
       if (route === '/random/confirm') {
         await page.goto('/#/');
         await page.getByRole('button', { name: /random/i }).click();
-        await page.waitForURL('/#/random/confirm');
+        // Wait for random page first, then confirm page
+        await page.waitForURL('/#/random');
+        await page.waitForURL('/#/random/confirm', { timeout: 10000 });
       } else {
         await page.goto(`/#${route}`);
       }
