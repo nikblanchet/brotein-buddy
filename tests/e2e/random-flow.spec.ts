@@ -127,7 +127,7 @@ test.describe('Random Selection Flow', () => {
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
     });
 
-    test.skip('handles no flavors available', async ({ page, context }) => {
+    test('handles no flavors available', async ({ page, context }) => {
       // Set up state with no flavors
       await context.addInitScript((key) => {
         const emptyState: AppState = {
@@ -153,7 +153,7 @@ test.describe('Random Selection Flow', () => {
       await expect(homeButton).toBeVisible();
     });
 
-    test.skip('handles all flavors excluded', async ({ page, context }) => {
+    test('handles all flavors excluded', async ({ page, context }) => {
       // Set up state with all flavors excluded
       await context.addInitScript((key) => {
         const excludedState: AppState = {
@@ -187,7 +187,7 @@ test.describe('Random Selection Flow', () => {
       );
     });
 
-    test.skip('handles no boxes in stock', async ({ page, context }) => {
+    test('handles no boxes in stock', async ({ page, context }) => {
       // Set up state with flavors but no boxes
       await context.addInitScript((key) => {
         const noStockState: AppState = {

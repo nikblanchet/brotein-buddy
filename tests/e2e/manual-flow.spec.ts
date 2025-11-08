@@ -133,7 +133,7 @@ test.describe('Manual Flavor Selection Flow', () => {
     await expect(page).toHaveURL(/#\/$/);
   });
 
-  test.skip('shows empty state when no flavors configured', async ({ page }) => {
+  test('shows empty state when no flavors configured', async ({ page }) => {
     // Navigate away first
     await page.goto('/#/inventory');
 

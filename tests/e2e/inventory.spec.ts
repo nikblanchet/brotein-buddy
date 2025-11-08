@@ -418,7 +418,7 @@ test.describe('Inventory Screen', () => {
   });
 
   test.describe('Empty State', () => {
-    test.skip('shows empty state when no boxes exist', async ({ page, context }) => {
+    test('shows empty state when no boxes exist', async ({ page, context }) => {
       // Set up state with no boxes
       await context.addInitScript((key) => {
         const state = {
