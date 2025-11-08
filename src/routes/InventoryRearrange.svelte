@@ -321,7 +321,16 @@
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-sm);
     margin-bottom: var(--space-1);
-    color: var(--color-text-primary);
+    color: #ffffff; /* White text for contrast */
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
   }
 
   .box-quantity {
