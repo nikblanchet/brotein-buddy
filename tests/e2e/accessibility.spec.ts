@@ -289,9 +289,9 @@ test.describe('Accessibility - Color Contrast Verification', () => {
 
   for (const route of routes) {
     test(`should have WCAG AA color contrast on ${route}`, async ({ page, context }) => {
-      await context.addInitScript(() => {
+      await context.addInitScript((key) => {
         localStorage.setItem(
-          STORAGE_KEY,
+          key,
           JSON.stringify({
             version: 1,
             boxes: [
@@ -308,7 +308,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
             settings: {},
           })
         );
-      });
+      }, STORAGE_KEY);
 
       // Navigate to /random/confirm via random selection flow
       if (route === '/random/confirm') {

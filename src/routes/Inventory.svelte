@@ -433,6 +433,16 @@
 
   .box-quantity {
     font-size: var(--font-size-sm);
+    color: #ffffff; /* White text for contrast */
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
   }
 
   .box-status {
