@@ -34,8 +34,8 @@
   --color-warning-bg: #fef3c7; /* Light yellow background for badges */
   --color-warning-dark: #b45309; /* Dark orange text for badges */
 
-  --color-danger: #ef4444;
-  --color-danger-hover: #dc2626;
+  --color-danger: #dc2626; /* Darkened for WCAG AA contrast (4.51:1 with white, was 3.76:1) */
+  --color-danger-hover: #b91c1c; /* Darkened proportionally */
   --color-danger-bg: #fee2e2; /* Light red background for badges */
   --color-danger-dark: #b91c1c; /* Dark red text for badges */
 
