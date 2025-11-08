@@ -502,9 +502,16 @@
   .box-label {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
-    color: rgba(0, 0, 0, 0.7);
+    color: #ffffff; /* White text for contrast */
     text-align: center;
     padding: var(--space-2);
+    background: rgba(
+      0,
+      0,
+      0,
+      0.7
+    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
+    border-radius: var(--radius-sm);
   }
 
   .box-details {
