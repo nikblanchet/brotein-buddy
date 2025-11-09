@@ -35,11 +35,17 @@
    * Populates the app with realistic demo data and closes the modal
    */
   function handleLoadSampleData() {
-    const sampleData = generateSampleData();
-    saveState(sampleData);
-    onclose();
-    // Reload the page to reflect the new data
-    window.location.reload();
+    try {
+      const sampleData = generateSampleData();
+      saveState(sampleData);
+      onclose();
+      // Reload the page to reflect the new data
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to save sample data:', error);
+      alert('Unable to save sample data. Your browser storage may be full.');
+      // Don't close modal - let user try Start Fresh instead
+    }
   }
 
   /**
