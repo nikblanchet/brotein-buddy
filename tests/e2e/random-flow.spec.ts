@@ -275,47 +275,6 @@ test.describe('Random Selection Flow', () => {
 
       expect(updatedQuantity).toBe(initialQuantity - 1);
     });
-
-    test('disables Add Another button when quantity is 1', async ({ page, context }) => {
-      // Set up state with a box that has quantity 1
-      await context.addInitScript((key) => {
-        const lowQuantityState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
-          boxes: [
-            {
-              id: 'box-1',
-              flavorId: 'chocolate',
-              quantity: 1,
-              location: { stack: 1, height: 0 },
-              isOpen: true,
-            },
-          ],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(lowQuantityState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-
-      // Dismiss WelcomeModal if it appears
-      try {
-        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
-        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
-        await startFreshButton.click();
-        await page.waitForTimeout(500);
-      } catch {
-        // Modal didn't appear, continue
-      }
-
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
-
-      // Add Another button should be disabled
-      const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
-      await expect(addAnotherButton).toBeDisabled();
-    });
   });
 
   test.describe('Different Choice Action', () => {
@@ -403,47 +362,6 @@ test.describe('Random Selection Flow', () => {
       const alternativeBoxes = page.locator('.alternative-box');
       const count = await alternativeBoxes.count();
       expect(count).toBeGreaterThanOrEqual(1);
-    });
-
-    test('does not show alternative boxes when only one box exists', async ({ page, context }) => {
-      // Set up state with only one box per flavor
-      await context.addInitScript((key) => {
-        const singleBoxState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
-          boxes: [
-            {
-              id: 'box-1',
-              flavorId: 'chocolate',
-              quantity: 10,
-              location: { stack: 1, height: 0 },
-              isOpen: true,
-            },
-          ],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(singleBoxState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-
-      // Dismiss WelcomeModal if it appears
-      try {
-        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
-        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
-        await startFreshButton.click();
-        await page.waitForTimeout(500);
-      } catch {
-        // Modal didn't appear, continue
-      }
-
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
-
-      // Should NOT show Alternative Boxes section
-      const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
-      await expect(alternativeSection).not.toBeVisible();
     });
   });
 
@@ -600,5 +518,91 @@ test.describe('Random Selection Flow - Error State: No Boxes in Stock', () => {
 
     // Should show error message (matches substring of detailed error)
     await expect(page.locator('.error-message')).toContainText('no boxes in stock');
+  });
+});
+
+test.describe('Random Selection Flow - Add Another: Quantity 1', () => {
+  test('disables Add Another button when quantity is 1', async ({ page, context }) => {
+    // Set up state with a box that has quantity 1
+    await context.addInitScript((key) => {
+      const lowQuantityState: AppState = {
+        version: 1,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        boxes: [
+          {
+            id: 'box-1',
+            flavorId: 'chocolate',
+            quantity: 1,
+            location: { stack: 1, height: 0 },
+            isOpen: true,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(lowQuantityState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
+
+    // Add Another button should be disabled
+    const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
+    await expect(addAnotherButton).toBeDisabled();
+  });
+});
+
+test.describe('Random Selection Flow - Alternative Boxes: Single Box', () => {
+  test('does not show alternative boxes when only one box exists', async ({ page, context }) => {
+    // Set up state with only one box per flavor
+    await context.addInitScript((key) => {
+      const singleBoxState: AppState = {
+        version: 1,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        boxes: [
+          {
+            id: 'box-1',
+            flavorId: 'chocolate',
+            quantity: 10,
+            location: { stack: 1, height: 0 },
+            isOpen: true,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(singleBoxState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
+
+    // Should NOT show Alternative Boxes section
+    const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
+    await expect(alternativeSection).not.toBeVisible();
   });
 });
