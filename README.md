@@ -5,6 +5,10 @@
 
 A Progressive Web App for tracking your protein shake inventory by flavor and location.
 
+## Screenshots
+
+> Note: Screenshots will be added after production deployment
+
 ## Features
 
 - **Smart Random Selection**: Weighted by quantity - pick a shake at random and get told exactly where it is
@@ -27,9 +31,14 @@ The app works completely offline after installation!
 
 ## Quick Start
 
-1. Tap "Inventory Management" to add your first flavors and boxes
-2. Use "Random Pick" to let the app choose a flavor for you
-3. Confirm your selection and the inventory updates automatically
+**First-time users**: A welcome screen will offer to load sample data so you can explore the app immediately, or you can start fresh with an empty inventory.
+
+### Using the App
+
+1. **Add Inventory**: Tap "Inventory Management" to add your flavors and boxes
+2. **Random Selection**: Tap "Random Pick" to let the app choose a flavor (weighted by quantity)
+3. **Confirm**: Review the selected box location and confirm to update your inventory automatically
+4. **Rearrange**: Use drag-and-drop to reorganize your physical stacks visually
 
 ## Tech Stack
 
