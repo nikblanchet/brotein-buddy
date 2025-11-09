@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// Load .env.local if it exists (for worktree-specific port configuration)
+dotenv.config({ path: '.env.local' });
 
 export default defineConfig({
   testDir: './tests/e2e',
