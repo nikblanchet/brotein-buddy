@@ -99,6 +99,16 @@ test.describe('Inventory Screen', () => {
     // Navigate directly to inventory screen
     await page.goto('/#/inventory');
 
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
+
     // Wait for inventory screen to be fully loaded
     await expect(page.locator('h1')).toContainText('Inventory');
   });

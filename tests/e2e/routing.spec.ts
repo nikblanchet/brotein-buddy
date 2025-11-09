@@ -14,6 +14,17 @@ import type { AppState } from '../../src/types/models';
 test.beforeEach(async ({ page }) => {
   // Set up test data for box edit routing tests
   await page.goto('/#/');
+
+  // Dismiss WelcomeModal if it appears
+  try {
+    const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+    await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+    await startFreshButton.click();
+    await page.waitForTimeout(500); // Wait for modal close animation
+  } catch (error) {
+    // Modal didn't appear (localStorage already prevents it), continue with test
+  }
+
   await page.evaluate(() => {
     const testState: AppState = {
       version: 1,
