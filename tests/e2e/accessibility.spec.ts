@@ -25,6 +25,16 @@ test.describe('Accessibility - Home Screen', () => {
       );
     }, STORAGE_KEY);
     await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
   });
 
   test('should not have automatically detectable accessibility issues', async ({ page }) => {
@@ -79,6 +89,16 @@ test.describe('Accessibility - Random Selection Flow', () => {
       );
     }, STORAGE_KEY);
     await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
   });
 
   test('should not have accessibility issues on random page', async ({ page }) => {
@@ -157,6 +177,16 @@ test.describe('Accessibility - Inventory Screen', () => {
       );
     }, STORAGE_KEY);
     await page.goto('/#/inventory');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
   });
 
   test('should not have accessibility issues on inventory visual view', async ({ page }) => {
@@ -276,6 +306,16 @@ test.describe('Accessibility - Rearrange Screen', () => {
       );
     }, STORAGE_KEY);
     await page.goto('/#/inventory/rearrange');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
   });
 
   test('should not have accessibility issues on rearrange page', async ({ page }) => {
