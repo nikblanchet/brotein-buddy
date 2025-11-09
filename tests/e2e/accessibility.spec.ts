@@ -32,7 +32,7 @@ test.describe('Accessibility - Home Screen', () => {
       await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
       await startFreshButton.click();
       await page.waitForTimeout(500); // Wait for modal close animation
-    } catch (error) {
+    } catch (_error) {
       // Modal didn't appear (localStorage already prevents it), continue with test
     }
   });
@@ -96,7 +96,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
       await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
       await startFreshButton.click();
       await page.waitForTimeout(500); // Wait for modal close animation
-    } catch (error) {
+    } catch (_error) {
       // Modal didn't appear (localStorage already prevents it), continue with test
     }
   });
@@ -184,7 +184,7 @@ test.describe('Accessibility - Inventory Screen', () => {
       await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
       await startFreshButton.click();
       await page.waitForTimeout(500); // Wait for modal close animation
-    } catch (error) {
+    } catch (_error) {
       // Modal didn't appear (localStorage already prevents it), continue with test
     }
   });
@@ -313,7 +313,7 @@ test.describe('Accessibility - Rearrange Screen', () => {
       await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
       await startFreshButton.click();
       await page.waitForTimeout(500); // Wait for modal close animation
-    } catch (error) {
+    } catch (_error) {
       // Modal didn't appear (localStorage already prevents it), continue with test
     }
   });
