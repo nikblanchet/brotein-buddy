@@ -110,6 +110,17 @@ test.describe('Random Selection Flow', () => {
 
     // Navigate to home screen
     await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
+
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
@@ -126,91 +137,10 @@ test.describe('Random Selection Flow', () => {
       // Wait for navigation to confirm screen (selection happens automatically)
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
     });
-
-    test.skip('handles no flavors available', async ({ page, context }) => {
-      // Set up state with no flavors
-      await context.addInitScript((key) => {
-        const emptyState: AppState = {
-          version: 1,
-          flavors: [],
-          boxes: [],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(emptyState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
-      await randomButton.click();
-
-      // Should show error message
-      await expect(page.locator('h1')).toContainText('No Selection Available');
-      await expect(page.locator('.error-message')).toContainText('No flavors configured');
-
-      // Should have Back to Home button
-      const homeButton = page.locator('button').filter({ hasText: 'Back to Home' });
-      await expect(homeButton).toBeVisible();
-    });
-
-    test.skip('handles all flavors excluded', async ({ page, context }) => {
-      // Set up state with all flavors excluded
-      await context.addInitScript((key) => {
-        const excludedState: AppState = {
-          version: 1,
-          flavors: [
-            { id: 'chocolate', name: 'Chocolate', excludeFromRandom: true },
-            { id: 'vanilla', name: 'Vanilla', excludeFromRandom: true },
-          ],
-          boxes: [
-            {
-              id: 'box-1',
-              flavorId: 'chocolate',
-              quantity: 10,
-              location: { stack: 1, height: 0 },
-              isOpen: false,
-            },
-          ],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(excludedState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
-      await randomButton.click();
-
-      // Should show error message
-      await expect(page.locator('.error-message')).toContainText(
-        'All flavors are excluded from random selection'
-      );
-    });
-
-    test.skip('handles no boxes in stock', async ({ page, context }) => {
-      // Set up state with flavors but no boxes
-      await context.addInitScript((key) => {
-        const noStockState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
-          boxes: [],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(noStockState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
-      await randomButton.click();
-
-      // Should show error message
-      await expect(page.locator('.error-message')).toContainText('No boxes in stock');
-    });
   });
 
   test.describe('Confirmation Screen', () => {
-    test.skip('displays selected flavor and box details', async ({ page }) => {
+    test('displays selected flavor and box details', async ({ page }) => {
       // Navigate to random selection
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
@@ -225,9 +155,9 @@ test.describe('Random Selection Flow', () => {
 
       // Should display box details
       await expect(page.locator('h2')).toContainText('Use This Box');
-      await expect(page.locator('.quantity')).toBeVisible();
-      await expect(page.locator('.location')).toBeVisible();
-      await expect(page.locator('.status')).toBeVisible();
+      await expect(page.locator('.box-details .quantity')).toBeVisible();
+      await expect(page.locator('.box-details .location')).toBeVisible();
+      await expect(page.locator('.box-details .status')).toBeVisible();
     });
 
     test('displays all four action buttons', async ({ page }) => {
@@ -242,12 +172,12 @@ test.describe('Random Selection Flow', () => {
       await expect(page.locator('button').filter({ hasText: 'Cancel' })).toBeVisible();
     });
 
-    test.skip('shows open/unopened status correctly', async ({ page }) => {
+    test('shows open/unopened status correctly', async ({ page }) => {
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
-      // Should show either "Open" or "Unopened" status
-      const status = page.locator('.status');
+      // Should show either "Open" or "Unopened" status in priority box
+      const status = page.locator('.box-details .status');
       await expect(status).toBeVisible();
       const statusText = await status.textContent();
       expect(statusText === 'Open' || statusText === 'Unopened').toBeTruthy();
@@ -345,36 +275,6 @@ test.describe('Random Selection Flow', () => {
 
       expect(updatedQuantity).toBe(initialQuantity - 1);
     });
-
-    test.skip('disables Add Another button when quantity is 1', async ({ page, context }) => {
-      // Set up state with a box that has quantity 1
-      await context.addInitScript((key) => {
-        const lowQuantityState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
-          boxes: [
-            {
-              id: 'box-1',
-              flavorId: 'chocolate',
-              quantity: 1,
-              location: { stack: 1, height: 0 },
-              isOpen: true,
-            },
-          ],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(lowQuantityState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
-
-      // Add Another button should be disabled
-      const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
-      await expect(addAnotherButton).toBeDisabled();
-    });
   });
 
   test.describe('Different Choice Action', () => {
@@ -404,7 +304,7 @@ test.describe('Random Selection Flow', () => {
   });
 
   test.describe('Alternative Boxes Display', () => {
-    test.skip('shows alternative boxes when multiple boxes exist', async ({ page, context }) => {
+    test('shows alternative boxes when multiple boxes exist', async ({ page, context }) => {
       // Ensure chocolate has multiple boxes (it does in our default state)
       // Force selection of chocolate by making it the only available flavor
       await context.addInitScript((key) => {
@@ -441,6 +341,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
@@ -451,39 +362,6 @@ test.describe('Random Selection Flow', () => {
       const alternativeBoxes = page.locator('.alternative-box');
       const count = await alternativeBoxes.count();
       expect(count).toBeGreaterThanOrEqual(1);
-    });
-
-    test.skip('does not show alternative boxes when only one box exists', async ({
-      page,
-      context,
-    }) => {
-      // Set up state with only one box per flavor
-      await context.addInitScript((key) => {
-        const singleBoxState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
-          boxes: [
-            {
-              id: 'box-1',
-              flavorId: 'chocolate',
-              quantity: 10,
-              location: { stack: 1, height: 0 },
-              isOpen: true,
-            },
-          ],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(singleBoxState));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/');
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
-      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
-
-      // Should NOT show Alternative Boxes section
-      const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
-      await expect(alternativeSection).not.toBeVisible();
     });
   });
 
@@ -514,5 +392,217 @@ test.describe('Random Selection Flow', () => {
       // Just verify we're still on a valid page
       await expect(page.locator('body')).toBeVisible();
     });
+  });
+});
+
+// These tests need their own describe blocks because they require different initial state
+// (error conditions) than the main "Random Selection Flow" tests which use a beforeEach
+// with populated test data. Playwright's addInitScript must be called BEFORE navigation,
+// so tests that need fundamentally different state should be in separate describe blocks
+// to avoid inheriting conflicting beforeEach setup.
+
+test.describe('Random Selection Flow - Error State: No Flavors', () => {
+  test('handles no flavors available', async ({ page, context }) => {
+    // Set up state with no flavors
+    await context.addInitScript((key) => {
+      const emptyState: AppState = {
+        version: 1,
+        flavors: [],
+        boxes: [],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(emptyState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    await randomButton.click();
+
+    // Should show error message
+    await expect(page.locator('h1')).toContainText('No Selection Available');
+    await expect(page.locator('.error-message')).toContainText('No flavors configured');
+
+    // Should have Back to Home button
+    const homeButton = page.locator('button').filter({ hasText: 'Back to Home' });
+    await expect(homeButton).toBeVisible();
+  });
+});
+
+test.describe('Random Selection Flow - Error State: All Flavors Excluded', () => {
+  test('handles all flavors excluded', async ({ page, context }) => {
+    // Set up state with all flavors excluded
+    await context.addInitScript((key) => {
+      const excludedState: AppState = {
+        version: 1,
+        flavors: [
+          { id: 'chocolate', name: 'Chocolate', excludeFromRandom: true },
+          { id: 'vanilla', name: 'Vanilla', excludeFromRandom: true },
+        ],
+        boxes: [
+          {
+            id: 'box-1',
+            flavorId: 'chocolate',
+            quantity: 10,
+            location: { stack: 1, height: 0 },
+            isOpen: false,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(excludedState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    await randomButton.click();
+
+    // Should show error message
+    await expect(page.locator('.error-message')).toContainText(
+      'flavors are excluded from random selection'
+    );
+  });
+});
+
+test.describe('Random Selection Flow - Error State: No Boxes in Stock', () => {
+  test('handles no boxes in stock', async ({ page, context }) => {
+    // Set up state with flavors but no boxes
+    await context.addInitScript((key) => {
+      const noStockState: AppState = {
+        version: 1,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        boxes: [],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(noStockState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    await randomButton.click();
+
+    // Should show error message (matches substring of detailed error)
+    await expect(page.locator('.error-message')).toContainText('no boxes in stock');
+  });
+});
+
+test.describe('Random Selection Flow - Add Another: Quantity 1', () => {
+  test('disables Add Another button when quantity is 1', async ({ page, context }) => {
+    // Set up state with a box that has quantity 1
+    await context.addInitScript((key) => {
+      const lowQuantityState: AppState = {
+        version: 1,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        boxes: [
+          {
+            id: 'box-1',
+            flavorId: 'chocolate',
+            quantity: 1,
+            location: { stack: 1, height: 0 },
+            isOpen: true,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(lowQuantityState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
+
+    // Add Another button should be disabled
+    const addAnotherButton = page.locator('button').filter({ hasText: 'Add Another' });
+    await expect(addAnotherButton).toBeDisabled();
+  });
+});
+
+test.describe('Random Selection Flow - Alternative Boxes: Single Box', () => {
+  test('does not show alternative boxes when only one box exists', async ({ page, context }) => {
+    // Set up state with only one box per flavor
+    await context.addInitScript((key) => {
+      const singleBoxState: AppState = {
+        version: 1,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        boxes: [
+          {
+            id: 'box-1',
+            flavorId: 'chocolate',
+            quantity: 10,
+            location: { stack: 1, height: 0 },
+            isOpen: true,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(singleBoxState));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
+    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
+
+    // Should NOT show Alternative Boxes section
+    const alternativeSection = page.locator('h3').filter({ hasText: 'Alternative Boxes' });
+    await expect(alternativeSection).not.toBeVisible();
   });
 });

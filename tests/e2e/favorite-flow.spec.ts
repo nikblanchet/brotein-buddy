@@ -47,6 +47,17 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
 
       // Navigate to home screen
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
@@ -163,6 +174,16 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
     });
 
     test('displays "Set Favorite" text when no favorite configured', async ({ page }) => {
@@ -210,6 +231,16 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
 
       await page.goto('/#/');
 
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       // Button should show "Set Favorite" since flavor not found
       const favoriteButton = page.getByTestId('favorite-button');
       await expect(favoriteButton).toContainText('Set Favorite');
@@ -229,6 +260,16 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
 
       // Button should show and be enabled
       const favoriteButton = page.getByTestId('favorite-button');

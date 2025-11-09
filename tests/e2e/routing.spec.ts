@@ -14,6 +14,17 @@ import type { AppState } from '../../src/types/models';
 test.beforeEach(async ({ page }) => {
   // Set up test data for box edit routing tests
   await page.goto('/#/');
+
+  // Dismiss WelcomeModal if it appears
+  try {
+    const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+    await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+    await startFreshButton.click();
+    await page.waitForTimeout(500); // Wait for modal close animation
+  } catch {
+    // Modal didn't appear (localStorage already prevents it), continue with test
+  }
+
   await page.evaluate(() => {
     const testState: AppState = {
       version: 1,
@@ -159,27 +170,28 @@ test.describe('Routing - Button Navigation', () => {
 });
 
 test.describe('Routing - Browser Navigation', () => {
-  test.skip('back button navigates to previous route', async ({ page }) => {
+  test('back button navigates to previous route', async ({ page }) => {
     await page.goto('/#/');
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
-    await page.goto('/#/random');
-    await expect(page.locator('h1')).toContainText('Random Selection');
+    // Use /inventory instead of /random (which auto-redirects)
+    await page.goto('/#/inventory');
+    await expect(page.locator('h1')).toContainText('Inventory');
 
     await page.goBack();
     await expect(page).toHaveURL(/#\/$/);
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
   });
 
-  test.skip('forward button navigates after going back', async ({ page }) => {
+  test('forward button navigates after going back', async ({ page }) => {
     await page.goto('/#/');
-    await page.goto('/#/random');
+    await page.goto('/#/inventory');
     await page.goBack();
 
     await expect(page).toHaveURL(/#\/$/);
     await page.goForward();
-    await expect(page).toHaveURL(/#\/random$/);
-    await expect(page.locator('h1')).toContainText('Random Selection');
+    await expect(page).toHaveURL(/#\/inventory$/);
+    await expect(page.locator('h1')).toContainText('Inventory');
   });
 
   test('back button works through multiple routes', async ({ page }) => {

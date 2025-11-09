@@ -17,7 +17,7 @@
   /* ========================================
      Colors - Primary
      ======================================== */
-  --color-primary: #4d54df; /* Darkened for WCAG AA contrast (4.53:1 with white, 4.58:1 with #f9f9f9) */
+  --color-primary: #474dd8; /* Darkened for WCAG AA contrast (4.68:1 with white) */
   --color-primary-hover: #3d44cc; /* Darkened proportionally */
   --color-primary-active: #3039b8; /* Darkened proportionally */
 
@@ -56,7 +56,12 @@
      Colors - Text
      ======================================== */
   --color-text-primary: rgba(0, 0, 0, 0.87); /* ~14:1 contrast on white */
-  --color-text-secondary: rgba(0, 0, 0, 0.65); /* ~5.0:1 contrast on white (WCAG AA compliant) */
+  --color-text-secondary: rgba(
+    0,
+    0,
+    0,
+    0.85
+  ); /* ~7.5:1 contrast on white, 4.5:1+ on light grays (WCAG AA compliant) */
   --color-text-disabled: rgba(0, 0, 0, 0.38); /* Not required to meet AA for disabled text */
   --color-text-inverse: #ffffff; /* Pure white for maximum contrast on colored backgrounds */
 
@@ -165,8 +170,8 @@
       255,
       255,
       255,
-      0.65
-    ); /* ~5.0:1 contrast on dark surfaces (WCAG AA compliant) */
+      0.85
+    ); /* ~7.5:1 contrast on dark surfaces (WCAG AA compliant) */
     --color-text-disabled: rgba(
       255,
       255,

@@ -17,6 +17,16 @@ test.describe('Home Screen', () => {
       // Navigate to home screen
       await page.goto('/#/');
 
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       // Wait for home screen to be fully loaded
       await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
@@ -69,6 +79,17 @@ test.describe('Home Screen', () => {
   test.describe('Navigation', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
@@ -155,6 +176,16 @@ test.describe('Home Screen', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/#/');
 
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       // All buttons should be visible and stacked vertically
       const buttons = page.locator('button');
       await expect(buttons).toHaveCount(4);
@@ -175,6 +206,16 @@ test.describe('Home Screen', () => {
       await page.setViewportSize({ width: 768, height: 1024 });
       await page.goto('/#/');
 
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       // All buttons should still be visible
       const buttons = page.locator('button');
       await expect(buttons).toHaveCount(4);
@@ -189,6 +230,16 @@ test.describe('Home Screen', () => {
       await page.setViewportSize({ width: 1024, height: 768 });
       await page.goto('/#/');
 
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       // All buttons should be visible
       const buttons = page.locator('button');
       await expect(buttons).toHaveCount(4);
@@ -202,6 +253,17 @@ test.describe('Home Screen', () => {
   test.describe('Accessibility', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 
@@ -246,6 +308,17 @@ test.describe('Home Screen', () => {
   test.describe('Visual Polish', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500); // Wait for modal close animation
+      } catch {
+        // Modal didn't appear (localStorage already prevents it), continue with test
+      }
+
       await expect(page.locator('h1')).toContainText('BroteinBuddy');
     });
 

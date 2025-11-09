@@ -24,9 +24,32 @@
    */
   let selectedFlavorId = $state<string | null>(null);
   let selectedFlavor = $state<Flavor | null>(null);
-  let priorityBox = $state<Box | null>(null);
-  let alternativeBoxes = $state<Box[]>([]);
-  let errorMessage = $state<string | null>(null);
+  let sessionErrorMessage = $state<string | null>(null);
+
+  // Reactive derived values that automatically update when store changes
+  let priorityBox = $derived.by(() => {
+    if (!selectedFlavorId) return null;
+    return selectPriorityBox($appState.boxes, selectedFlavorId);
+  });
+
+  let errorMessage = $derived.by(() => {
+    // Check for session/loading errors first
+    if (sessionErrorMessage) return sessionErrorMessage;
+
+    // Check for "no boxes" error
+    if (selectedFlavorId && !priorityBox) {
+      return 'No boxes available for this flavor. Add inventory to continue.';
+    }
+
+    return null;
+  });
+
+  let alternativeBoxes = $derived.by(() => {
+    if (!selectedFlavorId || !priorityBox) return [];
+    return $appState.boxes
+      .filter((b) => b.flavorId === selectedFlavorId && b.id !== priorityBox.id)
+      .sort(compareBoxPriority);
+  });
 
   /**
    * Load flavor and box data on component mount
@@ -35,7 +58,7 @@
     const flavorId = sessionStorage.getItem('selectedFlavorId');
 
     if (!flavorId) {
-      errorMessage = 'No flavor selected. Please start from the Random Selection screen.';
+      sessionErrorMessage = 'No flavor selected. Please start from the Random Selection screen.';
       return;
     }
 
@@ -43,35 +66,12 @@
     selectedFlavor = maybeGetFlavor(flavorId, $appState.flavors);
 
     if (!selectedFlavor) {
-      errorMessage = 'Selected flavor not found. It may have been deleted.';
+      sessionErrorMessage = 'Selected flavor not found. It may have been deleted.';
       return;
     }
 
-    // Get priority box and alternatives
-    refreshBoxSelection();
+    // No manual refresh needed - derived values automatically compute on first render
   });
-
-  /**
-   * Refresh box selection (called after quantity updates)
-   */
-  function refreshBoxSelection() {
-    if (!selectedFlavorId) return;
-
-    priorityBox = selectPriorityBox($appState.boxes, selectedFlavorId);
-
-    if (!priorityBox) {
-      errorMessage = 'No boxes available for this flavor. Add inventory to continue.';
-      return;
-    }
-
-    // Get alternative boxes (other boxes of same flavor, sorted by priority)
-    const allFlavorBoxes = $appState.boxes
-      .filter((b) => b.flavorId === selectedFlavorId && b.id !== priorityBox?.id)
-      .sort(compareBoxPriority);
-
-    alternativeBoxes = allFlavorBoxes;
-    errorMessage = null;
-  }
 
   /**
    * Format location for display
@@ -116,8 +116,7 @@
     const newQuantity = priorityBox.quantity - 1;
     updateBoxQuantity(priorityBox.id, newQuantity);
 
-    // Refresh box selection (priority may have changed)
-    refreshBoxSelection();
+    // No manual refresh needed - derived values automatically update!
   }
 
   /**

@@ -40,8 +40,35 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Run E2E - accessibility
+        run: npx playwright test tests/e2e/accessibility.spec.ts
+
+      - name: Run E2E - button
+        run: npx playwright test tests/e2e/button.spec.ts
+
+      - name: Run E2E - favorite-flow
+        run: npx playwright test tests/e2e/favorite-flow.spec.ts
+
+      - name: Run E2E - home
+        run: npx playwright test tests/e2e/home.spec.ts
+
+      - name: Run E2E - inventory-box-edit
+        run: npx playwright test tests/e2e/inventory-box-edit.spec.ts
+
+      - name: Run E2E - inventory
+        run: npx playwright test tests/e2e/inventory.spec.ts
+
+      - name: Run E2E - manual-flow
+        run: npx playwright test tests/e2e/manual-flow.spec.ts
+
+      - name: Run E2E - random-flow
+        run: npx playwright test tests/e2e/random-flow.spec.ts
+
+      - name: Run E2E - rearrange
+        run: npx playwright test tests/e2e/rearrange.spec.ts
+
+      - name: Run E2E - routing
+        run: npx playwright test tests/e2e/routing.spec.ts
 
       - name: Build project
         run: npm run build
