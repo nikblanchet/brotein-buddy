@@ -33,8 +33,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    url: process.env.BASE_URL || 'http://localhost:5173',
+    port: parseInt(process.env.VITE_PORT || '5173'),
     reuseExistingServer: !process.env.CI,
-    timeout: 3000, // 3 seconds - fail fast to diagnose CI hangs
+    timeout: 120000, // 2 minutes - port checks are fast, this is just a safety net
   },
 });
