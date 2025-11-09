@@ -160,11 +160,14 @@ test.describe('Accessibility - Inventory Screen', () => {
   });
 
   test('should not have accessibility issues on inventory visual view', async ({ page }) => {
-    // Dismiss the Welcome Modal if it appears (for first-time users)
-    const startFreshButton = page.getByRole('button', { name: /start fresh/i });
-    if (await startFreshButton.isVisible()) {
+    // Wait for and dismiss the Welcome Modal (appears for first-time users)
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
       await startFreshButton.click();
-      await page.waitForTimeout(300); // Wait for modal close animation
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch (error) {
+      // Modal didn't appear (localStorage already set), continue with test
     }
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
