@@ -160,6 +160,13 @@ test.describe('Accessibility - Inventory Screen', () => {
   });
 
   test('should not have accessibility issues on inventory visual view', async ({ page }) => {
+    // Dismiss the Welcome Modal if it appears (for first-time users)
+    const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+    if (await startFreshButton.isVisible()) {
+      await startFreshButton.click();
+      await page.waitForTimeout(300); // Wait for modal close animation
+    }
+
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
   });
