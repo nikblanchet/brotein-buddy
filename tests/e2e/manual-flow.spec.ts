@@ -120,6 +120,17 @@ test.describe('Manual Flavor Selection Flow', () => {
 
     // Go back to home and test Strawberry selection
     await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
     await page.locator('button').filter({ hasText: 'Choose Flavor' }).click();
     await page.locator('.flavor-item').filter({ hasText: 'Strawberry' }).click();
@@ -148,6 +159,16 @@ test.describe('Manual Flavor Selection Flow', () => {
     // Navigate away first
     await page.goto('/#/inventory');
 
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
     // Clear localStorage and set empty state
     await page.evaluate((key) => {
       const emptyState = {
@@ -162,6 +183,17 @@ test.describe('Manual Flavor Selection Flow', () => {
 
     // Navigate back to home to apply the empty state
     await page.goto('/#/');
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
     const chooseFlavorButton = page.locator('button').filter({ hasText: 'Choose Flavor' });
