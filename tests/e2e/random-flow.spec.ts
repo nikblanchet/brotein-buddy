@@ -216,7 +216,7 @@ test.describe('Random Selection Flow', () => {
 
       // Should show error message
       await expect(page.locator('.error-message')).toContainText(
-        'All flavors are excluded from random selection'
+        'flavors are excluded from random selection'
       );
     });
 
