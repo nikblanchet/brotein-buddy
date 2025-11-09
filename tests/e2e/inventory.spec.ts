@@ -427,41 +427,6 @@ test.describe('Inventory Screen', () => {
     });
   });
 
-  test.describe('Empty State', () => {
-    test('shows empty state when no boxes exist', async ({ page, context }) => {
-      // Set up state with no boxes
-      await context.addInitScript((key) => {
-        const state = {
-          version: 1,
-          boxes: [],
-          flavors: [],
-          favoriteFlavorId: null,
-          settings: {},
-        };
-        localStorage.setItem(key, JSON.stringify(state));
-      }, STORAGE_KEY);
-
-      await page.goto('/#/inventory', { waitUntil: 'networkidle' });
-
-      // Dismiss WelcomeModal if it appears
-      try {
-        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
-        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
-        await startFreshButton.click();
-        await page.waitForTimeout(500); // Wait for modal close animation
-      } catch {
-        // Modal didn't appear (localStorage already prevents it), continue with test
-      }
-
-      // Wait for inventory page to load
-      await expect(page.locator('h1')).toContainText('Inventory');
-
-      // Should show empty state message
-      await expect(page.locator('.empty-state')).toBeVisible();
-      await expect(page.locator('.empty-state')).toContainText('No boxes in inventory');
-    });
-  });
-
   test.describe('Keyboard Navigation', () => {
     test('can navigate to boxes using keyboard in visual view', async ({ page }) => {
       // Focus first box
@@ -564,5 +529,43 @@ test.describe('Inventory Screen', () => {
       const header = page.locator('.inventory-header');
       await expect(header).toBeVisible();
     });
+  });
+});
+
+// Separate describe block for Empty State tests
+// This needs its own describe block because it requires different initial state
+// than the main Inventory Screen tests (which use a beforeEach with test data)
+test.describe('Inventory Screen - Empty State', () => {
+  test('shows empty state when no boxes exist', async ({ page, context }) => {
+    // Set up state with no boxes
+    await context.addInitScript((key) => {
+      const state = {
+        version: 1,
+        boxes: [],
+        flavors: [],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+      localStorage.setItem(key, JSON.stringify(state));
+    }, STORAGE_KEY);
+
+    await page.goto('/#/inventory', { waitUntil: 'networkidle' });
+
+    // Dismiss WelcomeModal if it appears
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500); // Wait for modal close animation
+    } catch {
+      // Modal didn't appear (localStorage already prevents it), continue with test
+    }
+
+    // Wait for inventory page to load
+    await expect(page.locator('h1')).toContainText('Inventory');
+
+    // Should show empty state message
+    await expect(page.locator('.empty-state')).toBeVisible();
+    await expect(page.locator('.empty-state')).toContainText('No boxes in inventory');
   });
 });
