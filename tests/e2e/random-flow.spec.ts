@@ -152,6 +152,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -189,6 +200,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -212,6 +234,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
       await randomButton.click();
 
@@ -379,6 +412,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
@@ -452,6 +496,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
@@ -486,6 +541,17 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       await page.goto('/#/');
+
+      // Dismiss WelcomeModal if it appears
+      try {
+        const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+        await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+        await startFreshButton.click();
+        await page.waitForTimeout(500);
+      } catch {
+        // Modal didn't appear, continue
+      }
+
       await page.locator('button').filter({ hasText: 'Random Pick' }).click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
