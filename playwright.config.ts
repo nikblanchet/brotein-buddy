@@ -35,6 +35,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: process.env.BASE_URL || 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 30000, // Reduced from 120s to 30s to fail faster on CI
   },
 });
