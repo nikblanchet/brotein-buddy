@@ -23,7 +23,7 @@ test.describe('Home Screen', () => {
         await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
         await startFreshButton.click();
         await page.waitForTimeout(500); // Wait for modal close animation
-      } catch (error) {
+      } catch {
         // Modal didn't appear (localStorage already prevents it), continue with test
       }
 
@@ -86,7 +86,7 @@ test.describe('Home Screen', () => {
         await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
         await startFreshButton.click();
         await page.waitForTimeout(500); // Wait for modal close animation
-      } catch (error) {
+      } catch {
         // Modal didn't appear (localStorage already prevents it), continue with test
       }
 
@@ -230,7 +230,7 @@ test.describe('Home Screen', () => {
         await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
         await startFreshButton.click();
         await page.waitForTimeout(500); // Wait for modal close animation
-      } catch (error) {
+      } catch {
         // Modal didn't appear (localStorage already prevents it), continue with test
       }
 
@@ -285,7 +285,7 @@ test.describe('Home Screen', () => {
         await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
         await startFreshButton.click();
         await page.waitForTimeout(500); // Wait for modal close animation
-      } catch (error) {
+      } catch {
         // Modal didn't appear (localStorage already prevents it), continue with test
       }
 
