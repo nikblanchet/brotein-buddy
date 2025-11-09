@@ -174,8 +174,9 @@ test.describe('Routing - Browser Navigation', () => {
     await page.goto('/#/');
     await expect(page.locator('h1')).toContainText('BroteinBuddy');
 
-    await page.goto('/#/random');
-    await expect(page.locator('h1')).toContainText('Random Selection');
+    // Use /inventory instead of /random (which auto-redirects)
+    await page.goto('/#/inventory');
+    await expect(page.locator('h1')).toContainText('Inventory');
 
     await page.goBack();
     await expect(page).toHaveURL(/#\/$/);
@@ -184,13 +185,13 @@ test.describe('Routing - Browser Navigation', () => {
 
   test('forward button navigates after going back', async ({ page }) => {
     await page.goto('/#/');
-    await page.goto('/#/random');
+    await page.goto('/#/inventory');
     await page.goBack();
 
     await expect(page).toHaveURL(/#\/$/);
     await page.goForward();
-    await expect(page).toHaveURL(/#\/random$/);
-    await expect(page.locator('h1')).toContainText('Random Selection');
+    await expect(page).toHaveURL(/#\/inventory$/);
+    await expect(page.locator('h1')).toContainText('Inventory');
   });
 
   test('back button works through multiple routes', async ({ page }) => {
