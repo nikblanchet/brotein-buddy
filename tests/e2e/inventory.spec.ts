@@ -441,7 +441,7 @@ test.describe('Inventory Screen', () => {
         localStorage.setItem(key, JSON.stringify(state));
       }, STORAGE_KEY);
 
-      await page.goto('/#/inventory');
+      await page.goto('/#/inventory', { waitUntil: 'networkidle' });
 
       // Dismiss WelcomeModal if it appears
       try {
@@ -452,6 +452,9 @@ test.describe('Inventory Screen', () => {
       } catch {
         // Modal didn't appear (localStorage already prevents it), continue with test
       }
+
+      // Wait for inventory page to load
+      await expect(page.locator('h1')).toContainText('Inventory');
 
       // Should show empty state message
       await expect(page.locator('.empty-state')).toBeVisible();
