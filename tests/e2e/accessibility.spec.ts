@@ -363,6 +363,17 @@ test.describe('Accessibility - Color Contrast Verification', () => {
       // Navigate to /random/confirm via random selection flow
       if (route === '/random/confirm') {
         await page.goto('/#/');
+
+        // Dismiss WelcomeModal if it appears
+        try {
+          const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+          await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+          await startFreshButton.click();
+          await page.waitForTimeout(500); // Wait for modal close animation
+        } catch (error) {
+          // Modal didn't appear (localStorage already prevents it), continue with test
+        }
+
         await page.getByRole('button', { name: /random/i }).click();
         // Wait for random page first, then confirm page (selection is async, needs time)
         await page.waitForURL('/#/random');
@@ -383,6 +394,16 @@ test.describe('Accessibility - Color Contrast Verification', () => {
         }
       } else {
         await page.goto(`/#${route}`);
+
+        // Dismiss WelcomeModal if it appears
+        try {
+          const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+          await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+          await startFreshButton.click();
+          await page.waitForTimeout(500); // Wait for modal close animation
+        } catch (error) {
+          // Modal didn't appear (localStorage already prevents it), continue with test
+        }
       }
 
       await page.waitForTimeout(1000); // Wait for page to fully render
