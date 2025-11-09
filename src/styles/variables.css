@@ -17,7 +17,7 @@
   /* ========================================
      Colors - Primary
      ======================================== */
-  --color-primary: #4d54df; /* Darkened for WCAG AA contrast (4.53:1 with white, 4.58:1 with #f9f9f9) */
+  --color-primary: #474dd8; /* Darkened for WCAG AA contrast (4.68:1 with white) */
   --color-primary-hover: #3d44cc; /* Darkened proportionally */
   --color-primary-active: #3039b8; /* Darkened proportionally */
 
