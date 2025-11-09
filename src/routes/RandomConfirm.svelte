@@ -24,18 +24,24 @@
    */
   let selectedFlavorId = $state<string | null>(null);
   let selectedFlavor = $state<Flavor | null>(null);
-  let errorMessage = $state<string | null>(null);
+  let sessionErrorMessage = $state<string | null>(null);
 
   // Reactive derived values that automatically update when store changes
   let priorityBox = $derived.by(() => {
     if (!selectedFlavorId) return null;
-    const box = selectPriorityBox($appState.boxes, selectedFlavorId);
-    if (!box) {
-      errorMessage = 'No boxes available for this flavor. Add inventory to continue.';
-    } else if (errorMessage === 'No boxes available for this flavor. Add inventory to continue.') {
-      errorMessage = null;
+    return selectPriorityBox($appState.boxes, selectedFlavorId);
+  });
+
+  let errorMessage = $derived.by(() => {
+    // Check for session/loading errors first
+    if (sessionErrorMessage) return sessionErrorMessage;
+
+    // Check for "no boxes" error
+    if (selectedFlavorId && !priorityBox) {
+      return 'No boxes available for this flavor. Add inventory to continue.';
     }
-    return box;
+
+    return null;
   });
 
   let alternativeBoxes = $derived.by(() => {
@@ -52,7 +58,7 @@
     const flavorId = sessionStorage.getItem('selectedFlavorId');
 
     if (!flavorId) {
-      errorMessage = 'No flavor selected. Please start from the Random Selection screen.';
+      sessionErrorMessage = 'No flavor selected. Please start from the Random Selection screen.';
       return;
     }
 
@@ -60,7 +66,7 @@
     selectedFlavor = maybeGetFlavor(flavorId, $appState.flavors);
 
     if (!selectedFlavor) {
-      errorMessage = 'Selected flavor not found. It may have been deleted.';
+      sessionErrorMessage = 'Selected flavor not found. It may have been deleted.';
       return;
     }
 
