@@ -68,6 +68,9 @@
     "svelte-dnd-action": "^0.9.67",
     "svelte-spa-router": "^4.0.1"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.52.5"
+  },
   "engines": {
     "node": ">=22.0.0"
   }
