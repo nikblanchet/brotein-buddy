@@ -67,5 +67,8 @@
   "dependencies": {
     "svelte-dnd-action": "^0.9.67",
     "svelte-spa-router": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
