@@ -5,6 +5,8 @@
 
 A Progressive Web App for tracking your protein shake inventory by flavor and location.
 
+> **Status**: Technical validation deployment. Known issues being tracked for Phase 3.4 (see [open issues](https://github.com/nikblanchet/brotein-buddy/issues?q=is%3Aissue+is%3Aopen)). Not portfolio-ready yet.
+
 ## Screenshots
 
 > Note: Screenshots will be added after production deployment
@@ -21,13 +23,15 @@ A Progressive Web App for tracking your protein shake inventory by flavor and lo
 
 ### On iPhone/iPad
 
-1. Open this app in Safari: [URL will be added after deployment]
+1. Open this app in Safari: https://brotein-buddy.vercel.app
 2. Tap the Share button (square with arrow)
 3. Scroll down and tap "Add to Home Screen"
 4. Tap "Add"
 5. Launch the app from your home screen
 
 The app works completely offline after installation!
+
+> **Note**: PWA navigation currently requires browser back button. See [Issue #77](https://github.com/nikblanchet/brotein-buddy/issues/77) for standalone mode fix.
 
 ## Quick Start
 
