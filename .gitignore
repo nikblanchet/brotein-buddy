@@ -16,27 +16,7 @@ lerna-debug.log*
 
 # Environment
 .env
-.env.local
 *.local
-
-# Worktrees directory
-/wt/
-
-# Shared directory - personal files not committed
-/.shared/
-
-# Confidential context (if symlinked to root)
-CLAUDE.md
-CLAUDE_CONTEXT.md
-
-# Planning and scratch (if symlinked to root)
-.planning
-.scratch
-
-# Claude Code personal settings (symlinked in worktrees)
-.claude/agents
-.claude/settings.local.json
-.claude/skills
 
 # Testing
 coverage/
@@ -63,4 +43,3 @@ tests/e2e/**/__diff_output__/
 # OS
 .DS_Store
 Thumbs.db
-.scratch/
