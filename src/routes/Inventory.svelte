@@ -15,9 +15,15 @@
 
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
+  import AddInventoryModal from '$lib/components/AddInventoryModal.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
+
+  /**
+   * Modal state for adding inventory
+   */
+  let isAddInventoryModalOpen = $state(false);
   import type { Flavor, RandomPool } from '../types/models';
   import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
   import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
@@ -162,6 +168,9 @@
         View: {viewMode === 'visual' ? 'Visual' : 'Table'}
       </Button>
       <Button variant="secondary" size="base" onclick={handleRearrangeClick}>Rearrange</Button>
+      <Button variant="secondary" size="base" onclick={() => (isAddInventoryModalOpen = true)}
+        >Add Inventory</Button
+      >
       <Button variant="primary" size="base" onclick={handleNewFlavorClick}>New Flavor</Button>
     </div>
   </header>
@@ -297,6 +306,14 @@
     </div>
   {/if}
 </div>
+
+<!-- Add Inventory Modal -->
+<AddInventoryModal
+  open={isAddInventoryModalOpen}
+  onclose={() => (isAddInventoryModalOpen = false)}
+  existingBoxes={$appState.boxes}
+  flavors={$appState.flavors}
+/>
 
 <!-- New Flavor Modal -->
 <Modal open={isNewFlavorModalOpen} title="Add New Flavor" onclose={closeNewFlavorModal} size="sm">

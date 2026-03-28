@@ -450,6 +450,83 @@ test.describe('Inventory Box Edit Screen', () => {
     });
   });
 
+  test.describe('Set Quantity', () => {
+    test('should show Set Quantity button on box edit screen', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+      await expect(page.getByRole('button', { name: 'Set Quantity' })).toBeVisible();
+    });
+
+    test('should open Set Quantity modal when button is clicked', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+      await page.getByRole('button', { name: 'Set Quantity' }).click();
+      await expect(page.locator('h2:has-text("Set Quantity")')).toBeVisible();
+    });
+
+    test('should show current quantity in modal label', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+      await page.getByRole('button', { name: 'Set Quantity' }).click();
+      await expect(page.getByText(/current: 5/)).toBeVisible();
+    });
+
+    test('confirm button should be disabled until a value is selected', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+      await page.getByRole('button', { name: 'Set Quantity' }).click();
+      await expect(
+        page.getByRole('button', { name: 'Set Quantity', exact: true }).last()
+      ).toBeDisabled();
+    });
+
+    test('should set quantity to selected value', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+
+      // Initial quantity is 5
+      await expect(page.locator('.value:has-text("5")')).toBeVisible();
+
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("9")');
+      await page.click('button:has-text("Set to 9")');
+
+      // Quantity should now be 9 (absolute set, not delta)
+      await expect(page.locator('.value:has-text("9")')).toBeVisible();
+
+      const state = await page.evaluate<AppState>(() =>
+        JSON.parse(localStorage.getItem('BROTEINBUDDY_APP_STATE') || '{}')
+      );
+      expect(state.boxes.find((b) => b.id === 'box_test_1')?.quantity).toBe(9);
+    });
+
+    test('cancel should not change the quantity', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("3")');
+      await page.click('button:has-text("Cancel")');
+
+      // Quantity should remain 5
+      await expect(page.locator('.value:has-text("5")')).toBeVisible();
+
+      const state = await page.evaluate<AppState>(() =>
+        JSON.parse(localStorage.getItem('BROTEINBUDDY_APP_STATE') || '{}')
+      );
+      expect(state.boxes.find((b) => b.id === 'box_test_1')?.quantity).toBe(5);
+    });
+
+    test('should not trigger auto-delete prompt (min is 1, not 0)', async ({ page }) => {
+      await page.goto('/#/inventory/box_test_1/edit');
+
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("1")');
+      await page.click('button:has-text("Set to 1")');
+
+      // Should update quantity without showing auto-delete prompt
+      // Use detail-item scoping to avoid matching "Stack 1, Height 1" location value
+      await expect(
+        page.locator('.detail-item:has(.label:has-text("Quantity")) .value:has-text("1")')
+      ).toBeVisible();
+      await expect(page.locator('h2:has-text("Box Empty")')).not.toBeVisible();
+    });
+  });
+
   test.describe('Accessibility', () => {
     test('should have proper heading structure', async ({ page }) => {
       await page.goto('/#/inventory/box_test_1/edit');

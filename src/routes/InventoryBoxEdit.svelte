@@ -63,6 +63,7 @@
   // Modal states
   let showAddQuantityModal = $state(false);
   let showRemoveQuantityModal = $state(false);
+  let showSetQuantityModal = $state(false);
   let showLocationModal = $state(false);
   let showDeleteConfirmModal = $state(false);
   let showConflictModal = $state(false);
@@ -72,6 +73,7 @@
 
   // NumberPad state
   let pendingQuantityChange = $state<number | null>(null);
+  let pendingSetQuantity = $state<number | null>(null);
 
   // Location change state
   let newStack = $state<number | null>(null);
@@ -230,6 +232,26 @@
     if (!box) return;
     updateBoxIsOpen(boxId, !box.isOpen);
   }
+
+  // Handler: NumberPad selection for set quantity
+  function handleSetQuantitySelect(value: number | 'keyboard') {
+    if (value === 'keyboard') return;
+    pendingSetQuantity = value;
+  }
+
+  // Handler: Confirm set quantity
+  function handleConfirmSetQuantity() {
+    if (!box || pendingSetQuantity === null) return;
+    updateBoxQuantity(boxId, pendingSetQuantity);
+    showSetQuantityModal = false;
+    pendingSetQuantity = null;
+  }
+
+  // Handler: Cancel set quantity
+  function handleCancelSetQuantity() {
+    pendingSetQuantity = null;
+    showSetQuantityModal = false;
+  }
 </script>
 
 {#if !box}
@@ -284,6 +306,9 @@
       <Button variant="primary" onclick={() => (showRemoveQuantityModal = true)}>
         Remove Quantity
       </Button>
+
+      <Button variant="secondary" onclick={() => (showSetQuantityModal = true)}>Set Quantity</Button
+      >
 
       <Button variant="secondary" onclick={handleOpenLocationModal}>Change Location</Button>
 
@@ -346,6 +371,32 @@
         disabled={pendingQuantityChange === null}
       >
         Confirm
+      </Button>
+    </div>
+  </Modal>
+
+  <!-- Set Quantity Modal -->
+  <Modal open={showSetQuantityModal} title="Set Quantity" onclose={handleCancelSetQuantity}>
+    <div class="numberpad-container">
+      <div id="set-quantity-label" class="numberpad-label" role="group" aria-label="Set quantity">
+        Select the new quantity (current: {box.quantity}):
+      </div>
+      <NumberPad
+        min={1}
+        max={12}
+        onselect={handleSetQuantitySelect}
+        ariaLabelledBy="set-quantity-label"
+      />
+    </div>
+
+    <div class="modal-actions">
+      <Button variant="secondary" onclick={handleCancelSetQuantity}>Cancel</Button>
+      <Button
+        variant="primary"
+        onclick={handleConfirmSetQuantity}
+        disabled={pendingSetQuantity === null}
+      >
+        {pendingSetQuantity !== null ? `Set to ${pendingSetQuantity}` : 'Set Quantity'}
       </Button>
     </div>
   </Modal>
