@@ -23,37 +23,37 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.0",
-    "@eslint/js": "^9.38.0",
-    "@playwright/test": "^1.56.1",
+    "@axe-core/playwright": "^4.11.1",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.58.2",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
-    "@testing-library/svelte": "^5.2.8",
+    "@testing-library/svelte": "^5.3.1",
     "@testing-library/user-event": "^14.6.1",
-    "@tsconfig/svelte": "^5.0.5",
-    "@types/node": "^24.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "@vitest/coverage-v8": "^4.0.3",
-    "@vitest/ui": "^4.0.3",
-    "dotenv": "^17.2.3",
-    "eslint": "^9.38.0",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^25.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/ui": "^4.1.2",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.12.5",
-    "globals": "^16.4.0",
+    "eslint-plugin-svelte": "^3.16.0",
+    "globals": "^17.4.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.0.1",
-    "lint-staged": "^16.2.6",
-    "prettier": "^3.6.2",
-    "prettier-plugin-svelte": "^3.4.0",
-    "pwa-asset-generator": "^8.1.2",
-    "rollup-plugin-visualizer": "^6.0.5",
-    "svelte": "^5.39.6",
-    "svelte-check": "^4.3.2",
-    "svelte-eslint-parser": "^1.4.0",
+    "jsdom": "^29.0.1",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-svelte": "^3.5.1",
+    "pwa-asset-generator": "^8.1.4",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "svelte": "^5.55.0",
+    "svelte-check": "^4.4.5",
+    "svelte-eslint-parser": "^1.6.0",
     "typescript": "~5.9.3",
-    "vite": "^7.1.7",
-    "vite-plugin-pwa": "^1.1.0",
-    "vitest": "^4.0.3"
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.1.2"
   },
   "lint-staged": {
     "*.{js,ts,svelte}": [
@@ -65,11 +65,11 @@
     ]
   },
   "dependencies": {
-    "svelte-dnd-action": "^0.9.67",
-    "svelte-spa-router": "^4.0.1"
+    "svelte-dnd-action": "^0.9.69",
+    "svelte-spa-router": "^5.0.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.52.5"
+    "@rollup/rollup-linux-x64-gnu": "4.60.0"
   },
   "engines": {
     "node": ">=22.0.0"

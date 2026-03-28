@@ -13,7 +13,7 @@
    * Global styles are defined in app.css and imported in main.ts.
    */
 
-  import Router, { location } from 'svelte-spa-router';
+  import Router, { router } from 'svelte-spa-router';
   import { routes } from './lib/router/routes';
   import WelcomeModal from './lib/components/WelcomeModal.svelte';
   import { onMount } from 'svelte';
@@ -63,8 +63,8 @@
    * Falls back to route-specific titles for dynamic routes (e.g., /inventory/:boxId/edit)
    */
   $effect(() => {
-    const currentPath = $location;
-    let title = 'BroteinBuddy';
+    const currentPath = router.location;
+    let title;
 
     // Check exact path match first
     if (currentPath in pageTitles) {
