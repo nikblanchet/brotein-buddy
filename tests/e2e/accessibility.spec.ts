@@ -8,7 +8,7 @@ test.describe('Accessibility - Home Screen', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -18,7 +18,7 @@ test.describe('Accessibility - Home Screen', () => {
               isOpen: true,
             },
           ],
-          flavors: [{ id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false }],
+          flavors: [{ id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' }],
           favoriteFlavorId: 'flavor-1',
           settings: {},
         })
@@ -52,7 +52,7 @@ test.describe('Accessibility - Home Screen', () => {
   });
 
   test('should have keyboard accessible buttons', async ({ page }) => {
-    const randomButton = page.getByRole('button', { name: /random/i });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.focus();
     await expect(randomButton).toBeFocused();
   });
@@ -72,7 +72,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -82,7 +82,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
               isOpen: true,
             },
           ],
-          flavors: [{ id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false }],
+          flavors: [{ id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' }],
           favoriteFlavorId: null,
           settings: {},
         })
@@ -102,7 +102,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should not have accessibility issues on random page', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await page.waitForURL('/#/random');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
@@ -110,7 +110,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should not have accessibility issues on confirm page', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     // Wait for random selection page first
     await page.waitForURL('/#/random');
 
@@ -135,7 +135,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should have proper ARIA labels for loading states', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await page.waitForURL('/#/random');
 
     // Check for aria-live region or aria-label on spinner
@@ -150,7 +150,7 @@ test.describe('Accessibility - Inventory Screen', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -168,8 +168,8 @@ test.describe('Accessibility - Inventory Screen', () => {
             },
           ],
           flavors: [
-            { id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'flavor-2', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'flavor-2', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           favoriteFlavorId: null,
           settings: {},
@@ -234,7 +234,7 @@ test.describe('Accessibility - Box Edit Screen', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -244,7 +244,7 @@ test.describe('Accessibility - Box Edit Screen', () => {
               isOpen: true,
             },
           ],
-          flavors: [{ id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false }],
+          flavors: [{ id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' }],
           favoriteFlavorId: null,
           settings: {},
         })
@@ -289,7 +289,7 @@ test.describe('Accessibility - Rearrange Screen', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -307,8 +307,8 @@ test.describe('Accessibility - Rearrange Screen', () => {
             },
           ],
           flavors: [
-            { id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'flavor-2', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'flavor-2', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           favoriteFlavorId: null,
           settings: {},
@@ -353,7 +353,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
         localStorage.setItem(
           key,
           JSON.stringify({
-            version: 1,
+            version: 2,
             boxes: [
               {
                 id: 'box-1',
@@ -363,7 +363,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
                 isOpen: true,
               },
             ],
-            flavors: [{ id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false }],
+            flavors: [{ id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' }],
             favoriteFlavorId: null,
             settings: {},
           })
@@ -384,7 +384,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
           // Modal didn't appear (localStorage already prevents it), continue with test
         }
 
-        await page.getByRole('button', { name: /random/i }).click();
+        await page.getByTestId('random-caffeine-free-button').click();
         // Wait for random page first, then confirm page (selection is async, needs time)
         await page.waitForURL('/#/random');
 
@@ -438,7 +438,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [
             {
               id: 'box-1',
@@ -448,7 +448,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
               isOpen: true,
             },
           ],
-          flavors: [{ id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false }],
+          flavors: [{ id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' }],
           favoriteFlavorId: 'flavor-1',
           settings: {},
         })
@@ -481,7 +481,7 @@ test.describe('Accessibility - Keyboard Navigation', () => {
     await page.goto('/#/');
 
     // Focus first button directly (skip link focus varies by browser)
-    const randomButton = page.locator('button').filter({ hasText: /Random Pick/i });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.focus();
 
     const initialUrl = page.url();
@@ -502,11 +502,11 @@ test.describe('Accessibility - Modal Dialogs', () => {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           boxes: [],
           flavors: [
-            { id: 'flavor-1', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'flavor-2', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'flavor-1', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'flavor-2', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           favoriteFlavorId: null,
           settings: {},

@@ -16,7 +16,7 @@ describe('generateSampleData', () => {
 
   it('should have correct schema version', () => {
     const data = generateSampleData();
-    expect(data.version).toBe(1);
+    expect(data.version).toBe(2);
   });
 
   describe('flavors', () => {
@@ -41,7 +41,7 @@ describe('generateSampleData', () => {
 
     it('should have at least one flavor available for random selection', () => {
       const data = generateSampleData();
-      const availableForRandom = data.flavors.filter((f) => !f.excludeFromRandom);
+      const availableForRandom = data.flavors.filter((f) => f.randomPool !== null);
       expect(availableForRandom.length).toBeGreaterThan(0);
     });
 
@@ -199,7 +199,7 @@ describe('generateSampleData', () => {
 
     it('should include at least one flavor excluded from random', () => {
       const data = generateSampleData();
-      const excludedFlavors = data.flavors.filter((f) => f.excludeFromRandom);
+      const excludedFlavors = data.flavors.filter((f) => f.randomPool === null);
 
       // Should demonstrate the exclusion feature
       expect(excludedFlavors.length).toBeGreaterThan(0);

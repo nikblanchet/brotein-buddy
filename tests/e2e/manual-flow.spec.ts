@@ -17,11 +17,11 @@ test.describe('Manual Flavor Selection Flow', () => {
     // Set up localStorage with test state
     await context.addInitScript((key) => {
       const testState: AppState = {
-        version: 1,
+        version: 2,
         flavors: [
-          { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-          { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
-          { id: 'strawberry', name: 'Strawberry', excludeFromRandom: true },
+          { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+          { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+          { id: 'strawberry', name: 'Strawberry', randomPool: null },
         ],
         boxes: [
           {
@@ -86,14 +86,18 @@ test.describe('Manual Flavor Selection Flow', () => {
     await expect(page.locator('.flavor-item').filter({ hasText: 'Strawberry' })).toBeVisible();
   });
 
-  test('shows excluded badge for excluded flavors', async ({ page }) => {
+  test('shows pool badges for pool-assigned flavors and no badge for excluded', async ({
+    page,
+  }) => {
     const chooseFlavorButton = page.locator('button').filter({ hasText: 'Choose Flavor' });
     await chooseFlavorButton.click();
 
-    // Strawberry should have excluded badge
+    // Strawberry should not have a pool badge (null pool means excluded)
     const strawberryItem = page.locator('.flavor-item').filter({ hasText: 'Strawberry' });
-    await expect(strawberryItem.locator('.excluded-badge')).toBeVisible();
-    await expect(strawberryItem.locator('.excluded-badge')).toContainText('Excluded from Random');
+    // Chocolate and Vanilla have pool badges, but Strawberry (null pool) does not
+    const chocolateItem = page.locator('.flavor-item').filter({ hasText: 'Chocolate' });
+    await expect(chocolateItem.locator('.pool-badge')).toBeVisible();
+    await expect(strawberryItem.locator('.pool-badge')).not.toBeVisible();
   });
 
   test('navigates to confirmation when flavor selected', async ({ page }) => {
@@ -172,7 +176,7 @@ test.describe('Manual Flavor Selection Flow', () => {
     // Clear localStorage and set empty state
     await page.evaluate((key) => {
       const emptyState = {
-        version: 1,
+        version: 2,
         flavors: [],
         boxes: [],
         favoriteFlavorId: null,

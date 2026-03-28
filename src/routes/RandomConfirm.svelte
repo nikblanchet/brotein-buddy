@@ -129,11 +129,13 @@
   function handleDifferentChoice() {
     if (!selectedFlavorId) return;
 
-    // Clear navigation state
-    clearNavigationState();
+    const flavorIdToExclude = selectedFlavorId;
+
+    // Clear flavor selection but preserve selectedPool for the re-roll
+    selectedFlavorIdStore.set(null);
 
     // Navigate to random with exclude parameter
-    push(`${ROUTES.RANDOM}?excludeLastPick=${selectedFlavorId}`);
+    push(`${ROUTES.RANDOM}?excludeLastPick=${flavorIdToExclude}`);
   }
 
   /**

@@ -298,7 +298,7 @@ export function updateBoxIsOpen(boxId: string, isOpen: boolean): void {
  * const newFlavor: Flavor = {
  *   id: 'flavor_chocolate',
  *   name: 'Chocolate',
- *   excludeFromRandom: false
+ *   randomPool: 'caffeinated'
  * };
  * addFlavor(newFlavor);
  * ```
@@ -338,13 +338,13 @@ export function addFlavor(flavor: Flavor): void {
  * // Update just the name
  * updateFlavor('flavor_001', { name: 'Dark Chocolate' });
  *
- * // Update excludeFromRandom flag
- * updateFlavor('flavor_001', { excludeFromRandom: true });
+ * // Update random pool
+ * updateFlavor('flavor_001', { randomPool: 'caffeinated' });
  *
  * // Update multiple fields
  * updateFlavor('flavor_001', {
  *   name: 'Milk Chocolate',
- *   excludeFromRandom: false
+ *   randomPool: 'caffeine-free'
  * });
  * ```
  *

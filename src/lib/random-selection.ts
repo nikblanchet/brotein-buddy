@@ -8,7 +8,7 @@
  * @module lib/random-selection
  */
 
-import type { AppState, Flavor } from '../types/models';
+import type { AppState, Flavor, RandomPool } from '../types/models';
 
 /**
  * Selects a random flavor using weighted probability based on total quantity.
@@ -16,13 +16,14 @@ import type { AppState, Flavor } from '../types/models';
  * The selection algorithm:
  * 1. Calculates total quantity for each flavor across all boxes
  * 2. Filters out flavors that are:
- *    - Marked as excludeFromRandom
+ *    - Not in the requested pool
  *    - Have zero total quantity
  *    - Match the excludeLastPick parameter (if provided)
  * 3. Uses weighted random selection where probability is proportional to quantity
  * 4. Returns the selected flavor, or null if no valid flavors exist
  *
  * @param state - The complete application state containing boxes and flavors
+ * @param pool - Which random pool to select from ('caffeinated' or 'caffeine-free')
  * @param excludeLastPick - Optional flavor ID to exclude (prevents consecutive repeats)
  * @returns The selected flavor, or null if no valid flavors available
  *
@@ -31,9 +32,9 @@ import type { AppState, Flavor } from '../types/models';
  * const state: AppState = {
  *   version: 1,
  *   flavors: [
- *     { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
- *     { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
- *     { id: 'strawberry', name: 'Strawberry', excludeFromRandom: true }
+ *     { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeinated' },
+ *     { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+ *     { id: 'strawberry', name: 'Strawberry', randomPool: null }
  *   ],
  *   boxes: [
  *     { id: 'b1', flavorId: 'chocolate', quantity: 8, location: {...}, isOpen: true },
@@ -46,12 +47,12 @@ import type { AppState, Flavor } from '../types/models';
  *
  * // Chocolate has 20 total quantity (8 + 12), vanilla has 5
  * // Chocolate has 20/25 = 80% chance, vanilla has 5/25 = 20% chance
- * // Strawberry is excluded due to excludeFromRandom flag
- * const selected = selectRandomFlavor(state);
+ * // Strawberry is excluded (null pool)
+ * const selected = selectRandomFlavor(state, 'caffeinated');
  *
  * // Avoid selecting the same flavor twice in a row
- * const firstPick = selectRandomFlavor(state);
- * const secondPick = selectRandomFlavor(state, firstPick?.id);
+ * const firstPick = selectRandomFlavor(state, 'caffeinated');
+ * const secondPick = selectRandomFlavor(state, 'caffeinated', firstPick?.id);
  * // secondPick will never equal firstPick
  * ```
  *
@@ -60,7 +61,7 @@ import type { AppState, Flavor } from '../types/models';
  * // Returns null when no valid flavors
  * const emptyState: AppState = {
  *   version: 1,
- *   flavors: [{ id: 'f1', name: 'Test', excludeFromRandom: true }],
+ *   flavors: [{ id: 'f1', name: 'Test', randomPool: null }],
  *   boxes: [],
  *   favoriteFlavorId: null,
  *   settings: {}
@@ -75,7 +76,11 @@ import type { AppState, Flavor } from '../types/models';
  * - Time complexity: O(n + m) where n = boxes, m = flavors
  * - Space complexity: O(m) for quantity map
  */
-export function selectRandomFlavor(state: AppState, excludeLastPick?: string): Flavor | null {
+export function selectRandomFlavor(
+  state: AppState,
+  pool: RandomPool,
+  excludeLastPick?: string
+): Flavor | null {
   // Step 1: Calculate total quantity for each flavor
   const quantityByFlavorId = new Map<string, number>();
 
@@ -86,8 +91,8 @@ export function selectRandomFlavor(state: AppState, excludeLastPick?: string): F
 
   // Step 2: Filter flavors to only include valid candidates
   const validFlavors = state.flavors.filter((flavor) => {
-    // Exclude if user has marked it as excluded
-    if (flavor.excludeFromRandom) {
+    // Exclude if flavor is not in the requested pool
+    if (flavor.randomPool !== pool) {
       return false;
     }
 

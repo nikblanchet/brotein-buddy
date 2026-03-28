@@ -154,37 +154,33 @@ export function clearState(): void {
  * @returns Migrated data compatible with current schema
  *
  * @remarks
- * Current schema version: 1
+ * Current schema version: 2
  * Migration path:
- * - Version 1: Current version, no migration needed
- * - Future versions: Add migration logic here
- *
- * @example
- * ```typescript
- * // Future migration example (when v2 is added):
- * if (data.version === 1) {
- *   // Transform v1 to v2
- *   return {
- *     ...data,
- *     version: 2,
- *     newField: defaultValue
- *   };
- * }
- * ```
+ * - Version 1 → 2: Replace `excludeFromRandom: boolean` with `randomPool: RandomPool | null`
+ *   - `excludeFromRandom: false` → `randomPool: 'caffeine-free'`
+ *   - `excludeFromRandom: true` → `randomPool: null`
  */
 function migrateState(data: unknown): unknown {
-  // For v1, no migrations exist yet
-  // Simply return the data as-is for validation
-  // Future versions will add migration logic here
+  if (typeof data === 'object' && data !== null && 'version' in data) {
+    const versioned = data as { version: number; flavors?: unknown[] };
 
-  // Example structure for future migrations:
-  // if (typeof data === 'object' && data !== null && 'version' in data) {
-  //   const versioned = data as { version: number };
-  //   if (versioned.version === 1) {
-  //     // Migrate from v1 to v2
-  //     return { ...data, version: 2, newField: defaultValue };
-  //   }
-  // }
+    if (versioned.version === 1 && Array.isArray(versioned.flavors)) {
+      const migratedFlavors = versioned.flavors.map((f: unknown) => {
+        const flavor = f as Record<string, unknown>;
+        const { excludeFromRandom, ...rest } = flavor;
+        return {
+          ...rest,
+          randomPool: excludeFromRandom ? null : 'caffeine-free',
+        };
+      });
+
+      return {
+        ...versioned,
+        version: 2,
+        flavors: migratedFlavors,
+      };
+    }
+  }
 
   return data;
 }

@@ -104,7 +104,7 @@ describe.skip('WelcomeModal', () => {
     it('should save generated sample data to storage', async () => {
       const mockSampleData = {
         version: 1,
-        flavors: [{ id: 'test', name: 'Test', excludeFromRandom: false }],
+        flavors: [{ id: 'test', name: 'Test', randomPool: 'caffeine-free' }],
         boxes: [],
         favoriteFlavorId: null,
         settings: {},

@@ -38,6 +38,13 @@ export interface Location {
 }
 
 /**
+ * The random selection pool a flavor can belong to.
+ * - 'caffeinated': Caffeinated shake pool (⚡)
+ * - 'caffeine-free': Caffeine-free shake pool (💪)
+ */
+export type RandomPool = 'caffeinated' | 'caffeine-free';
+
+/**
  * Represents a protein shake flavor that can be tracked in inventory.
  *
  * Flavors are the primary categorization for boxes. Each box contains
@@ -48,22 +55,22 @@ export interface Location {
  * const chocolateFlavor: Flavor = {
  *   id: 'flavor_001',
  *   name: 'Chocolate',
- *   excludeFromRandom: false
+ *   randomPool: 'caffeinated'
  * };
  *
- * // A flavor the user never wants randomly selected
+ * // A flavor excluded from random selection
  * const vanillaFlavor: Flavor = {
  *   id: 'flavor_002',
  *   name: 'Vanilla',
- *   excludeFromRandom: true
+ *   randomPool: null
  * };
  * ```
  *
  * @remarks
  * - IDs should be unique across all flavors
  * - Name is user-facing and can be changed
- * - excludeFromRandom allows users to prevent certain flavors from
- *   appearing in random selection (e.g., flavors they're saving)
+ * - randomPool assigns the flavor to a random selection pool,
+ *   or null to exclude from all random selection
  */
 export interface Flavor {
   /** Unique identifier for this flavor */
@@ -73,10 +80,10 @@ export interface Flavor {
   name: string;
 
   /**
-   * Whether to exclude this flavor from random selection algorithm.
-   * Set to true for flavors the user wants to manually select only.
+   * Which random selection pool this flavor belongs to.
+   * null means excluded from all random selection pools.
    */
-  excludeFromRandom: boolean;
+  randomPool: RandomPool | null;
 }
 
 /**
@@ -184,7 +191,7 @@ export interface AppState {
   /**
    * Schema version number for migration support.
    * Increment when making breaking changes to the data structure.
-   * Current version: 1
+   * Current version: 2
    */
   version: number;
 
@@ -254,28 +261,30 @@ export function isLocation(value: unknown): value is Location {
  * @example
  * ```typescript
  * // Valid flavors
- * isFlavor({ id: 'f1', name: 'Chocolate', excludeFromRandom: false }); // true
- * isFlavor({ id: 'f2', name: 'Vanilla', excludeFromRandom: true }); // true
+ * isFlavor({ id: 'f1', name: 'Chocolate', randomPool: 'caffeinated' }); // true
+ * isFlavor({ id: 'f2', name: 'Vanilla', randomPool: 'caffeine-free' }); // true
+ * isFlavor({ id: 'f3', name: 'Strawberry', randomPool: null }); // true
  *
  * // Invalid flavors
- * isFlavor({ id: '', name: 'Chocolate', excludeFromRandom: false }); // false (empty id)
- * isFlavor({ id: 'f1', name: '', excludeFromRandom: false }); // false (empty name)
- * isFlavor({ id: 'f1', name: 'Chocolate' }); // false (missing excludeFromRandom)
- * isFlavor({ id: 'f1', name: 'Chocolate', excludeFromRandom: 'false' }); // false (wrong type)
+ * isFlavor({ id: '', name: 'Chocolate', randomPool: 'caffeinated' }); // false (empty id)
+ * isFlavor({ id: 'f1', name: '', randomPool: 'caffeinated' }); // false (empty name)
+ * isFlavor({ id: 'f1', name: 'Chocolate' }); // false (missing randomPool)
+ * isFlavor({ id: 'f1', name: 'Chocolate', randomPool: 'invalid' }); // false (invalid pool)
  * ```
  */
 export function isFlavor(value: unknown): value is Flavor {
+  const v = value as Record<string, unknown>;
   return (
     typeof value === 'object' &&
     value !== null &&
     'id' in value &&
     'name' in value &&
-    'excludeFromRandom' in value &&
-    typeof (value as Flavor).id === 'string' &&
-    typeof (value as Flavor).name === 'string' &&
-    typeof (value as Flavor).excludeFromRandom === 'boolean' &&
-    (value as Flavor).id.length > 0 &&
-    (value as Flavor).name.length > 0
+    'randomPool' in value &&
+    typeof v.id === 'string' &&
+    typeof v.name === 'string' &&
+    v.id.length > 0 &&
+    (v.name as string).length > 0 &&
+    (v.randomPool === 'caffeinated' || v.randomPool === 'caffeine-free' || v.randomPool === null)
   );
 }
 
@@ -381,7 +390,7 @@ export function isAppState(value: unknown): value is AppState {
  */
 export function createDefaultAppState(): AppState {
   return {
-    version: 1,
+    version: 2,
     boxes: [],
     flavors: [],
     favoriteFlavorId: null,

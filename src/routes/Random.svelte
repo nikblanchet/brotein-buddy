@@ -13,9 +13,10 @@
   import { push, router } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
-  import { selectedFlavorId, clearNavigationState } from '$lib/navigation-state';
+  import { selectedFlavorId, selectedPool } from '$lib/navigation-state';
   import { selectRandomFlavor } from '$lib/random-selection';
   import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   /**
    * Parse query parameters to check if we should exclude the last pick
@@ -41,7 +42,14 @@
     errorMessage = null;
 
     try {
-      const flavor = selectRandomFlavor($appState, excludeLastPick);
+      const pool = get(selectedPool);
+      if (!pool) {
+        errorMessage = 'No pool selected. Please start from the Home screen.';
+        isSelecting = false;
+        return;
+      }
+
+      const flavor = selectRandomFlavor($appState, pool, excludeLastPick);
 
       if (flavor === null) {
         // No valid flavors available
@@ -67,21 +75,23 @@
    */
   function determineErrorMessage(): string {
     const { flavors, boxes } = $appState;
+    const pool = get(selectedPool);
+    const poolEmoji = pool === 'caffeinated' ? '⚡' : '💪';
 
     // Case 1: No flavors at all
     if (flavors.length === 0) {
       return 'No flavors configured yet. Go to Inventory Management and tap "New Flavor" to add your first flavor.';
     }
 
-    // Case 2: All flavors excluded
-    const availableFlavors = flavors.filter((f) => !f.excludeFromRandom);
-    if (availableFlavors.length === 0) {
-      return `All ${flavors.length} flavor${flavors.length !== 1 ? 's are' : ' is'} excluded from random selection. Go to Inventory Management to update flavor preferences.`;
+    // Case 2: No flavors in this pool
+    const poolFlavors = flavors.filter((f) => f.randomPool === pool);
+    if (poolFlavors.length === 0) {
+      return `No ${poolEmoji} flavors in this pool. Go to Inventory Management to assign flavors to this pool.`;
     }
 
     // Case 3: No boxes at all
     if (boxes.length === 0) {
-      return `You have ${availableFlavors.length} flavor${availableFlavors.length !== 1 ? 's' : ''} but no boxes in stock. Go to Inventory Management to add boxes.`;
+      return `You have ${poolFlavors.length} ${poolEmoji} flavor${poolFlavors.length !== 1 ? 's' : ''} but no boxes in stock. Go to Inventory Management to add boxes.`;
     }
 
     // Case 4: Boxes exist but all empty
@@ -90,14 +100,13 @@
       return `All ${boxes.length} box${boxes.length !== 1 ? 'es are' : ' is'} empty. Go to Inventory Management to add quantity to a box.`;
     }
 
-    // Case 5: Edge case - flavors with quantity exist but are all excluded
-    // (This is the final fallback and indicates available flavors have no stock)
-    const flavorsWithStock = availableFlavors.filter((f) =>
+    // Case 5: Pool flavors have no stock
+    const poolFlavorsWithStock = poolFlavors.filter((f) =>
       boxesWithQuantity.some((b) => b.flavorId === f.id)
     );
 
-    if (flavorsWithStock.length === 0) {
-      return `The ${availableFlavors.length} available flavor${availableFlavors.length !== 1 ? 's have' : ' has'} no stock. Add boxes for these flavors in Inventory Management.`;
+    if (poolFlavorsWithStock.length === 0) {
+      return `The ${poolFlavors.length} ${poolEmoji} flavor${poolFlavors.length !== 1 ? 's have' : ' has'} no stock. Add boxes for these flavors in Inventory Management.`;
     }
 
     // Should never reach here, but provide fallback
@@ -113,8 +122,9 @@
 
   // Perform selection automatically when component mounts
   onMount(() => {
-    // Clear any stale navigation state from previous sessions
-    clearNavigationState();
+    // Clear stale flavor selection from previous flow, but keep selectedPool
+    // since it was just set by Home.svelte before navigating here
+    selectedFlavorId.set(null);
 
     // Minimal delay to ensure store is initialized
     setTimeout(() => {

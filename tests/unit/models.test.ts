@@ -74,20 +74,29 @@ describe('isLocation', () => {
 });
 
 describe('isFlavor', () => {
-  it('returns true for valid Flavor', () => {
+  it('returns true for valid Flavor with caffeinated pool', () => {
     const validFlavor: Flavor = {
       id: 'flavor_001',
       name: 'Chocolate',
-      excludeFromRandom: false,
+      randomPool: 'caffeinated',
     };
     expect(isFlavor(validFlavor)).toBe(true);
   });
 
-  it('returns true for Flavor with excludeFromRandom true', () => {
+  it('returns true for valid Flavor with caffeine-free pool', () => {
     const flavor: Flavor = {
       id: 'flavor_002',
       name: 'Vanilla',
-      excludeFromRandom: true,
+      randomPool: 'caffeine-free',
+    };
+    expect(isFlavor(flavor)).toBe(true);
+  });
+
+  it('returns true for Flavor with null randomPool (excluded)', () => {
+    const flavor: Flavor = {
+      id: 'flavor_003',
+      name: 'Strawberry',
+      randomPool: null,
     };
     expect(isFlavor(flavor)).toBe(true);
   });
@@ -96,7 +105,7 @@ describe('isFlavor', () => {
     const invalidFlavor = {
       id: '',
       name: 'Chocolate',
-      excludeFromRandom: false,
+      randomPool: 'caffeinated',
     };
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
@@ -105,7 +114,7 @@ describe('isFlavor', () => {
     const invalidFlavor = {
       id: 'flavor_001',
       name: '',
-      excludeFromRandom: false,
+      randomPool: 'caffeinated',
     };
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
@@ -113,7 +122,7 @@ describe('isFlavor', () => {
   it('returns false for missing id', () => {
     const invalidFlavor = {
       name: 'Chocolate',
-      excludeFromRandom: false,
+      randomPool: 'caffeinated',
     };
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
@@ -121,12 +130,12 @@ describe('isFlavor', () => {
   it('returns false for missing name', () => {
     const invalidFlavor = {
       id: 'flavor_001',
-      excludeFromRandom: false,
+      randomPool: 'caffeinated',
     };
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
 
-  it('returns false for missing excludeFromRandom', () => {
+  it('returns false for missing randomPool', () => {
     const invalidFlavor = {
       id: 'flavor_001',
       name: 'Chocolate',
@@ -134,11 +143,11 @@ describe('isFlavor', () => {
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
 
-  it('returns false for non-boolean excludeFromRandom', () => {
+  it('returns false for invalid randomPool value', () => {
     const invalidFlavor = {
       id: 'flavor_001',
       name: 'Chocolate',
-      excludeFromRandom: 'false',
+      randomPool: 'invalid',
     };
     expect(isFlavor(invalidFlavor)).toBe(false);
   });
@@ -274,7 +283,7 @@ describe('isBox', () => {
 describe('isAppState', () => {
   it('returns true for valid empty AppState', () => {
     const validAppState: AppState = {
-      version: 1,
+      version: 2,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
@@ -285,7 +294,7 @@ describe('isAppState', () => {
 
   it('returns true for AppState with data', () => {
     const appState: AppState = {
-      version: 1,
+      version: 2,
       boxes: [
         {
           id: 'box_001',
@@ -299,7 +308,7 @@ describe('isAppState', () => {
         {
           id: 'flavor_001',
           name: 'Chocolate',
-          excludeFromRandom: false,
+          randomPool: 'caffeinated',
         },
       ],
       favoriteFlavorId: 'flavor_001',
@@ -310,7 +319,7 @@ describe('isAppState', () => {
 
   it('returns true for AppState with null favoriteFlavorId', () => {
     const appState: AppState = {
-      version: 1,
+      version: 2,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
@@ -475,9 +484,9 @@ describe('createDefaultAppState', () => {
     expect(isAppState(defaultState)).toBe(true);
   });
 
-  it('has version 1', () => {
+  it('has version 2', () => {
     const defaultState = createDefaultAppState();
-    expect(defaultState.version).toBe(1);
+    expect(defaultState.version).toBe(2);
   });
 
   it('has empty boxes array', () => {

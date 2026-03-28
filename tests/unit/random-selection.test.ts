@@ -6,14 +6,18 @@
 
 import { describe, it, expect } from 'vitest';
 import { selectRandomFlavor } from '../../src/lib/random-selection';
-import type { AppState, Flavor, Box } from '../../src/types/models';
+import type { AppState, Flavor, Box, RandomPool } from '../../src/types/models';
 
 describe('selectRandomFlavor', () => {
   // Test helpers for creating test data
-  const createFlavor = (id: string, name: string, excludeFromRandom = false): Flavor => ({
+  const createFlavor = (
+    id: string,
+    name: string,
+    randomPool: RandomPool | null = 'caffeine-free'
+  ): Flavor => ({
     id,
     name,
-    excludeFromRandom,
+    randomPool,
   });
 
   const createBox = (id: string, flavorId: string, quantity: number, isOpen = false): Box => ({
@@ -29,45 +33,47 @@ describe('selectRandomFlavor', () => {
     boxes: Box[],
     favoriteFlavorId: string | null = null
   ): AppState => ({
-    version: 1,
+    version: 2,
     flavors,
     boxes,
     favoriteFlavorId,
     settings: {},
   });
 
+  const defaultPool: RandomPool = 'caffeine-free';
+
   describe('basic functionality', () => {
     it('should return null when there are no flavors', () => {
       const state = createState([], []);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toBeNull();
     });
 
     it('should return null when there are no boxes', () => {
       const state = createState([createFlavor('f1', 'Chocolate')], []);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toBeNull();
     });
 
-    it('should return null when all flavors are excluded', () => {
+    it('should return null when all flavors are excluded (null pool)', () => {
       const state = createState(
-        [createFlavor('f1', 'Chocolate', true)],
+        [createFlavor('f1', 'Chocolate', null)],
         [createBox('b1', 'f1', 12)]
       );
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toBeNull();
     });
 
     it('should return null when all boxes have zero quantity', () => {
       const state = createState([createFlavor('f1', 'Chocolate')], [createBox('b1', 'f1', 0)]);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toBeNull();
     });
 
     it('should return the only available flavor', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 12)]);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toEqual(chocolate);
     });
 
@@ -78,45 +84,58 @@ describe('selectRandomFlavor', () => {
         [chocolate, vanilla],
         [createBox('b1', 'f1', 10), createBox('b2', 'f2', 10)]
       );
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).not.toBeNull();
       expect([chocolate, vanilla]).toContainEqual(result);
     });
   });
 
-  describe('excludeFromRandom flag', () => {
-    it('should not select flavors marked with excludeFromRandom', () => {
-      const chocolate = createFlavor('f1', 'Chocolate', false);
-      const vanilla = createFlavor('f2', 'Vanilla', true); // excluded
+  describe('pool filtering', () => {
+    it('should not select flavors with null pool (excluded)', () => {
+      const chocolate = createFlavor('f1', 'Chocolate', 'caffeine-free');
+      const vanilla = createFlavor('f2', 'Vanilla', null); // excluded
       const state = createState(
         [chocolate, vanilla],
         [createBox('b1', 'f1', 10), createBox('b2', 'f2', 10)]
       );
 
-      // Run multiple times to ensure vanilla is never selected
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, 'caffeine-free');
         expect(result).toEqual(chocolate);
         expect(result).not.toEqual(vanilla);
       }
     });
 
-    it('should only select non-excluded flavors from mixed set', () => {
-      const chocolate = createFlavor('f1', 'Chocolate', false);
-      const vanilla = createFlavor('f2', 'Vanilla', true); // excluded
-      const strawberry = createFlavor('f3', 'Strawberry', false);
+    it('should only select flavors from the requested pool', () => {
+      const chocolate = createFlavor('f1', 'Chocolate', 'caffeinated');
+      const vanilla = createFlavor('f2', 'Vanilla', 'caffeine-free');
+      const strawberry = createFlavor('f3', 'Strawberry', 'caffeine-free');
       const state = createState(
         [chocolate, vanilla, strawberry],
         [createBox('b1', 'f1', 10), createBox('b2', 'f2', 10), createBox('b3', 'f3', 10)]
       );
 
-      // Run multiple times to ensure vanilla is never selected
+      // Caffeinated pool should only return chocolate
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state);
-        expect(result).not.toBeNull();
-        expect([chocolate, strawberry]).toContainEqual(result);
-        expect(result).not.toEqual(vanilla);
+        const result = selectRandomFlavor(state, 'caffeinated');
+        expect(result).toEqual(chocolate);
       }
+
+      // Caffeine-free pool should only return vanilla or strawberry
+      for (let i = 0; i < 50; i++) {
+        const result = selectRandomFlavor(state, 'caffeine-free');
+        expect(result).not.toBeNull();
+        expect([vanilla, strawberry]).toContainEqual(result);
+        expect(result).not.toEqual(chocolate);
+      }
+    });
+
+    it('should return null when no flavors in requested pool', () => {
+      const chocolate = createFlavor('f1', 'Chocolate', 'caffeinated');
+      const state = createState([chocolate], [createBox('b1', 'f1', 10)]);
+
+      const result = selectRandomFlavor(state, 'caffeine-free');
+      expect(result).toBeNull();
     });
   });
 
@@ -131,7 +150,7 @@ describe('selectRandomFlavor', () => {
 
       // Exclude chocolate
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state, 'f1');
+        const result = selectRandomFlavor(state, defaultPool, 'f1');
         expect(result).toEqual(vanilla);
       }
     });
@@ -139,21 +158,21 @@ describe('selectRandomFlavor', () => {
     it('should return null if only flavor is excluded by excludeLastPick', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 12)]);
-      const result = selectRandomFlavor(state, 'f1');
+      const result = selectRandomFlavor(state, defaultPool, 'f1');
       expect(result).toBeNull();
     });
 
     it('should work when excludeLastPick is undefined', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 12)]);
-      const result = selectRandomFlavor(state, undefined);
+      const result = selectRandomFlavor(state, defaultPool, undefined);
       expect(result).toEqual(chocolate);
     });
 
     it('should work when excludeLastPick does not match any flavor', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 12)]);
-      const result = selectRandomFlavor(state, 'nonexistent');
+      const result = selectRandomFlavor(state, defaultPool, 'nonexistent');
       expect(result).toEqual(chocolate);
     });
   });
@@ -166,7 +185,7 @@ describe('selectRandomFlavor', () => {
         [createBox('b1', 'f1', 8), createBox('b2', 'f1', 12), createBox('b3', 'f1', 4)]
       );
       // Total quantity is 24, so chocolate should always be selected
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toEqual(chocolate);
     });
 
@@ -179,7 +198,7 @@ describe('selectRandomFlavor', () => {
       );
 
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).toEqual(chocolate);
       }
     });
@@ -190,47 +209,47 @@ describe('selectRandomFlavor', () => {
       const state = createState([chocolate, vanilla], [createBox('b1', 'f1', 10)]);
 
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).toEqual(chocolate);
       }
     });
   });
 
   describe('combined filters', () => {
-    it('should apply both excludeFromRandom and excludeLastPick', () => {
-      const chocolate = createFlavor('f1', 'Chocolate', false);
-      const vanilla = createFlavor('f2', 'Vanilla', true); // excluded by flag
-      const strawberry = createFlavor('f3', 'Strawberry', false);
+    it('should apply both pool filter and excludeLastPick', () => {
+      const chocolate = createFlavor('f1', 'Chocolate', 'caffeine-free');
+      const vanilla = createFlavor('f2', 'Vanilla', 'caffeinated'); // wrong pool
+      const strawberry = createFlavor('f3', 'Strawberry', 'caffeine-free');
       const state = createState(
         [chocolate, vanilla, strawberry],
         [createBox('b1', 'f1', 10), createBox('b2', 'f2', 10), createBox('b3', 'f3', 10)]
       );
 
-      // Exclude chocolate by last pick, vanilla by flag
+      // Exclude chocolate by last pick, vanilla by pool
       // Only strawberry should be selected
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state, 'f1');
+        const result = selectRandomFlavor(state, 'caffeine-free', 'f1');
         expect(result).toEqual(strawberry);
       }
     });
 
-    it('should apply all three filters: excludeFromRandom, excludeLastPick, and zero quantity', () => {
-      const chocolate = createFlavor('f1', 'Chocolate', false);
-      const vanilla = createFlavor('f2', 'Vanilla', true); // excluded by flag
-      const strawberry = createFlavor('f3', 'Strawberry', false);
-      const banana = createFlavor('f4', 'Banana', false);
+    it('should apply all three filters: pool, excludeLastPick, and zero quantity', () => {
+      const chocolate = createFlavor('f1', 'Chocolate', 'caffeine-free');
+      const vanilla = createFlavor('f2', 'Vanilla', null); // excluded (null pool)
+      const strawberry = createFlavor('f3', 'Strawberry', 'caffeine-free');
+      const banana = createFlavor('f4', 'Banana', 'caffeine-free');
       const state = createState(
         [chocolate, vanilla, strawberry, banana],
         [
           createBox('b1', 'f1', 10), // will be excluded by excludeLastPick
-          createBox('b2', 'f2', 10), // excluded by flag
+          createBox('b2', 'f2', 10), // excluded by null pool
           createBox('b3', 'f3', 0), // excluded by zero quantity
           createBox('b4', 'f4', 10), // only valid option
         ]
       );
 
       for (let i = 0; i < 50; i++) {
-        const result = selectRandomFlavor(state, 'f1');
+        const result = selectRandomFlavor(state, defaultPool, 'f1');
         expect(result).toEqual(banana);
       }
     });
@@ -255,7 +274,7 @@ describe('selectRandomFlavor', () => {
       const iterations = 1000;
 
       for (let i = 0; i < iterations; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).not.toBeNull();
         counts[result!.id as keyof typeof counts]++;
       }
@@ -295,7 +314,7 @@ describe('selectRandomFlavor', () => {
       const iterations = 1000;
 
       for (let i = 0; i < iterations; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).not.toBeNull();
         counts[result!.id as keyof typeof counts]++;
       }
@@ -331,7 +350,7 @@ describe('selectRandomFlavor', () => {
       const iterations = 1000;
 
       for (let i = 0; i < iterations; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).not.toBeNull();
         counts[result!.id as keyof typeof counts]++;
       }
@@ -352,14 +371,14 @@ describe('selectRandomFlavor', () => {
     it('should handle single box with quantity 1', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 1)]);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toEqual(chocolate);
     });
 
     it('should handle very large quantities', () => {
       const chocolate = createFlavor('f1', 'Chocolate');
       const state = createState([chocolate], [createBox('b1', 'f1', 999999)]);
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).toEqual(chocolate);
     });
 
@@ -368,7 +387,7 @@ describe('selectRandomFlavor', () => {
       const boxes = Array.from({ length: 30 }, (_, i) => createBox(`b${i}`, `f${i % 10}`, 10));
       const state = createState(flavors, boxes);
 
-      const result = selectRandomFlavor(state);
+      const result = selectRandomFlavor(state, defaultPool);
       expect(result).not.toBeNull();
       expect(flavors).toContainEqual(result);
     });
@@ -384,7 +403,7 @@ describe('selectRandomFlavor', () => {
 
       // Run many times to potentially trigger floating point edge case
       for (let i = 0; i < 100; i++) {
-        const result = selectRandomFlavor(state);
+        const result = selectRandomFlavor(state, defaultPool);
         expect(result).not.toBeNull();
         expect([chocolate, vanilla]).toContainEqual(result);
       }

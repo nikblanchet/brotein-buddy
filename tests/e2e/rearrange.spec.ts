@@ -6,7 +6,7 @@ test.describe('Inventory Rearrange', () => {
     // Set up test data via localStorage BEFORE navigation
     await context.addInitScript((key) => {
       const testState = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box-1',
@@ -31,9 +31,9 @@ test.describe('Inventory Rearrange', () => {
           },
         ],
         flavors: [
-          { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-          { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
-          { id: 'strawberry', name: 'Strawberry', excludeFromRandom: false },
+          { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+          { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+          { id: 'strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
         ],
         favoriteFlavorId: null,
         settings: {},

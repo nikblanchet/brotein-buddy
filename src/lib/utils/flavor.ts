@@ -20,13 +20,13 @@ import type { Flavor } from '../../types/models';
  * @example
  * ```typescript
  * const flavors: Flavor[] = [
- *   { id: 'choc', name: 'Chocolate', excludeFromRandom: false },
- *   { id: 'van', name: 'Vanilla', excludeFromRandom: false }
+ *   { id: 'choc', name: 'Chocolate', randomPool: 'caffeine-free' },
+ *   { id: 'van', name: 'Vanilla', randomPool: 'caffeine-free' }
  * ];
  *
  * // Found
  * const flavor = maybeGetFlavor('choc', flavors);
- * // flavor = { id: 'choc', name: 'Chocolate', excludeFromRandom: false }
+ * // flavor = { id: 'choc', name: 'Chocolate', randomPool: 'caffeine-free' }
  *
  * // Not found
  * const missing = maybeGetFlavor('strawberry', flavors);

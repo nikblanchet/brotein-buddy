@@ -20,11 +20,11 @@ import { STORAGE_KEY } from '../../src/lib/storage';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createTestState(): AppState {
   return {
-    version: 1,
+    version: 2,
     flavors: [
-      { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-      { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
-      { id: 'strawberry', name: 'Strawberry', excludeFromRandom: false },
+      { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+      { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+      { id: 'strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
     ],
     boxes: [
       {
@@ -66,11 +66,11 @@ test.describe('Random Selection Flow', () => {
     // Set up localStorage with test state
     await context.addInitScript((key) => {
       const testState: AppState = {
-        version: 1,
+        version: 2,
         flavors: [
-          { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-          { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
-          { id: 'strawberry', name: 'Strawberry', excludeFromRandom: false },
+          { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+          { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+          { id: 'strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
         ],
         boxes: [
           {
@@ -127,7 +127,7 @@ test.describe('Random Selection Flow', () => {
   test.describe('Random Selection Screen', () => {
     test('automatically performs selection on load', async ({ page }) => {
       // Click Random Pick button
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
       await randomButton.click();
 
       // Should navigate to random route
@@ -142,7 +142,7 @@ test.describe('Random Selection Flow', () => {
   test.describe('Confirmation Screen', () => {
     test('displays selected flavor and box details', async ({ page }) => {
       // Navigate to random selection
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
       await randomButton.click();
 
       // Wait for confirmation screen
@@ -162,7 +162,7 @@ test.describe('Random Selection Flow', () => {
 
     test('displays all four action buttons', async ({ page }) => {
       // Navigate through random flow
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Check all buttons exist
@@ -173,7 +173,7 @@ test.describe('Random Selection Flow', () => {
     });
 
     test('shows open/unopened status correctly', async ({ page }) => {
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show either "Open" or "Unopened" status in priority box
@@ -198,7 +198,7 @@ test.describe('Random Selection Flow', () => {
       );
 
       // Navigate through random flow
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Confirm
@@ -231,7 +231,7 @@ test.describe('Random Selection Flow', () => {
       }, STORAGE_KEY);
 
       // Navigate through random flow
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Click Cancel
@@ -253,7 +253,7 @@ test.describe('Random Selection Flow', () => {
   test.describe('Add Another Action', () => {
     test('decrements quantity and stays on confirmation screen', async ({ page }) => {
       // Navigate through random flow
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get initial quantity displayed
@@ -280,7 +280,7 @@ test.describe('Random Selection Flow', () => {
   test.describe('Different Choice Action', () => {
     test('navigates back to random selection with exclusion', async ({ page }) => {
       // Navigate through random flow
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Get the selected flavor name (will be used to verify exclusion when test is re-enabled)
@@ -309,8 +309,8 @@ test.describe('Random Selection Flow', () => {
       // Force selection of chocolate by making it the only available flavor
       await context.addInitScript((key) => {
         const singleFlavorState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+          version: 2,
+          flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
           boxes: [
             {
               id: 'box-choc-1',
@@ -352,7 +352,7 @@ test.describe('Random Selection Flow', () => {
         // Modal didn't appear, continue
       }
 
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Should show Alternative Boxes section
@@ -378,7 +378,7 @@ test.describe('Random Selection Flow', () => {
     });
 
     test('all buttons are keyboard accessible', async ({ page }) => {
-      await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+      await page.getByTestId('random-caffeine-free-button').click();
       await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
       // Tab through buttons
@@ -406,7 +406,7 @@ test.describe('Random Selection Flow - Error State: No Flavors', () => {
     // Set up state with no flavors
     await context.addInitScript((key) => {
       const emptyState: AppState = {
-        version: 1,
+        version: 2,
         flavors: [],
         boxes: [],
         favoriteFlavorId: null,
@@ -427,12 +427,12 @@ test.describe('Random Selection Flow - Error State: No Flavors', () => {
       // Modal didn't appear, continue
     }
 
-    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.click();
 
     // Should show error message
     await expect(page.locator('h1')).toContainText('No Selection Available');
-    await expect(page.locator('.error-message')).toContainText('No flavors configured');
+    await expect(page.locator('.error-message')).toContainText('No flavors configured yet');
 
     // Should have Back to Home button
     const homeButton = page.locator('button').filter({ hasText: 'Back to Home' });
@@ -445,10 +445,10 @@ test.describe('Random Selection Flow - Error State: All Flavors Excluded', () =>
     // Set up state with all flavors excluded
     await context.addInitScript((key) => {
       const excludedState: AppState = {
-        version: 1,
+        version: 2,
         flavors: [
-          { id: 'chocolate', name: 'Chocolate', excludeFromRandom: true },
-          { id: 'vanilla', name: 'Vanilla', excludeFromRandom: true },
+          { id: 'chocolate', name: 'Chocolate', randomPool: null },
+          { id: 'vanilla', name: 'Vanilla', randomPool: null },
         ],
         boxes: [
           {
@@ -477,13 +477,11 @@ test.describe('Random Selection Flow - Error State: All Flavors Excluded', () =>
       // Modal didn't appear, continue
     }
 
-    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.click();
 
-    // Should show error message
-    await expect(page.locator('.error-message')).toContainText(
-      'flavors are excluded from random selection'
-    );
+    // Should show error message - all flavors have randomPool: null, so none are in the caffeine-free pool
+    await expect(page.locator('.error-message')).toContainText('No 💪 flavors in this pool');
   });
 });
 
@@ -492,8 +490,8 @@ test.describe('Random Selection Flow - Error State: No Boxes in Stock', () => {
     // Set up state with flavors but no boxes
     await context.addInitScript((key) => {
       const noStockState: AppState = {
-        version: 1,
-        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        version: 2,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
         boxes: [],
         favoriteFlavorId: null,
         settings: {},
@@ -513,7 +511,7 @@ test.describe('Random Selection Flow - Error State: No Boxes in Stock', () => {
       // Modal didn't appear, continue
     }
 
-    const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.click();
 
     // Should show error message (matches substring of detailed error)
@@ -526,8 +524,8 @@ test.describe('Random Selection Flow - Add Another: Quantity 1', () => {
     // Set up state with a box that has quantity 1
     await context.addInitScript((key) => {
       const lowQuantityState: AppState = {
-        version: 1,
-        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        version: 2,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
         boxes: [
           {
             id: 'box-1',
@@ -555,7 +553,7 @@ test.describe('Random Selection Flow - Add Another: Quantity 1', () => {
       // Modal didn't appear, continue
     }
 
-    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
     // Add Another button should be disabled
@@ -569,8 +567,8 @@ test.describe('Random Selection Flow - Alternative Boxes: Single Box', () => {
     // Set up state with only one box per flavor
     await context.addInitScript((key) => {
       const singleBoxState: AppState = {
-        version: 1,
-        flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+        version: 2,
+        flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
         boxes: [
           {
             id: 'box-1',
@@ -598,7 +596,7 @@ test.describe('Random Selection Flow - Alternative Boxes: Single Box', () => {
       // Modal didn't appear, continue
     }
 
-    await page.locator('button').filter({ hasText: 'Random Pick' }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
 
     // Should NOT show Alternative Boxes section

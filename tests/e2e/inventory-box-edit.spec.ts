@@ -19,7 +19,7 @@ test.describe('Inventory Box Edit Screen', () => {
     // Set up test data via localStorage
     await page.evaluate(() => {
       const testState = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box_test_1',
@@ -44,9 +44,9 @@ test.describe('Inventory Box Edit Screen', () => {
           },
         ],
         flavors: [
-          { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
-          { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
-          { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: false },
+          { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+          { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+          { id: 'flavor_strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
         ],
         favoriteFlavorId: null,
         settings: {},

@@ -46,18 +46,19 @@ test.describe('Home Screen', () => {
       // Get all buttons
       const buttons = page.locator('button');
 
-      // Should have exactly 4 buttons
-      await expect(buttons).toHaveCount(4);
+      // Should have exactly 5 buttons (2 random pick + favorite + choose flavor + manage inventory)
+      await expect(buttons).toHaveCount(5);
 
       // Verify button text content
       await expect(buttons.nth(0)).toContainText('Random Pick');
-      await expect(buttons.nth(1)).toContainText('Set Favorite'); // Default when no favorite
-      await expect(buttons.nth(2)).toContainText('Choose Flavor');
-      await expect(buttons.nth(3)).toContainText('Manage Inventory');
+      await expect(buttons.nth(1)).toContainText('Random Pick');
+      await expect(buttons.nth(2)).toContainText('Set Favorite'); // Default when no favorite
+      await expect(buttons.nth(3)).toContainText('Choose Flavor');
+      await expect(buttons.nth(4)).toContainText('Manage Inventory');
     });
 
     test('buttons have proper visual hierarchy', async ({ page }) => {
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
       const inventoryButton = page.locator('button').filter({ hasText: 'Manage Inventory' });
 
       // Random button should be more prominent (larger font)
@@ -94,7 +95,7 @@ test.describe('Home Screen', () => {
     });
 
     test('random button navigates to /random route', async ({ page }) => {
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
       await randomButton.click();
 
       // Should navigate to random selection route
@@ -125,9 +126,9 @@ test.describe('Home Screen', () => {
       // Set up localStorage without favorite flavor
       await context.addInitScript((key) => {
         const state = {
-          version: 1,
+          version: 2,
           boxes: [],
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+          flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
           favoriteFlavorId: null,
           settings: {},
         };
@@ -148,11 +149,11 @@ test.describe('Home Screen', () => {
       // Set up localStorage with favorite flavor
       await context.addInitScript((key) => {
         const state = {
-          version: 1,
+          version: 2,
           boxes: [],
           flavors: [
-            { id: 'choc_001', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'van_002', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'choc_001', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'van_002', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           favoriteFlavorId: 'choc_001',
           settings: {},
@@ -188,10 +189,10 @@ test.describe('Home Screen', () => {
 
       // All buttons should be visible and stacked vertically
       const buttons = page.locator('button');
-      await expect(buttons).toHaveCount(4);
+      await expect(buttons).toHaveCount(5);
 
       // Check that each button is visible
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 5; i++) {
         await expect(buttons.nth(i)).toBeVisible();
       }
 
@@ -218,9 +219,9 @@ test.describe('Home Screen', () => {
 
       // All buttons should still be visible
       const buttons = page.locator('button');
-      await expect(buttons).toHaveCount(4);
+      await expect(buttons).toHaveCount(5);
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 5; i++) {
         await expect(buttons.nth(i)).toBeVisible();
       }
     });
@@ -242,9 +243,9 @@ test.describe('Home Screen', () => {
 
       // All buttons should be visible
       const buttons = page.locator('button');
-      await expect(buttons).toHaveCount(4);
+      await expect(buttons).toHaveCount(5);
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 5; i++) {
         await expect(buttons.nth(i)).toBeVisible();
       }
     });
@@ -271,7 +272,7 @@ test.describe('Home Screen', () => {
       const buttons = page.locator('button');
 
       // Each button should have text content
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 5; i++) {
         const text = await buttons.nth(i).textContent();
         expect(text).toBeTruthy();
         expect(text?.trim()).not.toBe('');
@@ -281,7 +282,7 @@ test.describe('Home Screen', () => {
     test('keyboard navigation works', async ({ page }) => {
       // Focus the Random Pick button directly to test button navigation
       // (Skip link focus behavior varies by browser and is tested separately in accessibility.spec.ts)
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
       await randomButton.focus();
       await expect(randomButton).toBeFocused();
 
@@ -297,7 +298,7 @@ test.describe('Home Screen', () => {
       const buttons = page.locator('button');
 
       // Check each button meets minimum touch target size
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 5; i++) {
         const bbox = await buttons.nth(i).boundingBox();
         expect(bbox?.height).toBeGreaterThanOrEqual(44);
         expect(bbox?.width).toBeGreaterThanOrEqual(44);
@@ -333,7 +334,7 @@ test.describe('Home Screen', () => {
     });
 
     test('buttons respond to hover state', async ({ page }) => {
-      const randomButton = page.locator('button').filter({ hasText: 'Random Pick' });
+      const randomButton = page.getByTestId('random-caffeine-free-button');
 
       // Hover over button
       await randomButton.hover();

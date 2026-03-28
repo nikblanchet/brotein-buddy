@@ -18,7 +18,7 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
-  import type { Flavor } from '../types/models';
+  import type { Flavor, RandomPool } from '../types/models';
   import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
   import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
   import { getFlavorColor } from '$lib/utils/flavor-color';
@@ -37,7 +37,7 @@
    */
   let isNewFlavorModalOpen = $state(false);
   let newFlavorName = $state('');
-  let newFlavorExcludeFromRandom = $state(false);
+  let newFlavorRandomPool = $state<string>('caffeine-free');
 
   /**
    * Table sorting state
@@ -103,7 +103,7 @@
    */
   function handleNewFlavorClick() {
     newFlavorName = '';
-    newFlavorExcludeFromRandom = false;
+    newFlavorRandomPool = 'caffeine-free';
     isNewFlavorModalOpen = true;
   }
 
@@ -113,7 +113,7 @@
   function closeNewFlavorModal() {
     isNewFlavorModalOpen = false;
     newFlavorName = '';
-    newFlavorExcludeFromRandom = false;
+    newFlavorRandomPool = 'caffeine-free';
   }
 
   /**
@@ -127,7 +127,9 @@
     const newFlavor: Flavor = {
       id: generateFlavorId(),
       name: newFlavorName.trim(),
-      excludeFromRandom: newFlavorExcludeFromRandom,
+      randomPool: (newFlavorRandomPool === 'none'
+        ? null
+        : newFlavorRandomPool) as RandomPool | null,
     };
 
     addFlavor(newFlavor);
@@ -311,10 +313,21 @@
     </div>
 
     <div class="form-group">
-      <label class="checkbox-label">
-        <input type="checkbox" bind:checked={newFlavorExcludeFromRandom} />
-        Exclude from random selection
-      </label>
+      <label>Random Pool</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" bind:group={newFlavorRandomPool} value="caffeinated" />
+          ⚡ Caffeinated
+        </label>
+        <label class="radio-label">
+          <input type="radio" bind:group={newFlavorRandomPool} value="caffeine-free" />
+          💪 Caffeine-Free
+        </label>
+        <label class="radio-label">
+          <input type="radio" bind:group={newFlavorRandomPool} value="none" />
+          None (exclude from random)
+        </label>
+      </div>
     </div>
   </div>
 
@@ -635,7 +648,13 @@
     border-color: var(--color-primary);
   }
 
-  .checkbox-label {
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .radio-label {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -643,7 +662,7 @@
     font-size: var(--font-size-base);
   }
 
-  .checkbox-label input[type='checkbox'] {
+  .radio-label input[type='radio'] {
     cursor: pointer;
   }
 

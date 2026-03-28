@@ -14,10 +14,10 @@ describe('maybeGetFlavor', () => {
    * Test data: A set of sample flavors for testing
    */
   const testFlavors: Flavor[] = [
-    { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
-    { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
-    { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: true },
-    { id: 'flavor_banana', name: 'Banana', excludeFromRandom: false },
+    { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+    { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+    { id: 'flavor_strawberry', name: 'Strawberry', randomPool: null },
+    { id: 'flavor_banana', name: 'Banana', randomPool: 'caffeine-free' },
   ];
 
   describe('valid inputs', () => {
@@ -31,13 +31,13 @@ describe('maybeGetFlavor', () => {
       const result = maybeGetFlavor('flavor_strawberry', testFlavors);
       expect(result).toEqual(testFlavors[2]);
       expect(result?.name).toBe('Strawberry');
-      expect(result?.excludeFromRandom).toBe(true);
+      expect(result?.randomPool).toBeNull();
     });
 
     it('returns the first matching flavor if duplicates exist', () => {
       const duplicateFlavors: Flavor[] = [
-        { id: 'dup', name: 'First', excludeFromRandom: false },
-        { id: 'dup', name: 'Second', excludeFromRandom: false },
+        { id: 'dup', name: 'First', randomPool: 'caffeine-free' },
+        { id: 'dup', name: 'Second', randomPool: 'caffeine-free' },
       ];
       const result = maybeGetFlavor('dup', duplicateFlavors);
       expect(result?.name).toBe('First');
@@ -101,7 +101,7 @@ describe('maybeGetFlavor', () => {
   describe('edge cases', () => {
     it('handles array with single flavor', () => {
       const singleFlavor: Flavor[] = [
-        { id: 'only', name: 'Only Flavor', excludeFromRandom: false },
+        { id: 'only', name: 'Only Flavor', randomPool: 'caffeine-free' },
       ];
       const result = maybeGetFlavor('only', singleFlavor);
       expect(result).toEqual(singleFlavor[0]);
@@ -109,9 +109,9 @@ describe('maybeGetFlavor', () => {
 
     it('handles flavors with special characters in ID', () => {
       const specialFlavors: Flavor[] = [
-        { id: 'flavor-with-dash', name: 'Dashed', excludeFromRandom: false },
-        { id: 'flavor_with_underscore', name: 'Underscored', excludeFromRandom: false },
-        { id: 'flavor.with.dot', name: 'Dotted', excludeFromRandom: false },
+        { id: 'flavor-with-dash', name: 'Dashed', randomPool: 'caffeine-free' },
+        { id: 'flavor_with_underscore', name: 'Underscored', randomPool: 'caffeine-free' },
+        { id: 'flavor.with.dot', name: 'Dotted', randomPool: 'caffeine-free' },
       ];
 
       expect(maybeGetFlavor('flavor-with-dash', specialFlavors)?.name).toBe('Dashed');
@@ -121,8 +121,8 @@ describe('maybeGetFlavor', () => {
 
     it('handles flavors with Unicode characters in name', () => {
       const unicodeFlavors: Flavor[] = [
-        { id: 'emoji', name: '🍫 Chocolate', excludeFromRandom: false },
-        { id: 'accents', name: 'Café', excludeFromRandom: false },
+        { id: 'emoji', name: '🍫 Chocolate', randomPool: 'caffeine-free' },
+        { id: 'accents', name: 'Café', randomPool: 'caffeine-free' },
       ];
 
       const result = maybeGetFlavor('emoji', unicodeFlavors);
@@ -148,11 +148,11 @@ describe('maybeGetFlavor', () => {
         // These should all be type-safe without errors
         const id: string = result.id;
         const name: string = result.name;
-        const exclude: boolean = result.excludeFromRandom;
+        const pool: string | null = result.randomPool;
 
         expect(id).toBeDefined();
         expect(name).toBeDefined();
-        expect(typeof exclude).toBe('boolean');
+        expect(typeof pool === 'string' || pool === null).toBe(true);
       }
     });
 

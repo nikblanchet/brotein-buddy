@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
 
   await page.evaluate(() => {
     const testState: AppState = {
-      version: 1,
+      version: 2,
       boxes: [
         {
           id: 'test-box-123',
@@ -73,9 +73,9 @@ test.beforeEach(async ({ page }) => {
         },
       ],
       flavors: [
-        { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
-        { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
-        { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: false },
+        { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+        { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+        { id: 'flavor_strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
       ],
       favoriteFlavorId: null,
       settings: {},
