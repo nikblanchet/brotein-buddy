@@ -125,7 +125,7 @@ test.describe('Add Inventory', () => {
       await page.getByText('Closed Boxes').click();
 
       // Select count of 1 on the NumberPad
-      await page.getByRole('button', { name: '1', exact: true }).first().click();
+      await page.click('button:has-text("1")');
 
       // Confirm
       await page.getByRole('button', { name: /Add 1 Box/i }).click();
@@ -151,7 +151,7 @@ test.describe('Add Inventory', () => {
       await page.getByText('Closed Boxes').click();
 
       // Select count of 3 on the NumberPad
-      await page.getByRole('button', { name: '3', exact: true }).first().click();
+      await page.click('button:has-text("3")');
       await page.getByRole('button', { name: /Add 3 Boxes/i }).click();
 
       const state = await page.evaluate<AppState>(() =>
@@ -183,7 +183,7 @@ test.describe('Add Inventory', () => {
 
       // Change flavor to Vanilla
       await page.locator('#flavor-select').selectOption('flavor_vanilla');
-      await page.getByRole('button', { name: '2', exact: true }).first().click();
+      await page.click('button:has-text("2")');
       await page.getByRole('button', { name: /Add 2 Boxes/i }).click();
 
       const state = await page.evaluate<AppState>(() =>
@@ -228,7 +228,7 @@ test.describe('Add Inventory', () => {
       await page.getByText('Open Box').click();
 
       // Select quantity 7
-      await page.getByRole('button', { name: '7', exact: true }).first().click();
+      await page.click('button:has-text("7")');
       await page.getByRole('button', { name: /Add Open Box/i }).click();
 
       // Modal should close
@@ -248,7 +248,7 @@ test.describe('Add Inventory', () => {
       await page.getByRole('button', { name: 'Add Inventory' }).click();
       await page.getByText('Open Box').click();
 
-      await page.getByRole('button', { name: '5', exact: true }).first().click();
+      await page.click('button:has-text("5")');
       await page.getByRole('button', { name: 'Cancel' }).click();
 
       await expect(page.getByRole('heading', { name: 'Add Inventory' })).not.toBeVisible();

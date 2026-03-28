@@ -482,9 +482,9 @@ test.describe('Inventory Box Edit Screen', () => {
       // Initial quantity is 5
       await expect(page.locator('.value:has-text("5")')).toBeVisible();
 
-      await page.getByRole('button', { name: 'Set Quantity' }).click();
-      await page.getByRole('button', { name: '9', exact: true }).first().click();
-      await page.getByRole('button', { name: 'Set to 9' }).click();
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("9")');
+      await page.click('button:has-text("Set to 9")');
 
       // Quantity should now be 9 (absolute set, not delta)
       await expect(page.locator('.value:has-text("9")')).toBeVisible();
@@ -498,9 +498,9 @@ test.describe('Inventory Box Edit Screen', () => {
     test('cancel should not change the quantity', async ({ page }) => {
       await page.goto('/#/inventory/box_test_1/edit');
 
-      await page.getByRole('button', { name: 'Set Quantity' }).click();
-      await page.getByRole('button', { name: '3', exact: true }).first().click();
-      await page.getByRole('button', { name: 'Cancel' }).click();
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("3")');
+      await page.click('button:has-text("Cancel")');
 
       // Quantity should remain 5
       await expect(page.locator('.value:has-text("5")')).toBeVisible();
@@ -514,9 +514,9 @@ test.describe('Inventory Box Edit Screen', () => {
     test('should not trigger auto-delete prompt (min is 1, not 0)', async ({ page }) => {
       await page.goto('/#/inventory/box_test_1/edit');
 
-      await page.getByRole('button', { name: 'Set Quantity' }).click();
-      await page.getByRole('button', { name: '1', exact: true }).first().click();
-      await page.getByRole('button', { name: 'Set to 1' }).click();
+      await page.click('button:has-text("Set Quantity")');
+      await page.click('button:has-text("1")');
+      await page.click('button:has-text("Set to 1")');
 
       // Should update quantity without showing auto-delete prompt
       await expect(page.locator('.value:has-text("1")')).toBeVisible();
