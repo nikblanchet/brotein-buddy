@@ -432,7 +432,7 @@ test.describe('Random Selection Flow - Error State: No Flavors', () => {
 
     // Should show error message
     await expect(page.locator('h1')).toContainText('No Selection Available');
-    await expect(page.locator('.error-message')).toContainText('No flavors configured');
+    await expect(page.locator('.error-message')).toContainText('No flavors configured yet');
 
     // Should have Back to Home button
     const homeButton = page.locator('button').filter({ hasText: 'Back to Home' });
@@ -480,10 +480,8 @@ test.describe('Random Selection Flow - Error State: All Flavors Excluded', () =>
     const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.click();
 
-    // Should show error message
-    await expect(page.locator('.error-message')).toContainText(
-      'flavors are excluded from random selection'
-    );
+    // Should show error message - all flavors have randomPool: null, so none are in the caffeine-free pool
+    await expect(page.locator('.error-message')).toContainText('No 💪 flavors in this pool');
   });
 });
 

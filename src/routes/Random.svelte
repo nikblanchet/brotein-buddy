@@ -13,7 +13,7 @@
   import { push, router } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
-  import { selectedFlavorId, selectedPool, clearNavigationState } from '$lib/navigation-state';
+  import { selectedFlavorId, selectedPool } from '$lib/navigation-state';
   import { selectRandomFlavor } from '$lib/random-selection';
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
@@ -122,8 +122,9 @@
 
   // Perform selection automatically when component mounts
   onMount(() => {
-    // Clear any stale navigation state from previous sessions
-    clearNavigationState();
+    // Clear stale flavor selection from previous flow, but keep selectedPool
+    // since it was just set by Home.svelte before navigating here
+    selectedFlavorId.set(null);
 
     // Minimal delay to ensure store is initialized
     setTimeout(() => {
