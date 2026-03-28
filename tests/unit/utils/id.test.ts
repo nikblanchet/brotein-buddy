@@ -9,52 +9,44 @@ import { generateFlavorId, generateBoxId } from '../../../src/lib/utils/id.js';
 
 describe('id utilities', () => {
   describe('generateFlavorId', () => {
-    it('generates ID with flavor prefix', () => {
+    it('generates ID with flavor prefix and UUID format', () => {
       const id = generateFlavorId();
-      expect(id).toMatch(/^flavor_\d+$/);
+      expect(id).toMatch(/^flavor_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     });
 
-    it('generates unique IDs', async () => {
+    it('generates unique IDs', () => {
       const id1 = generateFlavorId();
-      // Small delay to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 2));
       const id2 = generateFlavorId();
       expect(id1).not.toBe(id2);
     });
 
-    it('uses timestamp-based generation', () => {
-      const before = Date.now();
-      const id = generateFlavorId();
-      const after = Date.now();
-
-      const timestamp = parseInt(id.replace('flavor_', ''), 10);
-      expect(timestamp).toBeGreaterThanOrEqual(before);
-      expect(timestamp).toBeLessThanOrEqual(after);
+    it('generates unique IDs in a tight loop', () => {
+      const ids = new Set<string>();
+      for (let i = 0; i < 100; i++) {
+        ids.add(generateFlavorId());
+      }
+      expect(ids.size).toBe(100);
     });
   });
 
   describe('generateBoxId', () => {
-    it('generates ID with box prefix', () => {
+    it('generates ID with box prefix and UUID format', () => {
       const id = generateBoxId();
-      expect(id).toMatch(/^box_\d+$/);
+      expect(id).toMatch(/^box_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     });
 
-    it('generates unique IDs', async () => {
+    it('generates unique IDs', () => {
       const id1 = generateBoxId();
-      // Small delay to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 2));
       const id2 = generateBoxId();
       expect(id1).not.toBe(id2);
     });
 
-    it('uses timestamp-based generation', () => {
-      const before = Date.now();
-      const id = generateBoxId();
-      const after = Date.now();
-
-      const timestamp = parseInt(id.replace('box_', ''), 10);
-      expect(timestamp).toBeGreaterThanOrEqual(before);
-      expect(timestamp).toBeLessThanOrEqual(after);
+    it('generates unique IDs in a tight loop', () => {
+      const ids = new Set<string>();
+      for (let i = 0; i < 100; i++) {
+        ids.add(generateBoxId());
+      }
+      expect(ids.size).toBe(100);
     });
   });
 });

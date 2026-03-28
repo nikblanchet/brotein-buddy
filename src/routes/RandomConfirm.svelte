@@ -14,13 +14,17 @@
   import { ROUTES } from '$lib/router/routes';
   import { appState, updateBoxQuantity } from '$lib/stores';
   import { selectPriorityBox, compareBoxPriority } from '$lib/box-selection';
+  import {
+    selectedFlavorId as selectedFlavorIdStore,
+    clearNavigationState,
+  } from '$lib/navigation-state';
   import { maybeGetFlavor } from '$lib/utils/flavor';
   import type { Flavor, Box } from '../types/models';
+  import { get } from 'svelte/store';
   import { onMount } from 'svelte';
 
   /**
-   * Retrieve selected flavor from sessionStorage
-   * This was set by the Random.svelte component
+   * Selected flavor ID, retrieved from navigation state store
    */
   let selectedFlavorId = $state<string | null>(null);
   let selectedFlavor = $state<Flavor | null>(null);
@@ -55,7 +59,7 @@
    * Load flavor and box data on component mount
    */
   onMount(() => {
-    const flavorId = sessionStorage.getItem('selectedFlavorId');
+    const flavorId = get(selectedFlavorIdStore);
 
     if (!flavorId) {
       sessionErrorMessage = 'No flavor selected. Please start from the Random Selection screen.';
@@ -89,8 +93,8 @@
     const newQuantity = priorityBox.quantity - 1;
     updateBoxQuantity(priorityBox.id, newQuantity);
 
-    // Clear session storage
-    sessionStorage.removeItem('selectedFlavorId');
+    // Clear navigation state
+    clearNavigationState();
 
     // Navigate home
     push(ROUTES.HOME);
@@ -100,8 +104,8 @@
    * Cancel: go back to home without changes
    */
   function handleCancel() {
-    // Clear session storage
-    sessionStorage.removeItem('selectedFlavorId');
+    // Clear navigation state
+    clearNavigationState();
 
     // Navigate home without changes
     push(ROUTES.HOME);
@@ -125,8 +129,8 @@
   function handleDifferentChoice() {
     if (!selectedFlavorId) return;
 
-    // Clear session storage
-    sessionStorage.removeItem('selectedFlavorId');
+    // Clear navigation state
+    clearNavigationState();
 
     // Navigate to random with exclude parameter
     push(`${ROUTES.RANDOM}?excludeLastPick=${selectedFlavorId}`);

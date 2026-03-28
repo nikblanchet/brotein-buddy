@@ -43,7 +43,7 @@
     removeBox,
   } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
-  import { getFlavorColor } from '$lib/inventory-utils';
+  import { getFlavorColor } from '$lib/utils/flavor-color';
   import {
     validateLocationNoGaps,
     getLocationConflict,

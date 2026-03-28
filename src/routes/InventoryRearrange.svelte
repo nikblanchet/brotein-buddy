@@ -14,7 +14,8 @@
   import { ROUTES } from '$lib/router/routes';
   import { appState, updateBoxLocation } from '$lib/stores';
   import { validateLocationNoGaps } from '$lib/utils/location-validation';
-  import { groupBoxesByStack, getFlavorColor } from '$lib/inventory-utils';
+  import { groupBoxesByStack } from '$lib/inventory-utils';
+  import { getFlavorColor } from '$lib/utils/flavor-color';
   import { validateRearrangementState } from '$lib/rearrange-utils';
   import { dndzone, type DndEvent } from 'svelte-dnd-action';
   import type { Box } from '../types/models';

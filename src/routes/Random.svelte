@@ -13,6 +13,7 @@
   import { push, location } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
+  import { selectedFlavorId, clearNavigationState } from '$lib/navigation-state';
   import { selectRandomFlavor } from '$lib/random-selection';
   import { onMount } from 'svelte';
 
@@ -48,8 +49,8 @@
         isSelecting = false;
       } else {
         // Success! Navigate to confirmation with selected flavor
-        // Store selected flavor ID in sessionStorage for confirmation screen
-        sessionStorage.setItem('selectedFlavorId', flavor.id);
+        // Store selected flavor ID for confirmation screen
+        selectedFlavorId.set(flavor.id);
         push(ROUTES.RANDOM_CONFIRM);
       }
     } catch (error) {
@@ -112,8 +113,8 @@
 
   // Perform selection automatically when component mounts
   onMount(() => {
-    // Clear any stale sessionStorage from previous sessions
-    sessionStorage.removeItem('selectedFlavorId');
+    // Clear any stale navigation state from previous sessions
+    clearNavigationState();
 
     // Minimal delay to ensure store is initialized
     setTimeout(() => {
