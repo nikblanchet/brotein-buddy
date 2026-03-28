@@ -10,7 +10,7 @@
    */
 
   import Button from '$lib/components/Button.svelte';
-  import { push, location } from 'svelte-spa-router';
+  import { push, router } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
   import { selectedFlavorId, clearNavigationState } from '$lib/navigation-state';
@@ -22,7 +22,7 @@
    * Format: #/random?excludeLastPick=flavor-id
    */
   let excludeLastPick = $derived.by(() => {
-    const params = new URLSearchParams($location.split('?')[1] || '');
+    const params = new URLSearchParams(router.querystring || '');
     return params.get('excludeLastPick') || undefined;
   });
 
