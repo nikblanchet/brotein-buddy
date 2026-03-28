@@ -519,7 +519,10 @@ test.describe('Inventory Box Edit Screen', () => {
       await page.click('button:has-text("Set to 1")');
 
       // Should update quantity without showing auto-delete prompt
-      await expect(page.locator('.value:has-text("1")')).toBeVisible();
+      // Use detail-item scoping to avoid matching "Stack 1, Height 1" location value
+      await expect(
+        page.locator('.detail-item:has(.label:has-text("Quantity")) .value:has-text("1")')
+      ).toBeVisible();
       await expect(page.locator('h2:has-text("Box Empty")')).not.toBeVisible();
     });
   });
