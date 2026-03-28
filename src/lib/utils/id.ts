@@ -10,35 +10,33 @@
 /**
  * Generates a unique ID for a new flavor
  *
- * Uses timestamp-based ID generation for simplicity.
- * Can be easily switched to UUID or nanoid if needed.
+ * Uses crypto.randomUUID() for collision-resistant ID generation.
  *
- * @returns Unique flavor ID string (format: "flavor_{timestamp}")
+ * @returns Unique flavor ID string (format: "flavor_{uuid}")
  *
  * @example
  * ```typescript
  * const newFlavorId = generateFlavorId();
- * // Returns: "flavor_1698765432100"
+ * // Returns: "flavor_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
  * ```
  */
 export function generateFlavorId(): string {
-  return `flavor_${Date.now()}`;
+  return `flavor_${crypto.randomUUID()}`;
 }
 
 /**
  * Generates a unique ID for a new box
  *
- * Uses timestamp-based ID generation for simplicity.
- * Can be easily switched to UUID or nanoid if needed.
+ * Uses crypto.randomUUID() for collision-resistant ID generation.
  *
- * @returns Unique box ID string (format: "box_{timestamp}")
+ * @returns Unique box ID string (format: "box_{uuid}")
  *
  * @example
  * ```typescript
  * const newBoxId = generateBoxId();
- * // Returns: "box_1698765432100"
+ * // Returns: "box_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
  * ```
  */
 export function generateBoxId(): string {
-  return `box_${Date.now()}`;
+  return `box_${crypto.randomUUID()}`;
 }

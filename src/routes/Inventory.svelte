@@ -19,15 +19,10 @@
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
   import type { Flavor } from '../types/models';
-  import {
-    groupBoxesByStack,
-    getOutOfStockFlavors,
-    sortBoxes,
-    getFlavorColor,
-    formatLocation,
-    type SortColumn,
-    type SortDirection,
-  } from '$lib/inventory-utils';
+  import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
+  import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
+  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { formatLocation } from '$lib/utils/location-validation';
   import { generateFlavorId } from '$lib/utils/id';
 
   /**

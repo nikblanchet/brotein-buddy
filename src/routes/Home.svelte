@@ -14,6 +14,7 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
+  import { selectedFlavorId } from '$lib/navigation-state';
   import { maybeGetFlavor } from '$lib/utils/flavor';
   import type { Flavor } from '../types/models';
 
@@ -46,17 +47,10 @@
   /**
    * Navigate to favorite flavor quick-pick
    * Navigates directly to confirmation with favorite flavor pre-selected
-   *
-   * Uses sessionStorage for cross-route state passing because:
-   * - svelte-spa-router doesn't support navigation state in push()
-   * - Preserves state across browser refresh (better UX)
-   * - sessionStorage auto-clears when tab closes (no long-term storage)
-   *
-   * Pattern: Store minimal data (just ID) → navigate → destination retrieves and validates
    */
   function handleFavoriteClick() {
     if (favoriteFlavor) {
-      sessionStorage.setItem('selectedFlavorId', favoriteFlavor.id);
+      selectedFlavorId.set(favoriteFlavor.id);
       push(ROUTES.RANDOM_CONFIRM);
     }
   }
@@ -71,12 +65,9 @@
   /**
    * Handle flavor selection from picker
    * Navigates to confirmation screen with selected flavor
-   *
-   * Uses sessionStorage for cross-route state passing (same pattern as handleFavoriteClick).
-   * The destination route (RandomConfirm) retrieves selectedFlavorId and validates the flavor exists.
    */
   function handleFlavorSelect(flavor: Flavor) {
-    sessionStorage.setItem('selectedFlavorId', flavor.id);
+    selectedFlavorId.set(flavor.id);
     showFlavorPicker = false;
     push(ROUTES.RANDOM_CONFIRM);
   }
