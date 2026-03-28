@@ -52,7 +52,7 @@ test.describe('Accessibility - Home Screen', () => {
   });
 
   test('should have keyboard accessible buttons', async ({ page }) => {
-    const randomButton = page.getByRole('button', { name: /random/i });
+    const randomButton = page.getByTestId('random-caffeine-free-button');
     await randomButton.focus();
     await expect(randomButton).toBeFocused();
   });
@@ -102,7 +102,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should not have accessibility issues on random page', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await page.waitForURL('/#/random');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
@@ -110,7 +110,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should not have accessibility issues on confirm page', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     // Wait for random selection page first
     await page.waitForURL('/#/random');
 
@@ -135,7 +135,7 @@ test.describe('Accessibility - Random Selection Flow', () => {
   });
 
   test('should have proper ARIA labels for loading states', async ({ page }) => {
-    await page.getByRole('button', { name: /random/i }).click();
+    await page.getByTestId('random-caffeine-free-button').click();
     await page.waitForURL('/#/random');
 
     // Check for aria-live region or aria-label on spinner
@@ -384,7 +384,7 @@ test.describe('Accessibility - Color Contrast Verification', () => {
           // Modal didn't appear (localStorage already prevents it), continue with test
         }
 
-        await page.getByRole('button', { name: /random/i }).click();
+        await page.getByTestId('random-caffeine-free-button').click();
         // Wait for random page first, then confirm page (selection is async, needs time)
         await page.waitForURL('/#/random');
 
