@@ -35,7 +35,7 @@ describe('storage', () => {
       const defaultState = createDefaultAppState();
 
       expect(state).toEqual(defaultState);
-      expect(state.version).toBe(1);
+      expect(state.version).toBe(2);
       expect(state.boxes).toEqual([]);
       expect(state.flavors).toEqual([]);
       expect(state.favoriteFlavorId).toBeNull();
@@ -44,7 +44,7 @@ describe('storage', () => {
 
     it('should load valid state from localStorage', () => {
       const validState: AppState = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box1',
@@ -58,7 +58,7 @@ describe('storage', () => {
           {
             id: 'flavor1',
             name: 'Chocolate',
-            excludeFromRandom: false,
+            randomPool: 'caffeinated',
           },
         ],
         favoriteFlavorId: 'flavor1',
@@ -158,13 +158,13 @@ describe('storage', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const invalidState = {
-        version: 1,
+        version: 2,
         boxes: [],
         flavors: [
           {
             id: '', // Invalid: empty ID
             name: 'Chocolate',
-            excludeFromRandom: false,
+            randomPool: 'caffeinated',
           },
         ],
         favoriteFlavorId: null,
@@ -227,7 +227,7 @@ describe('storage', () => {
   describe('saveState', () => {
     it('should save valid state to localStorage', () => {
       const validState: AppState = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box1',
@@ -241,7 +241,7 @@ describe('storage', () => {
           {
             id: 'flavor1',
             name: 'Chocolate',
-            excludeFromRandom: false,
+            randomPool: 'caffeinated',
           },
         ],
         favoriteFlavorId: 'flavor1',
@@ -371,10 +371,120 @@ describe('storage', () => {
     });
   });
 
+  describe('v1 to v2 migration', () => {
+    it('should migrate v1 state with excludeFromRandom: false to randomPool caffeine-free', () => {
+      const v1State = {
+        version: 1,
+        boxes: [],
+        flavors: [
+          {
+            id: 'flavor1',
+            name: 'Chocolate',
+            excludeFromRandom: false,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1State));
+
+      const loaded = loadState();
+      expect(loaded.version).toBe(2);
+      expect(loaded.flavors[0].randomPool).toBe('caffeine-free');
+      expect((loaded.flavors[0] as Record<string, unknown>).excludeFromRandom).toBeUndefined();
+    });
+
+    it('should migrate v1 state with excludeFromRandom: true to randomPool null', () => {
+      const v1State = {
+        version: 1,
+        boxes: [],
+        flavors: [
+          {
+            id: 'flavor1',
+            name: 'Peanut Butter',
+            excludeFromRandom: true,
+          },
+        ],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1State));
+
+      const loaded = loadState();
+      expect(loaded.version).toBe(2);
+      expect(loaded.flavors[0].randomPool).toBeNull();
+    });
+
+    it('should migrate multiple flavors correctly', () => {
+      const v1State = {
+        version: 1,
+        boxes: [],
+        flavors: [
+          { id: 'f1', name: 'Chocolate', excludeFromRandom: false },
+          { id: 'f2', name: 'Vanilla', excludeFromRandom: false },
+          { id: 'f3', name: 'Peanut Butter', excludeFromRandom: true },
+        ],
+        favoriteFlavorId: 'f1',
+        settings: {},
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1State));
+
+      const loaded = loadState();
+      expect(loaded.version).toBe(2);
+      expect(loaded.flavors[0].randomPool).toBe('caffeine-free');
+      expect(loaded.flavors[1].randomPool).toBe('caffeine-free');
+      expect(loaded.flavors[2].randomPool).toBeNull();
+    });
+
+    it('should not migrate v2 state', () => {
+      const v2State: AppState = {
+        version: 2,
+        boxes: [],
+        flavors: [{ id: 'f1', name: 'Chocolate', randomPool: 'caffeinated' }],
+        favoriteFlavorId: null,
+        settings: {},
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v2State));
+
+      const loaded = loadState();
+      expect(loaded.version).toBe(2);
+      expect(loaded.flavors[0].randomPool).toBe('caffeinated');
+    });
+
+    it('should preserve boxes and other state during migration', () => {
+      const v1State = {
+        version: 1,
+        boxes: [
+          {
+            id: 'box1',
+            flavorId: 'f1',
+            quantity: 12,
+            location: { stack: 0, height: 0 },
+            isOpen: false,
+          },
+        ],
+        flavors: [{ id: 'f1', name: 'Chocolate', excludeFromRandom: false }],
+        favoriteFlavorId: 'f1',
+        settings: {},
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1State));
+
+      const loaded = loadState();
+      expect(loaded.boxes).toHaveLength(1);
+      expect(loaded.boxes[0].id).toBe('box1');
+      expect(loaded.favoriteFlavorId).toBe('f1');
+    });
+  });
+
   describe('integration scenarios', () => {
     it('should persist state across save and load', () => {
       const originalState: AppState = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box1',
@@ -395,12 +505,12 @@ describe('storage', () => {
           {
             id: 'flavor1',
             name: 'Chocolate',
-            excludeFromRandom: false,
+            randomPool: 'caffeinated',
           },
           {
             id: 'flavor2',
             name: 'Vanilla',
-            excludeFromRandom: true,
+            randomPool: null,
           },
         ],
         favoriteFlavorId: 'flavor1',

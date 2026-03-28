@@ -49,7 +49,7 @@ function createTestFlavor(overrides?: Partial<Flavor>): Flavor {
   return {
     id: `flavor_${Date.now()}_${Math.random()}`,
     name: 'Test Flavor',
-    excludeFromRandom: false,
+    randomPool: 'caffeine-free',
     ...overrides,
   };
 }
@@ -75,7 +75,7 @@ describe('stores', () => {
       expect(state.flavors).toEqual([]);
       expect(state.favoriteFlavorId).toBeNull();
       expect(state.settings).toEqual({});
-      expect(state.version).toBe(1);
+      expect(state.version).toBe(2);
     });
 
     it('should initialize with data from localStorage if available', () => {
@@ -589,29 +589,29 @@ describe('stores', () => {
         expect(state.flavors[0].name).toBe('Updated');
       });
 
-      it('should update excludeFromRandom flag', () => {
-        const flavor = createTestFlavor({ id: 'flavor_exclude', excludeFromRandom: false });
+      it('should update randomPool', () => {
+        const flavor = createTestFlavor({ id: 'flavor_pool', randomPool: 'caffeine-free' });
         addFlavor(flavor);
 
-        updateFlavor('flavor_exclude', { excludeFromRandom: true });
+        updateFlavor('flavor_pool', { randomPool: 'caffeinated' });
 
         const state = getCurrentState();
-        expect(state.flavors[0].excludeFromRandom).toBe(true);
+        expect(state.flavors[0].randomPool).toBe('caffeinated');
       });
 
       it('should update multiple fields at once', () => {
         const flavor = createTestFlavor({
           id: 'flavor_multi',
           name: 'Original',
-          excludeFromRandom: false,
+          randomPool: 'caffeine-free',
         });
         addFlavor(flavor);
 
-        updateFlavor('flavor_multi', { name: 'New Name', excludeFromRandom: true });
+        updateFlavor('flavor_multi', { name: 'New Name', randomPool: 'caffeinated' });
 
         const state = getCurrentState();
         expect(state.flavors[0].name).toBe('New Name');
-        expect(state.flavors[0].excludeFromRandom).toBe(true);
+        expect(state.flavors[0].randomPool).toBe('caffeinated');
       });
 
       it('should persist flavor updates to localStorage', () => {
@@ -647,7 +647,7 @@ describe('stores', () => {
         const flavor = createTestFlavor({
           id: 'flavor_partial',
           name: 'Original',
-          excludeFromRandom: false,
+          randomPool: 'caffeine-free',
         });
         addFlavor(flavor);
 
@@ -656,7 +656,7 @@ describe('stores', () => {
 
         const state = getCurrentState();
         expect(state.flavors[0].name).toBe('Only Name Changed');
-        expect(state.flavors[0].excludeFromRandom).toBe(false); // Should not change
+        expect(state.flavors[0].randomPool).toBe('caffeine-free'); // Should not change
       });
     });
 
@@ -744,10 +744,10 @@ describe('stores', () => {
       expect(state.flavors[0].name).toBe('Original');
 
       // Update flavor
-      updateFlavor('lifecycle_flavor', { name: 'Updated', excludeFromRandom: true });
+      updateFlavor('lifecycle_flavor', { name: 'Updated', randomPool: null });
       state = getCurrentState();
       expect(state.flavors[0].name).toBe('Updated');
-      expect(state.flavors[0].excludeFromRandom).toBe(true);
+      expect(state.flavors[0].randomPool).toBeNull();
 
       // Set as favorite
       setFavoriteFlavor('lifecycle_flavor');
@@ -856,7 +856,7 @@ describe('stores', () => {
       setFavoriteFlavor('choc');
 
       // Exclude strawberry from random
-      updateFlavor('straw', { excludeFromRandom: true });
+      updateFlavor('straw', { randomPool: null });
 
       // Use some chocolate (deduct from first box)
       updateBoxQuantity('box_choc_1', 10);
@@ -869,7 +869,7 @@ describe('stores', () => {
       expect(state.flavors).toHaveLength(3);
       expect(state.boxes).toHaveLength(4);
       expect(state.favoriteFlavorId).toBe('choc');
-      expect(state.flavors.find((f) => f.id === 'straw')?.excludeFromRandom).toBe(true);
+      expect(state.flavors.find((f) => f.id === 'straw')?.randomPool).toBeNull();
       expect(state.boxes.find((b) => b.id === 'box_choc_1')?.quantity).toBe(0);
 
       // Verify persistence

@@ -63,8 +63,8 @@ export function groupBoxesByStack(boxesWithFlavors: BoxWithFlavor[]): Map<number
  * @example
  * ```typescript
  * const flavors = [
- *   { id: 'f1', name: 'Chocolate', excludeFromRandom: false },
- *   { id: 'f2', name: 'Vanilla', excludeFromRandom: false },
+ *   { id: 'f1', name: 'Chocolate', randomPool: 'caffeinated' },
+ *   { id: 'f2', name: 'Vanilla', randomPool: 'caffeine-free' },
  * ];
  * const boxes = [
  *   { id: 'b1', flavorId: 'f1', quantity: 5, ... },

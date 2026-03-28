@@ -18,10 +18,10 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       // Set up localStorage with favorite configured
       await context.addInitScript((key) => {
         const testState: AppState = {
-          version: 1,
+          version: 2,
           flavors: [
-            { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           boxes: [
             {
@@ -119,10 +119,10 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       // Change favorite to Vanilla
       await context.addInitScript((key) => {
         const newState: AppState = {
-          version: 1,
+          version: 2,
           flavors: [
-            { id: 'chocolate', name: 'Chocolate', excludeFromRandom: false },
-            { id: 'vanilla', name: 'Vanilla', excludeFromRandom: false },
+            { id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+            { id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
           ],
           boxes: [
             {
@@ -156,8 +156,8 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       // Set up localStorage without favorite
       await context.addInitScript((key) => {
         const testState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+          version: 2,
+          flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
           boxes: [
             {
               id: 'box-1',
@@ -212,8 +212,8 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
       // Set up with favorite pointing to non-existent flavor
       await context.addInitScript((key) => {
         const testState: AppState = {
-          version: 1,
-          flavors: [{ id: 'vanilla', name: 'Vanilla', excludeFromRandom: false }],
+          version: 2,
+          flavors: [{ id: 'vanilla', name: 'Vanilla', randomPool: 'caffeine-free' }],
           boxes: [
             {
               id: 'box-1',
@@ -250,8 +250,8 @@ test.describe('Favorite Flavor Quick-Pick Flow', () => {
     test('handles favorite flavor with no boxes', async ({ page, context }) => {
       await context.addInitScript((key) => {
         const testState: AppState = {
-          version: 1,
-          flavors: [{ id: 'chocolate', name: 'Chocolate', excludeFromRandom: false }],
+          version: 2,
+          flavors: [{ id: 'chocolate', name: 'Chocolate', randomPool: 'caffeine-free' }],
           boxes: [], // No boxes
           favoriteFlavorId: 'chocolate',
           settings: {},

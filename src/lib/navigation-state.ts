@@ -8,6 +8,7 @@
  */
 
 import { writable } from 'svelte/store';
+import type { RandomPool } from '../types/models';
 
 /**
  * The flavor ID selected for the random confirmation flow.
@@ -16,9 +17,16 @@ import { writable } from 'svelte/store';
 export const selectedFlavorId = writable<string | null>(null);
 
 /**
+ * The random pool selected for the current random selection flow.
+ * Set by Home.svelte, consumed by Random.svelte.
+ */
+export const selectedPool = writable<RandomPool | null>(null);
+
+/**
  * Clear all navigation state. Call after consuming the state
  * or when navigating away without consuming.
  */
 export function clearNavigationState(): void {
   selectedFlavorId.set(null);
+  selectedPool.set(null);
 }

@@ -19,7 +19,7 @@ import { STORAGE_KEY } from '../../src/lib/storage';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createTestState(): AppState {
   return {
-    version: 1,
+    version: 2,
     boxes: [
       {
         id: 'box_1',
@@ -44,10 +44,10 @@ function createTestState(): AppState {
       },
     ],
     flavors: [
-      { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
-      { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
-      { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: false },
-      { id: 'flavor_caramel', name: 'Caramel', excludeFromRandom: false }, // Out of stock
+      { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+      { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+      { id: 'flavor_strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
+      { id: 'flavor_caramel', name: 'Caramel', randomPool: 'caffeine-free' }, // Out of stock
     ],
     favoriteFlavorId: null,
     settings: {},
@@ -60,7 +60,7 @@ test.describe('Inventory Screen', () => {
     // This ensures localStorage is populated BEFORE the page/modules load
     await context.addInitScript((key) => {
       const state = {
-        version: 1,
+        version: 2,
         boxes: [
           {
             id: 'box_1',
@@ -85,10 +85,10 @@ test.describe('Inventory Screen', () => {
           },
         ],
         flavors: [
-          { id: 'flavor_chocolate', name: 'Chocolate', excludeFromRandom: false },
-          { id: 'flavor_vanilla', name: 'Vanilla', excludeFromRandom: false },
-          { id: 'flavor_strawberry', name: 'Strawberry', excludeFromRandom: false },
-          { id: 'flavor_caramel', name: 'Caramel', excludeFromRandom: false },
+          { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
+          { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
+          { id: 'flavor_strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
+          { id: 'flavor_caramel', name: 'Caramel', randomPool: 'caffeine-free' },
         ],
         favoriteFlavorId: null,
         settings: {},
@@ -368,7 +368,7 @@ test.describe('Inventory Screen', () => {
       await expect(modal).toContainText('Add New Flavor');
     });
 
-    test('modal has flavor name input and checkbox', async ({ page }) => {
+    test('modal has flavor name input and radio group', async ({ page }) => {
       // Open modal
       await page.locator('button').filter({ hasText: 'New Flavor' }).click();
 
@@ -377,9 +377,12 @@ test.describe('Inventory Screen', () => {
       await expect(nameInput).toBeVisible();
       await expect(nameInput).toHaveAttribute('placeholder', 'Enter flavor name');
 
-      // Check for checkbox
-      const checkbox = page.locator('input[type="checkbox"]');
-      await expect(checkbox).toBeVisible();
+      // Check for radio buttons (random pool options)
+      const radioButtons = page.locator('input[type="radio"]');
+      await expect(radioButtons.first()).toBeVisible();
+      await expect(page.locator('text=⚡ Caffeinated')).toBeVisible();
+      await expect(page.locator('text=💪 Caffeine-Free')).toBeVisible();
+      await expect(page.locator('text=None (exclude from random)')).toBeVisible();
     });
 
     test('Save button is disabled when name is empty', async ({ page }) => {
@@ -540,7 +543,7 @@ test.describe('Inventory Screen - Empty State', () => {
     // Set up state with no boxes
     await context.addInitScript((key) => {
       const state = {
-        version: 1,
+        version: 2,
         boxes: [],
         flavors: [],
         favoriteFlavorId: null,

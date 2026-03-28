@@ -23,7 +23,7 @@ function createFlavor(overrides?: Partial<Flavor>): Flavor {
   return {
     id: 'flavor_test',
     name: 'Test Flavor',
-    excludeFromRandom: false,
+    randomPool: 'caffeine-free',
     ...overrides,
   };
 }

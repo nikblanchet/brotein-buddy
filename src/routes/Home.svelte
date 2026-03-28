@@ -14,9 +14,9 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
-  import { selectedFlavorId } from '$lib/navigation-state';
+  import { selectedFlavorId, selectedPool } from '$lib/navigation-state';
   import { maybeGetFlavor } from '$lib/utils/flavor';
-  import type { Flavor } from '../types/models';
+  import type { Flavor, RandomPool } from '../types/models';
 
   /**
    * Reactive: Get the user's favorite flavor (if configured)
@@ -38,9 +38,10 @@
   let showFlavorPicker = $state(false);
 
   /**
-   * Navigate to random flavor selection screen
+   * Navigate to random flavor selection screen for a specific pool
    */
-  function handleRandomClick() {
+  function handleRandomClick(pool: RandomPool) {
+    selectedPool.set(pool);
     push(ROUTES.RANDOM);
   }
 
@@ -87,15 +88,28 @@
   </header>
 
   <div class="buttons-container">
-    <!-- Button 1: Random Selection (Most Prominent) -->
+    <!-- Button 1a: Caffeinated Random Selection -->
     <Button
       variant="primary"
       size="lg"
       fullWidth={true}
-      onclick={handleRandomClick}
-      ariaLabel="Random Pick"
+      onclick={() => handleRandomClick('caffeinated')}
+      ariaLabel="Random Caffeinated Pick"
+      testId="random-caffeinated-button"
     >
-      🎲 Random Pick
+      ⚡ Random Pick
+    </Button>
+
+    <!-- Button 1b: Caffeine-Free Random Selection -->
+    <Button
+      variant="primary"
+      size="lg"
+      fullWidth={true}
+      onclick={() => handleRandomClick('caffeine-free')}
+      ariaLabel="Random Caffeine-Free Pick"
+      testId="random-caffeine-free-button"
+    >
+      💪 Random Pick
     </Button>
 
     <!-- Button 2: Favorite Flavor Quick-Pick (Second Most Prominent) -->
@@ -148,8 +162,10 @@
       {#each $appState.flavors as flavor (flavor.id)}
         <button class="flavor-item" onclick={() => handleFlavorSelect(flavor)} type="button">
           <span class="flavor-name">{flavor.name}</span>
-          {#if flavor.excludeFromRandom}
-            <span class="excluded-badge">Excluded from Random</span>
+          {#if flavor.randomPool === 'caffeinated'}
+            <span class="pool-badge">⚡</span>
+          {:else if flavor.randomPool === 'caffeine-free'}
+            <span class="pool-badge">💪</span>
           {/if}
         </button>
       {/each}
@@ -283,11 +299,7 @@
     color: var(--color-text-primary);
   }
 
-  .excluded-badge {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-    background: var(--color-surface-secondary);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+  .pool-badge {
+    font-size: var(--font-size-base);
   }
 </style>

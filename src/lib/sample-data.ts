@@ -46,33 +46,33 @@ import type { AppState } from '../types/models';
  */
 export function generateSampleData(): AppState {
   return {
-    version: 1,
+    version: 2,
 
     flavors: [
       {
         id: 'chocolate',
         name: 'Chocolate',
-        excludeFromRandom: false,
+        randomPool: 'caffeinated',
       },
       {
         id: 'vanilla',
         name: 'Vanilla',
-        excludeFromRandom: false,
+        randomPool: 'caffeine-free',
       },
       {
         id: 'strawberry',
         name: 'Strawberry',
-        excludeFromRandom: false,
+        randomPool: 'caffeine-free',
       },
       {
         id: 'cookies-cream',
         name: 'Cookies & Cream',
-        excludeFromRandom: false,
+        randomPool: 'caffeine-free',
       },
       {
         id: 'peanut-butter',
         name: 'Peanut Butter',
-        excludeFromRandom: true, // Excluded - saving this one!
+        randomPool: null, // Excluded - saving this one!
       },
     ],
 
