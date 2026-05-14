@@ -19,6 +19,9 @@ import {
   addFlavor,
   updateFlavor,
   setFavoriteFlavor,
+  recordShakeTaken,
+  recordShakeRejected,
+  recordSelectionCancelled,
 } from '../../src/lib/stores';
 import type { AppState, Box, Flavor } from '../../src/types/models';
 
@@ -76,7 +79,8 @@ describe('stores', () => {
       expect(state.flavors).toEqual([]);
       expect(state.favoriteFlavorId).toBeNull();
       expect(state.settings).toEqual({});
-      expect(state.version).toBe(2);
+      expect(state.events).toEqual([]);
+      expect(state.version).toBe(3);
     });
 
     it('should initialize with data from localStorage if available', () => {
@@ -126,11 +130,12 @@ describe('stores', () => {
   describe('replaceAppState', () => {
     it('replaces the entire state when given a valid AppState', () => {
       const incoming: AppState = {
-        version: 2,
+        version: 3,
         boxes: [createTestBox({ id: 'replaced_box' })],
         flavors: [createTestFlavor({ id: 'replaced_flavor' })],
         favoriteFlavorId: 'replaced_flavor',
         settings: {},
+        events: [],
       };
 
       replaceAppState(incoming);
@@ -143,7 +148,7 @@ describe('stores', () => {
 
     it('throws and does not mutate the store when given an invalid state', () => {
       const before = getCurrentState();
-      const bogus = { version: 2, boxes: 'not-an-array' } as unknown as AppState;
+      const bogus = { version: 3, boxes: 'not-an-array' } as unknown as AppState;
 
       expect(() => replaceAppState(bogus)).toThrow(/schema validation failed/);
       expect(getCurrentState()).toEqual(before);
@@ -906,6 +911,190 @@ describe('stores', () => {
       expect(parsed.flavors).toHaveLength(3);
       expect(parsed.boxes).toHaveLength(4);
       expect(parsed.favoriteFlavorId).toBe('choc');
+    });
+  });
+
+  describe('Event timeline emission', () => {
+    it('emits a box_received event when a box is added', () => {
+      const box = createTestBox({ id: 'box_evt_1', flavorId: 'flavor_evt' });
+      addBox(box);
+
+      const events = getCurrentState().events;
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        type: 'box_received',
+        boxId: 'box_evt_1',
+        flavorId: 'flavor_evt',
+        quantity: box.quantity,
+        location: box.location,
+        isOpen: box.isOpen,
+      });
+      expect(events[0].id).toMatch(/^ev_/);
+      expect(events[0].timestamp).toBeTruthy();
+    });
+
+    it('emits a box_removed event including the final quantity', () => {
+      const box = createTestBox({ id: 'box_evt_2', flavorId: 'flavor_evt', quantity: 5 });
+      addBox(box);
+      updateBoxQuantity('box_evt_2', 2);
+      removeBox('box_evt_2');
+
+      const events = getCurrentState().events;
+      const removed = events.find((e) => e.type === 'box_removed');
+      expect(removed).toBeDefined();
+      expect(removed).toMatchObject({
+        type: 'box_removed',
+        boxId: 'box_evt_2',
+        flavorId: 'flavor_evt',
+        finalQuantity: 2,
+      });
+    });
+
+    it('emits box_opened only on the false→true transition', () => {
+      const box = createTestBox({ id: 'box_evt_3', isOpen: false });
+      addBox(box);
+      const eventsBefore = getCurrentState().events.length;
+
+      updateBoxIsOpen('box_evt_3', true);
+      const eventsAfterOpen = getCurrentState().events;
+      expect(eventsAfterOpen.length).toBe(eventsBefore + 1);
+      expect(eventsAfterOpen.at(-1)).toMatchObject({
+        type: 'box_opened',
+        boxId: 'box_evt_3',
+      });
+
+      // Re-opening an already-open box should not emit another event
+      updateBoxIsOpen('box_evt_3', true);
+      expect(getCurrentState().events.length).toBe(eventsBefore + 1);
+
+      // Closing the box should NOT emit any event
+      updateBoxIsOpen('box_evt_3', false);
+      expect(getCurrentState().events.length).toBe(eventsBefore + 1);
+
+      // Opening again should emit
+      updateBoxIsOpen('box_evt_3', true);
+      expect(getCurrentState().events.length).toBe(eventsBefore + 2);
+    });
+
+    it('does not emit timeline events for manual updateBoxQuantity calls', () => {
+      const box = createTestBox({ id: 'box_evt_4', quantity: 12 });
+      addBox(box);
+      const eventsBefore = getCurrentState().events.length;
+
+      updateBoxQuantity('box_evt_4', 11);
+      updateBoxQuantity('box_evt_4', 10);
+
+      expect(getCurrentState().events.length).toBe(eventsBefore);
+    });
+  });
+
+  describe('recordShakeTaken', () => {
+    it('decrements quantity and appends a shake_taken event', () => {
+      addBox(createTestBox({ id: 'box_s1', flavorId: 'flavor_s1', quantity: 5 }));
+      const eventsBefore = getCurrentState().events.length;
+
+      recordShakeTaken({
+        boxId: 'box_s1',
+        flavorId: 'flavor_s1',
+        method: 'random',
+        pool: 'caffeinated',
+      });
+
+      const state = getCurrentState();
+      expect(state.boxes.find((b) => b.id === 'box_s1')?.quantity).toBe(4);
+      expect(state.events.length).toBe(eventsBefore + 1);
+      expect(state.events.at(-1)).toMatchObject({
+        type: 'shake_taken',
+        boxId: 'box_s1',
+        flavorId: 'flavor_s1',
+        method: 'random',
+        pool: 'caffeinated',
+      });
+    });
+
+    it('captures favorite-method shakes with a null pool', () => {
+      addBox(createTestBox({ id: 'box_s2', flavorId: 'flavor_s2', quantity: 3 }));
+      recordShakeTaken({
+        boxId: 'box_s2',
+        flavorId: 'flavor_s2',
+        method: 'favorite',
+        pool: null,
+      });
+      const last = getCurrentState().events.at(-1);
+      expect(last).toMatchObject({ type: 'shake_taken', method: 'favorite', pool: null });
+    });
+
+    it('throws when the box does not exist', () => {
+      expect(() =>
+        recordShakeTaken({
+          boxId: 'nonexistent',
+          flavorId: 'flavor_x',
+          method: 'random',
+          pool: 'caffeinated',
+        })
+      ).toThrow(/not found/);
+    });
+
+    it('throws when the box quantity is already zero', () => {
+      addBox(createTestBox({ id: 'box_s3', flavorId: 'flavor_s3', quantity: 0 }));
+      expect(() =>
+        recordShakeTaken({
+          boxId: 'box_s3',
+          flavorId: 'flavor_s3',
+          method: 'random',
+          pool: 'caffeinated',
+        })
+      ).toThrow(/empty/);
+    });
+  });
+
+  describe('recordShakeRejected', () => {
+    it('appends a shake_rejected event without touching boxes', () => {
+      addBox(createTestBox({ id: 'box_r1', flavorId: 'flavor_r1', quantity: 5 }));
+      const beforeBoxes = getCurrentState().boxes;
+
+      recordShakeRejected({
+        rejectedFlavorId: 'flavor_r1',
+        method: 'random',
+        pool: 'caffeine-free',
+      });
+
+      const state = getCurrentState();
+      expect(state.boxes).toEqual(beforeBoxes);
+      expect(state.events.at(-1)).toMatchObject({
+        type: 'shake_rejected',
+        rejectedFlavorId: 'flavor_r1',
+        method: 'random',
+        pool: 'caffeine-free',
+      });
+    });
+  });
+
+  describe('recordSelectionCancelled', () => {
+    it('appends a selection_cancelled event with a known flavor', () => {
+      recordSelectionCancelled({
+        flavorId: 'flavor_c1',
+        method: 'manual',
+        pool: null,
+      });
+      expect(getCurrentState().events.at(-1)).toMatchObject({
+        type: 'selection_cancelled',
+        flavorId: 'flavor_c1',
+        method: 'manual',
+        pool: null,
+      });
+    });
+
+    it('accepts a null flavorId for cancellations without a chosen flavor', () => {
+      recordSelectionCancelled({
+        flavorId: null,
+        method: 'random',
+        pool: 'caffeinated',
+      });
+      expect(getCurrentState().events.at(-1)).toMatchObject({
+        type: 'selection_cancelled',
+        flavorId: null,
+      });
     });
   });
 });
