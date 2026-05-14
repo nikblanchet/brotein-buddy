@@ -33,11 +33,12 @@ describe('selectRandomFlavor', () => {
     boxes: Box[],
     favoriteFlavorId: string | null = null
   ): AppState => ({
-    version: 2,
+    version: 3,
     flavors,
     boxes,
     favoriteFlavorId,
     settings: {},
+    events: [],
   });
 
   const defaultPool: RandomPool = 'caffeine-free';

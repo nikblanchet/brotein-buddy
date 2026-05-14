@@ -15,7 +15,7 @@ import {
 import { createDefaultAppState, type AppState } from '../../src/types/models';
 
 const sampleState: AppState = {
-  version: 2,
+  version: 3,
   boxes: [
     {
       id: 'box1',
@@ -38,6 +38,35 @@ const sampleState: AppState = {
   ],
   favoriteFlavorId: 'flavor1',
   settings: {},
+  events: [
+    {
+      id: 'ev_received_1',
+      timestamp: '2026-05-01T08:30:00.000Z',
+      type: 'box_received',
+      boxId: 'box1',
+      flavorId: 'flavor1',
+      quantity: 12,
+      location: { stack: 1, height: 0 },
+      isOpen: false,
+    },
+    {
+      id: 'ev_taken_1',
+      timestamp: '2026-05-02T14:15:00.000Z',
+      type: 'shake_taken',
+      boxId: 'box1',
+      flavorId: 'flavor1',
+      method: 'random',
+      pool: 'caffeinated',
+    },
+    {
+      id: 'ev_rejected_1',
+      timestamp: '2026-05-03T09:00:00.000Z',
+      type: 'shake_rejected',
+      rejectedFlavorId: 'flavor2',
+      method: 'random',
+      pool: 'caffeine-free',
+    },
+  ],
 };
 
 describe('exportStateAsJson', () => {
@@ -80,11 +109,37 @@ describe('parseBackupJson', () => {
 
     const result = parseBackupJson(v1Backup);
 
-    expect(result.version).toBe(2);
+    expect(result.version).toBe(3);
     expect(result.flavors).toEqual([
       { id: 'flavor1', name: 'Chocolate', randomPool: 'caffeine-free' },
       { id: 'flavor2', name: 'Vanilla', randomPool: null },
     ]);
+    expect(result.events).toEqual([]);
+  });
+
+  it('upgrades a v2 backup (no events field) to v3 with an empty events array', () => {
+    const v2Backup = JSON.stringify({
+      version: 2,
+      boxes: [
+        {
+          id: 'box1',
+          flavorId: 'flavor1',
+          quantity: 12,
+          location: { stack: 0, height: 0 },
+          isOpen: false,
+        },
+      ],
+      flavors: [{ id: 'flavor1', name: 'Chocolate', randomPool: 'caffeinated' }],
+      favoriteFlavorId: 'flavor1',
+      settings: {},
+    });
+
+    const result = parseBackupJson(v2Backup);
+
+    expect(result.version).toBe(3);
+    expect(result.events).toEqual([]);
+    expect(result.boxes).toHaveLength(1);
+    expect(result.favoriteFlavorId).toBe('flavor1');
   });
 
   it('throws BackupError(empty) on empty input', () => {

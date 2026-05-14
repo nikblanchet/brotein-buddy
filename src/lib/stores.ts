@@ -11,6 +11,8 @@
 import { writable, type Writable } from 'svelte/store';
 import { loadState, saveState } from './storage';
 import { isAppState, type AppState, type Box, type Flavor, type Location } from '../types/models';
+import type { AppEvent, EventMethod, EventPool } from '../types/events';
+import { createEvent } from './events';
 
 /**
  * Creates the application state store with auto-save functionality.
@@ -141,10 +143,18 @@ export function addBox(box: Box): void {
       throw new Error(`Box with ID "${box.id}" already exists`);
     }
 
-    // Create new state with box added
+    const event = createEvent('box_received', {
+      boxId: box.id,
+      flavorId: box.flavorId,
+      quantity: box.quantity,
+      location: box.location,
+      isOpen: box.isOpen,
+    });
+
     return {
       ...state,
       boxes: [...state.boxes, box],
+      events: [...state.events, event],
     };
   });
 }
@@ -173,10 +183,16 @@ export function removeBox(boxId: string): void {
       throw new Error(`Box with ID "${boxId}" not found`);
     }
 
-    // Create new state with box removed
+    const event = createEvent('box_removed', {
+      boxId: box.id,
+      flavorId: box.flavorId,
+      finalQuantity: box.quantity,
+    });
+
     return {
       ...state,
       boxes: state.boxes.filter((b) => b.id !== boxId),
+      events: [...state.events, event],
     };
   });
 }
@@ -298,16 +314,32 @@ export function updateBoxIsOpen(boxId: string, isOpen: boolean): void {
       throw new Error(`Box with ID "${boxId}" not found`);
     }
 
+    const previousBox = state.boxes[boxIndex];
+
     // Create new state with updated box
     const updatedBoxes = [...state.boxes];
     updatedBoxes[boxIndex] = {
-      ...updatedBoxes[boxIndex],
+      ...previousBox,
       isOpen,
     };
+
+    // Only emit `box_opened` on the false → true transition. Closing a box
+    // or toggling true → true produces no event.
+    const newEvents =
+      isOpen && !previousBox.isOpen
+        ? [
+            ...state.events,
+            createEvent('box_opened', {
+              boxId: previousBox.id,
+              flavorId: previousBox.flavorId,
+            }),
+          ]
+        : state.events;
 
     return {
       ...state,
       boxes: updatedBoxes,
+      events: newEvents,
     };
   });
 }
@@ -428,5 +460,106 @@ export function setFavoriteFlavor(flavorId: string | null): void {
   appState.update((state) => ({
     ...state,
     favoriteFlavorId: flavorId,
+  }));
+}
+
+/**
+ * Atomically decrements the quantity of a box and records a `shake_taken`
+ * event capturing how the shake was chosen.
+ *
+ * This is the single entry point for "the user took a shake" — the selection
+ * flow calls this instead of `updateBoxQuantity`, so the quantity change and
+ * the timeline event are committed in one store update.
+ *
+ * @param opts - Box, flavor, and selection-method context
+ * @throws {Error} If the box is not found or already at zero
+ */
+export function recordShakeTaken(opts: {
+  boxId: string;
+  flavorId: string;
+  method: EventMethod;
+  pool: EventPool;
+}): void {
+  appState.update((state) => {
+    const boxIndex = state.boxes.findIndex((b) => b.id === opts.boxId);
+    if (boxIndex === -1) {
+      throw new Error(`Box with ID "${opts.boxId}" not found`);
+    }
+
+    const previousBox = state.boxes[boxIndex];
+    if (previousBox.quantity <= 0) {
+      throw new Error(`Cannot take a shake from empty box "${opts.boxId}"`);
+    }
+
+    const updatedBoxes = [...state.boxes];
+    updatedBoxes[boxIndex] = {
+      ...previousBox,
+      quantity: previousBox.quantity - 1,
+    };
+
+    const event = createEvent('shake_taken', {
+      boxId: opts.boxId,
+      flavorId: opts.flavorId,
+      method: opts.method,
+      pool: opts.pool,
+    });
+
+    return {
+      ...state,
+      boxes: updatedBoxes,
+      events: [...state.events, event],
+    };
+  });
+}
+
+/**
+ * Records that the user rejected a suggested flavor by clicking
+ * "Different Choice" on the confirm screen. No box state changes; only the
+ * timeline gains an entry.
+ */
+export function recordShakeRejected(opts: {
+  rejectedFlavorId: string;
+  method: EventMethod;
+  pool: EventPool;
+}): void {
+  appendEvent(
+    createEvent('shake_rejected', {
+      rejectedFlavorId: opts.rejectedFlavorId,
+      method: opts.method,
+      pool: opts.pool,
+    })
+  );
+}
+
+/**
+ * Records that the user cancelled out of a selection flow without taking a
+ * shake. No box state changes; only the timeline gains an entry.
+ */
+export function recordSelectionCancelled(opts: {
+  flavorId: string | null;
+  method: EventMethod;
+  pool: EventPool;
+}): void {
+  appendEvent(
+    createEvent('selection_cancelled', {
+      flavorId: opts.flavorId,
+      method: opts.method,
+      pool: opts.pool,
+    })
+  );
+}
+
+/**
+ * Internal helper: appends one event to the timeline.
+ *
+ * Use this for actions that only need to record a timeline entry without
+ * touching boxes or flavors. Mutations that change both state and the
+ * timeline should build their event inside the same `appState.update` call
+ * to keep the write atomic.
+ */
+function appendEvent(event: AppEvent): void {
+  appState.update((state) => ({
+    ...state,
+    events: [...state.events, event],
   }));
 }

@@ -9,6 +9,7 @@
 
 import { writable } from 'svelte/store';
 import type { RandomPool } from '../types/models';
+import type { EventMethod } from '../types/events';
 
 /**
  * The flavor ID selected for the random confirmation flow.
@@ -23,10 +24,19 @@ export const selectedFlavorId = writable<string | null>(null);
 export const selectedPool = writable<RandomPool | null>(null);
 
 /**
+ * How the current selection flow was initiated.
+ * Set by Home.svelte on each entry path; read by RandomConfirm.svelte when
+ * emitting timeline events so the recorded `method` matches the user's intent
+ * (random / manual / favorite). null between flows.
+ */
+export const selectedMethod = writable<EventMethod | null>(null);
+
+/**
  * Clear all navigation state. Call after consuming the state
  * or when navigating away without consuming.
  */
 export function clearNavigationState(): void {
   selectedFlavorId.set(null);
   selectedPool.set(null);
+  selectedMethod.set(null);
 }

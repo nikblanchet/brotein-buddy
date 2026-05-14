@@ -14,7 +14,7 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState } from '$lib/stores';
-  import { selectedFlavorId, selectedPool } from '$lib/navigation-state';
+  import { selectedFlavorId, selectedPool, selectedMethod } from '$lib/navigation-state';
   import { maybeGetFlavor } from '$lib/utils/flavor';
   import type { Flavor, RandomPool } from '../types/models';
 
@@ -42,6 +42,7 @@
    */
   function handleRandomClick(pool: RandomPool) {
     selectedPool.set(pool);
+    selectedMethod.set('random');
     push(ROUTES.RANDOM);
   }
 
@@ -52,6 +53,8 @@
   function handleFavoriteClick() {
     if (favoriteFlavor) {
       selectedFlavorId.set(favoriteFlavor.id);
+      selectedPool.set(null);
+      selectedMethod.set('favorite');
       push(ROUTES.RANDOM_CONFIRM);
     }
   }
@@ -69,6 +72,8 @@
    */
   function handleFlavorSelect(flavor: Flavor) {
     selectedFlavorId.set(flavor.id);
+    selectedPool.set(null);
+    selectedMethod.set('manual');
     showFlavorPicker = false;
     push(ROUTES.RANDOM_CONFIRM);
   }

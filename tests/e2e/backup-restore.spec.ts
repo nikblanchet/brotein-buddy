@@ -105,9 +105,11 @@ test.describe('Backup & Restore', () => {
     const text = Buffer.concat(chunks).toString('utf-8');
     const parsed = JSON.parse(text) as AppState;
 
-    expect(parsed.version).toBe(2);
+    expect(parsed.version).toBe(3);
     expect(parsed.boxes).toHaveLength(1);
     expect(parsed.flavors[0].name).toBe('Chocolate');
+    expect(parsed.events).toBeDefined();
+    expect(Array.isArray(parsed.events)).toBe(true);
   });
 
   test('restores a backup file and replaces existing data', async ({ page }) => {
