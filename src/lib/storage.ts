@@ -160,7 +160,7 @@ export function clearState(): void {
  *   - `excludeFromRandom: false` → `randomPool: 'caffeine-free'`
  *   - `excludeFromRandom: true` → `randomPool: null`
  */
-function migrateState(data: unknown): unknown {
+export function migrateState(data: unknown): unknown {
   if (typeof data === 'object' && data !== null && 'version' in data) {
     const versioned = data as { version: number; flavors?: unknown[] };
 
