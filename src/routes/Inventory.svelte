@@ -20,6 +20,12 @@
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
+  import type { Flavor, RandomPool } from '../types/models';
+  import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
+  import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
+  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { formatLocation } from '$lib/utils/location-validation';
+  import { generateFlavorId } from '$lib/utils/id';
 
   /**
    * Modal state for adding inventory
@@ -30,12 +36,6 @@
    * Modal state for backup/restore
    */
   let isBackupModalOpen = $state(false);
-  import type { Flavor, RandomPool } from '../types/models';
-  import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
-  import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
-  import { getFlavorColor } from '$lib/utils/flavor-color';
-  import { formatLocation } from '$lib/utils/location-validation';
-  import { generateFlavorId } from '$lib/utils/id';
 
   /**
    * View mode state
