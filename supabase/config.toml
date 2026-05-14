@@ -1,0 +1,63 @@
+# Supabase project configuration.
+#
+# This file is consumed by the Supabase CLI (`supabase` command). Install
+# the CLI with `brew install supabase/tap/supabase`, then:
+#
+#   supabase login                       # one-time
+#   supabase link --project-ref <ref>    # link this repo to your project
+#   supabase db push                     # apply migrations/ to the linked project
+#
+# The `project_id` below names the local project (used for `supabase start`
+# to run a local Postgres/Auth stack against Docker). It is NOT the remote
+# project ref.
+
+project_id = "brotein-buddy"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+# Public URL of the app. The magic-link email contains a redirect that lands
+# here; supabase-js then completes the session client-side.
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://brotein-buddy.vercel.app"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+double_confirm_changes = true
+secure_password_change = false
+# Magic-link is the only sign-in method we use; password sign-in stays off.
+
+[auth.sms]
+enable_signup = false
+enable_confirmations = false
+
+[storage]
+enabled = false
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false
+
+[functions]
+enabled = false
