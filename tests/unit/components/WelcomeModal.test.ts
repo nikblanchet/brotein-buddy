@@ -103,11 +103,12 @@ describe.skip('WelcomeModal', () => {
 
     it('should save generated sample data to storage', async () => {
       const mockSampleData = {
-        version: 1,
-        flavors: [{ id: 'test', name: 'Test', randomPool: 'caffeine-free' }],
+        version: 3,
+        flavors: [{ id: 'test', name: 'Test', randomPool: 'caffeine-free' as const }],
         boxes: [],
         favoriteFlavorId: null,
         settings: {},
+        events: [],
       };
       vi.spyOn(sampleData, 'generateSampleData').mockReturnValue(mockSampleData);
       const saveSpy = vi.spyOn(storage, 'saveState');

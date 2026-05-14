@@ -156,37 +156,55 @@ export function clearState(): void {
  * data model changes (e.g., new fields added, old fields removed), this
  * function transforms old data to match the current schema.
  *
+ * Migrations are chained: a v1 payload runs through v1→v2 then v2→v3 in a
+ * single call. The function is idempotent — a payload already at the current
+ * version is returned unchanged.
+ *
  * @param data - Raw data loaded from localStorage (unknown type)
  * @returns Migrated data compatible with current schema
  *
  * @remarks
- * Current schema version: 2
+ * Current schema version: 3
+ *
  * Migration path:
  * - Version 1 → 2: Replace `excludeFromRandom: boolean` with `randomPool: RandomPool | null`
  *   - `excludeFromRandom: false` → `randomPool: 'caffeine-free'`
  *   - `excludeFromRandom: true` → `randomPool: null`
+ * - Version 2 → 3: Add empty `events: []` timeline. Existing boxes are
+ *   not backfilled with synthetic `box_received` events because their true
+ *   receive dates are unknown.
  */
 export function migrateState(data: unknown): unknown {
-  if (typeof data === 'object' && data !== null && 'version' in data) {
-    const versioned = data as { version: number; flavors?: unknown[] };
-
-    if (versioned.version === 1 && Array.isArray(versioned.flavors)) {
-      const migratedFlavors = versioned.flavors.map((f: unknown) => {
-        const flavor = f as Record<string, unknown>;
-        const { excludeFromRandom, ...rest } = flavor;
-        return {
-          ...rest,
-          randomPool: excludeFromRandom ? null : 'caffeine-free',
-        };
-      });
-
-      return {
-        ...versioned,
-        version: 2,
-        flavors: migratedFlavors,
-      };
-    }
+  if (typeof data !== 'object' || data === null || !('version' in data)) {
+    return data;
   }
 
-  return data;
+  let current = data as Record<string, unknown> & { version: number };
+
+  if (current.version === 1 && Array.isArray(current.flavors)) {
+    const migratedFlavors = current.flavors.map((f: unknown) => {
+      const flavor = f as Record<string, unknown>;
+      const { excludeFromRandom, ...rest } = flavor;
+      return {
+        ...rest,
+        randomPool: excludeFromRandom ? null : 'caffeine-free',
+      };
+    });
+
+    current = {
+      ...current,
+      version: 2,
+      flavors: migratedFlavors,
+    };
+  }
+
+  if (current.version === 2) {
+    current = {
+      ...current,
+      version: 3,
+      events: [],
+    };
+  }
+
+  return current;
 }

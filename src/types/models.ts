@@ -7,6 +7,8 @@
  * @module types/models
  */
 
+import { isAppEvent, type AppEvent } from './events';
+
 /**
  * Represents a 2D coordinate position in the physical storage system.
  *
@@ -172,11 +174,12 @@ export interface Settings {
  * @example
  * ```typescript
  * const initialState: AppState = {
- *   version: 1,
+ *   version: 3,
  *   boxes: [],
  *   flavors: [],
  *   favoriteFlavorId: null,
- *   settings: {}
+ *   settings: {},
+ *   events: []
  * };
  * ```
  *
@@ -185,13 +188,13 @@ export interface Settings {
  * - Schema version enables graceful migrations when structure changes
  * - All references between objects use IDs (normalized structure)
  * - favoriteFlavorId enables quick-pick functionality from home screen
- * - Current version is 1 (initial schema)
+ * - Current version is 3 (adds append-only `events` timeline)
  */
 export interface AppState {
   /**
    * Schema version number for migration support.
    * Increment when making breaking changes to the data structure.
-   * Current version: 2
+   * Current version: 3
    */
   version: number;
 
@@ -209,6 +212,14 @@ export interface AppState {
 
   /** Application-wide settings and preferences */
   settings: Settings;
+
+  /**
+   * Append-only timeline of user-visible actions: box lifecycle events,
+   * shake selections, and "no-transaction" moments (rejected suggestions,
+   * cancellations). Ordered by emission, which matches `timestamp` ordering
+   * in normal operation.
+   */
+  events: AppEvent[];
 }
 
 /**
@@ -368,6 +379,7 @@ export function isAppState(value: unknown): value is AppState {
     'flavors' in value &&
     'favoriteFlavorId' in value &&
     'settings' in value &&
+    'events' in value &&
     typeof (value as AppState).version === 'number' &&
     (value as AppState).version >= 1 &&
     Number.isInteger((value as AppState).version) &&
@@ -378,7 +390,9 @@ export function isAppState(value: unknown): value is AppState {
     ((value as AppState).favoriteFlavorId === null ||
       typeof (value as AppState).favoriteFlavorId === 'string') &&
     typeof (value as AppState).settings === 'object' &&
-    (value as AppState).settings !== null
+    (value as AppState).settings !== null &&
+    Array.isArray((value as AppState).events) &&
+    (value as AppState).events.every(isAppEvent)
   );
 }
 
@@ -390,10 +404,11 @@ export function isAppState(value: unknown): value is AppState {
  */
 export function createDefaultAppState(): AppState {
   return {
-    version: 2,
+    version: 3,
     boxes: [],
     flavors: [],
     favoriteFlavorId: null,
     settings: {},
+    events: [],
   };
 }

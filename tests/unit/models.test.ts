@@ -283,18 +283,19 @@ describe('isBox', () => {
 describe('isAppState', () => {
   it('returns true for valid empty AppState', () => {
     const validAppState: AppState = {
-      version: 2,
+      version: 3,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
       settings: {},
+      events: [],
     };
     expect(isAppState(validAppState)).toBe(true);
   });
 
   it('returns true for AppState with data', () => {
     const appState: AppState = {
-      version: 2,
+      version: 3,
       boxes: [
         {
           id: 'box_001',
@@ -313,30 +314,76 @@ describe('isAppState', () => {
       ],
       favoriteFlavorId: 'flavor_001',
       settings: {},
+      events: [
+        {
+          id: 'ev_1',
+          timestamp: '2026-05-14T12:00:00.000Z',
+          type: 'box_opened',
+          boxId: 'box_001',
+          flavorId: 'flavor_001',
+        },
+      ],
     };
     expect(isAppState(appState)).toBe(true);
   });
 
   it('returns true for AppState with null favoriteFlavorId', () => {
     const appState: AppState = {
-      version: 2,
+      version: 3,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
       settings: {},
+      events: [],
     };
     expect(isAppState(appState)).toBe(true);
   });
 
   it('returns true for AppState with future version', () => {
     const appState = {
-      version: 2,
+      version: 3,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+      events: [],
+    };
+    expect(isAppState(appState)).toBe(true);
+  });
+
+  it('returns false when events field is missing', () => {
+    const invalidAppState = {
+      version: 3,
       boxes: [],
       flavors: [],
       favoriteFlavorId: null,
       settings: {},
     };
-    expect(isAppState(appState)).toBe(true);
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false when events is not an array', () => {
+    const invalidAppState = {
+      version: 3,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+      events: 'not an array',
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
+  });
+
+  it('returns false when an event in events array is invalid', () => {
+    const invalidAppState = {
+      version: 3,
+      boxes: [],
+      flavors: [],
+      favoriteFlavorId: null,
+      settings: {},
+      events: [{ id: '', timestamp: '', type: 'box_opened' }],
+    };
+    expect(isAppState(invalidAppState)).toBe(false);
   });
 
   it('returns false for missing version', () => {
@@ -484,9 +531,9 @@ describe('createDefaultAppState', () => {
     expect(isAppState(defaultState)).toBe(true);
   });
 
-  it('has version 2', () => {
+  it('has version 3', () => {
     const defaultState = createDefaultAppState();
-    expect(defaultState.version).toBe(2);
+    expect(defaultState.version).toBe(3);
   });
 
   it('has empty boxes array', () => {
@@ -507,6 +554,11 @@ describe('createDefaultAppState', () => {
   it('has empty settings object', () => {
     const defaultState = createDefaultAppState();
     expect(defaultState.settings).toEqual({});
+  });
+
+  it('has empty events array', () => {
+    const defaultState = createDefaultAppState();
+    expect(defaultState.events).toEqual([]);
   });
 
   it('creates a new object each time', () => {

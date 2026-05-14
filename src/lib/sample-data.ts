@@ -46,7 +46,7 @@ import type { AppState } from '../types/models';
  */
 export function generateSampleData(): AppState {
   return {
-    version: 2,
+    version: 3,
 
     flavors: [
       {
@@ -142,5 +142,7 @@ export function generateSampleData(): AppState {
     favoriteFlavorId: 'chocolate', // Set favorite for quick-pick demonstration
 
     settings: {}, // Empty in v1
+
+    events: [], // Sample data starts with an empty timeline
   };
 }

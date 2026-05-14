@@ -16,7 +16,12 @@ describe('generateSampleData', () => {
 
   it('should have correct schema version', () => {
     const data = generateSampleData();
-    expect(data.version).toBe(2);
+    expect(data.version).toBe(3);
+  });
+
+  it('should include an empty events timeline', () => {
+    const data = generateSampleData();
+    expect(data.events).toEqual([]);
   });
 
   describe('flavors', () => {
