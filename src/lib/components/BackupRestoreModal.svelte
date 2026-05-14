@@ -143,6 +143,7 @@
           accept="application/json,.json"
           onchange={handleFileSelected}
           class="visually-hidden"
+          aria-label="Choose backup file (.json)"
           data-testid="backup-modal-file-input"
         />
         <Button
@@ -150,6 +151,7 @@
           size="base"
           fullWidth
           onclick={triggerFilePicker}
+          ariaLabel="Choose backup file to restore"
           testId="backup-modal-choose-file"
         >
           Choose file…
