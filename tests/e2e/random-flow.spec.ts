@@ -264,13 +264,20 @@ test.describe('Random Selection Flow', () => {
       // Should return to home
       await expect(page).toHaveURL(/#\/$/);
 
-      // Verify state was NOT updated
+      // Verify inventory was NOT updated (cancel still records a timeline
+      // event, so the full state is intentionally not byte-equal).
       const updatedState = await page.evaluate((key) => {
         const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : null;
       }, STORAGE_KEY);
 
-      expect(JSON.stringify(updatedState)).toBe(JSON.stringify(initialState));
+      expect(updatedState.boxes).toEqual(initialState.boxes);
+      expect(updatedState.flavors).toEqual(initialState.flavors);
+      expect(updatedState.favoriteFlavorId).toEqual(initialState.favoriteFlavorId);
+
+      const newEvents = updatedState.events.slice(initialState.events.length);
+      expect(newEvents).toHaveLength(1);
+      expect(newEvents[0].type).toBe('selection_cancelled');
     });
   });
 
