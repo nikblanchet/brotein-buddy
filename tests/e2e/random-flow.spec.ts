@@ -220,6 +220,30 @@ test.describe('Random Selection Flow', () => {
 
       expect(updatedTotalQuantity).toBe(initialTotalQuantity - 1);
     });
+
+    test('records a shake_taken event in the timeline', async ({ page }) => {
+      await page.getByTestId('random-caffeine-free-button').click();
+      await expect(page).toHaveURL(/#\/random\/confirm/, { timeout: 3000 });
+
+      await page.locator('button').filter({ hasText: 'Confirm' }).click();
+      await expect(page).toHaveURL(/#\/$/);
+
+      const after = await page.evaluate((key) => {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : null;
+      }, STORAGE_KEY);
+
+      expect(after.version).toBe(3);
+      expect(Array.isArray(after.events)).toBe(true);
+
+      const shakeTaken = after.events.find((e: { type: string }) => e.type === 'shake_taken');
+      expect(shakeTaken).toBeDefined();
+      expect(shakeTaken.method).toBe('random');
+      expect(shakeTaken.pool).toBe('caffeine-free');
+      expect(typeof shakeTaken.boxId).toBe('string');
+      expect(typeof shakeTaken.flavorId).toBe('string');
+      expect(typeof shakeTaken.timestamp).toBe('string');
+    });
   });
 
   test.describe('Cancel Action', () => {

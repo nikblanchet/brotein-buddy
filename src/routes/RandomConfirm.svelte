@@ -12,14 +12,22 @@
   import Button from '$lib/components/Button.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
-  import { appState, updateBoxQuantity } from '$lib/stores';
+  import {
+    appState,
+    recordShakeTaken,
+    recordShakeRejected,
+    recordSelectionCancelled,
+  } from '$lib/stores';
   import { selectPriorityBox, compareBoxPriority } from '$lib/box-selection';
   import {
     selectedFlavorId as selectedFlavorIdStore,
+    selectedPool as selectedPoolStore,
+    selectedMethod as selectedMethodStore,
     clearNavigationState,
   } from '$lib/navigation-state';
   import { maybeGetFlavor } from '$lib/utils/flavor';
   import type { Flavor, Box } from '../types/models';
+  import type { EventMethod, EventPool } from '../types/events';
   import { get } from 'svelte/store';
   import { onMount } from 'svelte';
 
@@ -29,6 +37,15 @@
   let selectedFlavorId = $state<string | null>(null);
   let selectedFlavor = $state<Flavor | null>(null);
   let sessionErrorMessage = $state<string | null>(null);
+
+  /**
+   * Selection method and pool snapshotted from navigation state on mount.
+   * Captured here (rather than read fresh on each click) so the timeline
+   * event records the method that brought the user to this screen — even if
+   * the user navigates away and back.
+   */
+  let selectionMethod = $state<EventMethod>('random');
+  let selectionPool = $state<EventPool>(null);
 
   // Reactive derived values that automatically update when store changes
   let priorityBox = $derived.by(() => {
@@ -74,6 +91,11 @@
       return;
     }
 
+    // Snapshot selection context for the timeline event. Default to 'random'
+    // for any direct navigation that bypassed Home.svelte's setters.
+    selectionMethod = get(selectedMethodStore) ?? 'random';
+    selectionPool = get(selectedPoolStore);
+
     // No manual refresh needed - derived values automatically compute on first render
   });
 
@@ -85,13 +107,17 @@
   }
 
   /**
-   * Confirm selection: decrement quantity and go home
+   * Confirm selection: decrement quantity, record event, and go home
    */
   function handleConfirm() {
-    if (!priorityBox) return;
+    if (!priorityBox || !selectedFlavorId) return;
 
-    const newQuantity = priorityBox.quantity - 1;
-    updateBoxQuantity(priorityBox.id, newQuantity);
+    recordShakeTaken({
+      boxId: priorityBox.id,
+      flavorId: selectedFlavorId,
+      method: selectionMethod,
+      pool: selectionPool,
+    });
 
     // Clear navigation state
     clearNavigationState();
@@ -104,6 +130,12 @@
    * Cancel: go back to home without changes
    */
   function handleCancel() {
+    recordSelectionCancelled({
+      flavorId: selectedFlavorId,
+      method: selectionMethod,
+      pool: selectionPool,
+    });
+
     // Clear navigation state
     clearNavigationState();
 
@@ -115,10 +147,14 @@
    * Add Another: decrement quantity again and stay on this screen
    */
   function handleAddAnother() {
-    if (!priorityBox) return;
+    if (!priorityBox || !selectedFlavorId) return;
 
-    const newQuantity = priorityBox.quantity - 1;
-    updateBoxQuantity(priorityBox.id, newQuantity);
+    recordShakeTaken({
+      boxId: priorityBox.id,
+      flavorId: selectedFlavorId,
+      method: selectionMethod,
+      pool: selectionPool,
+    });
 
     // No manual refresh needed - derived values automatically update!
   }
@@ -131,7 +167,14 @@
 
     const flavorIdToExclude = selectedFlavorId;
 
-    // Clear flavor selection but preserve selectedPool for the re-roll
+    recordShakeRejected({
+      rejectedFlavorId: flavorIdToExclude,
+      method: selectionMethod,
+      pool: selectionPool,
+    });
+
+    // Clear flavor selection but preserve selectedPool / selectedMethod
+    // for the re-roll (the user is still in the same random flow).
     selectedFlavorIdStore.set(null);
 
     // Navigate to random with exclude parameter
