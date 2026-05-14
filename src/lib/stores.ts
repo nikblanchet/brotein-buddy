@@ -10,7 +10,7 @@
 
 import { writable, type Writable } from 'svelte/store';
 import { loadState, saveState } from './storage';
-import type { AppState, Box, Flavor, Location } from '../types/models';
+import { isAppState, type AppState, type Box, type Flavor, type Location } from '../types/models';
 
 /**
  * Creates the application state store with auto-save functionality.
@@ -78,6 +78,34 @@ export const appState = createAppStore();
  */
 export function loadStateFromStorage(): void {
   appState.set(loadState());
+}
+
+/**
+ * Replaces the entire application state.
+ *
+ * Validates the provided state and atomically replaces the in-memory store.
+ * The store's auto-save subscription persists the new state to LocalStorage.
+ *
+ * @param state - The new application state
+ * @throws {Error} If state fails schema validation
+ *
+ * @example
+ * ```typescript
+ * // After parsing a backup file
+ * const restored = parseBackupJson(fileText);
+ * replaceAppState(restored);
+ * ```
+ *
+ * @remarks
+ * - Intended for restore-from-backup flows
+ * - Caller is responsible for warning the user that current data is replaced
+ * - Validation prevents corrupt imports from poisoning the store
+ */
+export function replaceAppState(state: AppState): void {
+  if (!isAppState(state)) {
+    throw new Error('Cannot replace state: schema validation failed');
+  }
+  appState.set(state);
 }
 
 /**

@@ -4,6 +4,12 @@
  * Provides functions to persist and retrieve application state from browser localStorage
  * with validation, error handling, and migration support.
  *
+ * Note: {@link migrateState} is exported (in addition to the higher-level
+ * {@link loadState} / {@link saveState} entry points) so that the backup/
+ * restore flow in `lib/backup.ts` can apply the same schema migrations to
+ * a JSON payload coming from a file as we apply to data already sitting
+ * in localStorage.
+ *
  * @module lib/storage
  */
 
@@ -160,7 +166,7 @@ export function clearState(): void {
  *   - `excludeFromRandom: false` → `randomPool: 'caffeine-free'`
  *   - `excludeFromRandom: true` → `randomPool: null`
  */
-function migrateState(data: unknown): unknown {
+export function migrateState(data: unknown): unknown {
   if (typeof data === 'object' && data !== null && 'version' in data) {
     const versioned = data as { version: number; flavors?: unknown[] };
 

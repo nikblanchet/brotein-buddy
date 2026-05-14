@@ -16,20 +16,26 @@
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import AddInventoryModal from '$lib/components/AddInventoryModal.svelte';
+  import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
-
-  /**
-   * Modal state for adding inventory
-   */
-  let isAddInventoryModalOpen = $state(false);
   import type { Flavor, RandomPool } from '../types/models';
   import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
   import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
   import { getFlavorColor } from '$lib/utils/flavor-color';
   import { formatLocation } from '$lib/utils/location-validation';
   import { generateFlavorId } from '$lib/utils/id';
+
+  /**
+   * Modal state for adding inventory
+   */
+  let isAddInventoryModalOpen = $state(false);
+
+  /**
+   * Modal state for backup/restore
+   */
+  let isBackupModalOpen = $state(false);
 
   /**
    * View mode state
@@ -172,6 +178,14 @@
         >Add Inventory</Button
       >
       <Button variant="primary" size="base" onclick={handleNewFlavorClick}>New Flavor</Button>
+      <Button
+        variant="ghost"
+        size="base"
+        onclick={() => (isBackupModalOpen = true)}
+        testId="inventory-backup-button"
+      >
+        Backup
+      </Button>
     </div>
   </header>
 
@@ -314,6 +328,9 @@
   existingBoxes={$appState.boxes}
   flavors={$appState.flavors}
 />
+
+<!-- Backup & Restore Modal -->
+<BackupRestoreModal open={isBackupModalOpen} onclose={() => (isBackupModalOpen = false)} />
 
 <!-- New Flavor Modal -->
 <Modal open={isNewFlavorModalOpen} title="Add New Flavor" onclose={closeNewFlavorModal} size="sm">

@@ -10,6 +10,7 @@ import { get } from 'svelte/store';
 import {
   appState,
   loadStateFromStorage,
+  replaceAppState,
   addBox,
   removeBox,
   updateBoxQuantity,
@@ -19,7 +20,7 @@ import {
   updateFlavor,
   setFavoriteFlavor,
 } from '../../src/lib/stores';
-import type { Box, Flavor } from '../../src/types/models';
+import type { AppState, Box, Flavor } from '../../src/types/models';
 
 /**
  * Test helper: Gets current store value synchronously.
@@ -119,6 +120,33 @@ describe('stores', () => {
       state = getCurrentState();
       expect(state.boxes).toHaveLength(2);
       expect(state.flavors).toHaveLength(1);
+    });
+  });
+
+  describe('replaceAppState', () => {
+    it('replaces the entire state when given a valid AppState', () => {
+      const incoming: AppState = {
+        version: 2,
+        boxes: [createTestBox({ id: 'replaced_box' })],
+        flavors: [createTestFlavor({ id: 'replaced_flavor' })],
+        favoriteFlavorId: 'replaced_flavor',
+        settings: {},
+      };
+
+      replaceAppState(incoming);
+
+      const state = getCurrentState();
+      expect(state).toEqual(incoming);
+      // Auto-save subscription persists to localStorage
+      expect(localStorage.getItem('BROTEINBUDDY_APP_STATE')).toBe(JSON.stringify(incoming));
+    });
+
+    it('throws and does not mutate the store when given an invalid state', () => {
+      const before = getCurrentState();
+      const bogus = { version: 2, boxes: 'not-an-array' } as unknown as AppState;
+
+      expect(() => replaceAppState(bogus)).toThrow(/schema validation failed/);
+      expect(getCurrentState()).toEqual(before);
     });
   });
 
