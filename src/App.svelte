@@ -26,6 +26,8 @@
   import PickResultSheet from './lib/components/PickResultSheet.svelte';
   import AddInventoryPanel from './lib/components/AddInventoryPanel.svelte';
   import { addInventoryOpen } from './lib/panel-state';
+  import ConflictResolutionModal from './lib/components/ConflictResolutionModal.svelte';
+  import { initializeSync } from './lib/sync-coordinator';
   import { onMount } from 'svelte';
 
   /**
@@ -77,13 +79,15 @@
   };
 
   /**
-   * Check if this is the first visit and show welcome modal
+   * Check if this is the first visit and show welcome modal.
+   * Also wires up the Supabase sync coordinator (no-op when not configured).
    */
   onMount(() => {
     const hasSeenWelcome = localStorage.getItem(WELCOME_SHOWN_KEY);
     if (!hasSeenWelcome) {
       showWelcomeModal = true;
     }
+    initializeSync();
   });
 
   /**
@@ -176,6 +180,10 @@
 
 <!-- Welcome Modal (first-time users) -->
 <WelcomeModal open={showWelcomeModal} onclose={handleWelcomeClose} />
+
+<!-- Sign-in conflict resolution. Modal opens itself when the coordinator
+     surfaces a pending conflict; renders nothing otherwise. -->
+<ConflictResolutionModal />
 
 <style>
   /**
