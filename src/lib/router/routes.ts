@@ -13,6 +13,7 @@ import RandomConfirm from '../../routes/RandomConfirm.svelte';
 import Inventory from '../../routes/Inventory.svelte';
 import InventoryBoxEdit from '../../routes/InventoryBoxEdit.svelte';
 import InventoryRearrange from '../../routes/InventoryRearrange.svelte';
+import More from '../../routes/More.svelte';
 import NotFound from '../../routes/NotFound.svelte';
 import ComponentDemo from '../ComponentDemo.svelte';
 
@@ -29,6 +30,7 @@ export const routes = {
   '/inventory': Inventory,
   '/inventory/:boxId/edit': InventoryBoxEdit,
   '/inventory/rearrange': InventoryRearrange,
+  '/more': More,
   '/component-demo': ComponentDemo,
   '*': NotFound,
 };
@@ -80,6 +82,18 @@ export const ROUTES = {
 
   /** Drag-and-drop box rearrangement screen */
   INVENTORY_REARRANGE: '/inventory/rearrange',
+
+  /** More screen with secondary functionality (backup, rearrange, settings) */
+  MORE: '/more',
+
+  /**
+   * Pick screen alias for HOME.
+   *
+   * The Pick screen replaces Home as the default route in the 2026 UX
+   * refresh. PICK and HOME both resolve to '/' so existing call sites
+   * keep working until they migrate.
+   */
+  PICK: '/',
 
   /** Component demo page for development and visual testing */
   COMPONENT_DEMO: '/component-demo',

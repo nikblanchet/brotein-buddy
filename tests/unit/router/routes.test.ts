@@ -29,6 +29,15 @@ describe('Routes Configuration', () => {
     it('defines inventory rearrange route', () => {
       expect(ROUTES.INVENTORY_REARRANGE).toBe('/inventory/rearrange');
     });
+
+    it('defines more route', () => {
+      expect(ROUTES.MORE).toBe('/more');
+    });
+
+    it('exposes pick alias for the home route', () => {
+      expect(ROUTES.PICK).toBe('/');
+      expect(ROUTES.PICK).toBe(ROUTES.HOME);
+    });
   });
 
   describe('ROUTES.INVENTORY_BOX_EDIT parameter helper', () => {
