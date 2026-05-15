@@ -8,6 +8,20 @@ import dotenv from 'dotenv';
 // Load .env.local if it exists (for worktree-specific port configuration)
 dotenv.config({ path: '.env.local' });
 
+// Resolve Supabase config from the available env-var aliases. Locally we
+// read VITE_SUPABASE_* from .env.local; on Vercel the Supabase integration
+// injects SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY (along with several
+// server-only secrets we deliberately ignore). We safelist by NAME to keep
+// SUPABASE_SERVICE_ROLE_KEY / SUPABASE_SECRET_KEY / SUPABASE_JWT_SECRET /
+// POSTGRES_PASSWORD out of the client bundle — widening Vite's envPrefix
+// would expose them all.
+const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
+const supabaseAnonKey =
+  process.env.VITE_SUPABASE_ANON_KEY ??
+  process.env.SUPABASE_PUBLISHABLE_KEY ??
+  process.env.SUPABASE_ANON_KEY ??
+  '';
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -83,6 +97,13 @@ export default defineConfig({
   ],
   server: {
     port: parseInt(process.env.VITE_PORT || '5173'),
+  },
+  define: {
+    // Map the resolved Supabase config onto the VITE_SUPABASE_* names the
+    // client reads. Empty strings fall through to lib/supabase.ts's
+    // "not configured" path, which renders local-only mode without crashing.
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseAnonKey),
   },
   resolve: {
     alias: {

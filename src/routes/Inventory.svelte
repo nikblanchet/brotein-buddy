@@ -17,6 +17,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import AddInventoryModal from '$lib/components/AddInventoryModal.svelte';
   import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
+  import SyncAccountModal from '$lib/components/SyncAccountModal.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
@@ -36,6 +37,11 @@
    * Modal state for backup/restore
    */
   let isBackupModalOpen = $state(false);
+
+  /**
+   * Modal state for sync & account
+   */
+  let isSyncModalOpen = $state(false);
 
   /**
    * View mode state
@@ -186,6 +192,14 @@
       >
         Backup
       </Button>
+      <Button
+        variant="ghost"
+        size="base"
+        onclick={() => (isSyncModalOpen = true)}
+        testId="inventory-sync-button"
+      >
+        Sync
+      </Button>
     </div>
   </header>
 
@@ -331,6 +345,9 @@
 
 <!-- Backup & Restore Modal -->
 <BackupRestoreModal open={isBackupModalOpen} onclose={() => (isBackupModalOpen = false)} />
+
+<!-- Sync & Account Modal -->
+<SyncAccountModal open={isSyncModalOpen} onclose={() => (isSyncModalOpen = false)} />
 
 <!-- New Flavor Modal -->
 <Modal open={isNewFlavorModalOpen} title="Add New Flavor" onclose={closeNewFlavorModal} size="sm">
