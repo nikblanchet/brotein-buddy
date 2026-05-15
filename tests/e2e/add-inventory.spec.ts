@@ -39,6 +39,20 @@ async function dismissWelcome(page: Page) {
   }
 }
 
+/**
+ * Opens the Add Inventory panel via whichever affordance the current
+ * viewport exposes: the FAB on phone widths, the topbar "+ Add
+ * inventory" button on laptop widths.
+ */
+async function openAddInventory(page: Page) {
+  const fab = page.getByTestId('add-inventory-fab');
+  if (await fab.isVisible()) {
+    await fab.click();
+  } else {
+    await page.getByTestId('topbar-add-inventory').click();
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
     key: STORAGE_KEY,
@@ -47,7 +61,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => window.localStorage.setItem('broteinbuddy_welcome_shown', 'true'));
   await page.goto('/#/inventory');
   await dismissWelcome(page);
-  await page.getByTestId('add-inventory-fab').click();
+  await openAddInventory(page);
 });
 
 test('FAB opens the panel on the mode-select step', async ({ page }) => {
@@ -75,7 +89,7 @@ test('Adding 1 closed box at the suggested location appears in inventory', async
   const confirm = page.getByTestId('add-inv-confirm');
   await expect(confirm).toContainText('Add 1 box · 12 bottles');
   await confirm.click();
-  await expect(page.getByTestId('add-inventory-panel')).toBeHidden();
+  await expect(page.getByTestId('add-inventory-panel')).toHaveAttribute('aria-hidden', 'true');
   // 24 bottles total now (12 existing + 12 new)
   await expect(page.getByTestId('inv-tally')).toContainText('24');
 });
@@ -83,6 +97,6 @@ test('Adding 1 closed box at the suggested location appears in inventory', async
 test('Cancel closes the panel without writing', async ({ page }) => {
   await page.getByTestId('mode-closed').click();
   await page.getByRole('button', { name: 'Cancel' }).click();
-  await expect(page.getByTestId('add-inventory-panel')).toBeHidden();
+  await expect(page.getByTestId('add-inventory-panel')).toHaveAttribute('aria-hidden', 'true');
   await expect(page.getByTestId('inv-tally')).toContainText('12');
 });
