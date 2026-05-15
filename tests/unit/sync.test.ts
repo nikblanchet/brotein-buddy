@@ -202,6 +202,12 @@ describe('peekRemoteState', () => {
     mock.__seedError('snapshot', { message: 'boom' });
     await expect(peekRemoteState()).rejects.toBeInstanceOf(SyncError);
   });
+
+  it('throws SyncError when the event count query fails', async () => {
+    mock.__seedSnapshot({ boxes: [], flavors: [], updated_at: '2026-05-14T12:00:00.000Z' });
+    mock.__seedError('count', { message: 'count failed' });
+    await expect(peekRemoteState()).rejects.toBeInstanceOf(SyncError);
+  });
 });
 
 describe('pullFullState', () => {
@@ -259,6 +265,20 @@ describe('pullFullState', () => {
     expect(state).not.toBeNull();
     expect(state!.version).toBe(3);
     expect(state!.events).toEqual([]);
+  });
+
+  it('throws SyncError when the events query fails', async () => {
+    mock.__seedSnapshot({
+      user_id: 'user-123',
+      version: 3,
+      boxes: [],
+      flavors: [],
+      favorite_flavor_id: null,
+      settings: {},
+      updated_at: '2026-05-14T12:00:00.000Z',
+    });
+    mock.__seedError('events', { message: 'events query failed' });
+    await expect(pullFullState()).rejects.toBeInstanceOf(SyncError);
   });
 
   it('throws SyncError when assembled state fails schema validation', async () => {

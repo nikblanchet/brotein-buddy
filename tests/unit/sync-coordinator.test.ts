@@ -249,6 +249,52 @@ describe('resolveConflict', () => {
   });
 });
 
+describe('auth event serialization', () => {
+  it('processes INITIAL_SESSION before SIGNED_IN even when fired back-to-back', async () => {
+    // Order: INITIAL_SESSION pull completes BEFORE SIGNED_IN reconcile starts.
+    const orderLog: string[] = [];
+
+    let releasePull: () => void = () => {};
+    pullFullState.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          orderLog.push('initial-pull-start');
+          releasePull = () => {
+            orderLog.push('initial-pull-end');
+            resolve(populatedLocalState());
+          };
+        })
+    );
+
+    peekRemoteState.mockImplementationOnce(async () => {
+      orderLog.push('signed-in-peek');
+      return {
+        exists: false,
+        boxCount: 0,
+        flavorCount: 0,
+        eventCount: 0,
+        updatedAt: null,
+      };
+    });
+
+    // Fire both handlers back-to-back, synchronously, before either resolves.
+    authChangeHandler!('INITIAL_SESSION', { user: { id: 'u1' } });
+    authChangeHandler!('SIGNED_IN', { user: { id: 'u1' } });
+
+    // Let INITIAL_SESSION's pull start, then release it.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(orderLog).toEqual(['initial-pull-start']);
+
+    releasePull();
+
+    // Drain.
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+
+    expect(orderLog).toEqual(['initial-pull-start', 'initial-pull-end', 'signed-in-peek']);
+  });
+});
+
 describe('debounced push', () => {
   it('does not push when no session is active', async () => {
     appStateStore.update((state) => ({ ...state, favoriteFlavorId: 'f1' }));
