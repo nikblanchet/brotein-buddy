@@ -1,4 +1,4 @@
-# ADR-012: OKLCH Cloud Dancer Token System with Curated Flavor Palette
+# ADR-014: OKLCH Cloud Dancer Token System with Curated Flavor Palette
 
 **Status:** Accepted
 

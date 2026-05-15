@@ -1,4 +1,4 @@
-# ADR-013: Persistent Three-Tab Navigation with Pick as Default Route
+# ADR-015: Persistent Three-Tab Navigation with Pick as Default Route
 
 **Status:** Accepted
 
@@ -89,5 +89,5 @@ Simpler tooling story (`@media (min-width: 820px)` is universally supported). Re
 ## References
 
 - ADR-006: Routing strategy (still in force; the new routes follow the same hash-routing model)
-- ADR-012: OKLCH Cloud Dancer Token System (provides the design tokens this nav consumes)
+- ADR-014: OKLCH Cloud Dancer Token System (provides the design tokens this nav consumes)
 - Design handoff: [`docs/design/2026-ux-refresh/README.md`](../design/2026-ux-refresh/README.md), sections "Navigation" and "Responsive Strategy" (annotated screenshots in the sibling `screenshots/` directory)
