@@ -25,6 +25,7 @@
   import AppNav from './lib/components/AppNav.svelte';
   import PickResultSheet from './lib/components/PickResultSheet.svelte';
   import AddInventoryPanel from './lib/components/AddInventoryPanel.svelte';
+  import SyncAccountModal from './lib/components/SyncAccountModal.svelte';
   import { addInventoryOpen } from './lib/panel-state';
   import ConflictResolutionModal from './lib/components/ConflictResolutionModal.svelte';
   import { initializeSync } from './lib/sync-coordinator';
@@ -176,6 +177,7 @@
   -->
   <PickResultSheet />
   <AddInventoryPanel />
+  <SyncAccountModal />
 </div>
 
 <!-- Welcome Modal (first-time users) -->
