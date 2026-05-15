@@ -145,7 +145,7 @@
 
   .explainer {
     margin: 0;
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     line-height: 1.5;
   }
 
@@ -160,15 +160,15 @@
     gap: var(--space-3);
     align-items: flex-start;
     padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-base);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-md);
     cursor: pointer;
     transition: border-color 0.15s ease;
   }
 
   .option.selected {
-    border-color: var(--color-primary);
-    background: var(--color-background-secondary);
+    border-color: var(--accent);
+    background: var(--surface-hover);
   }
 
   .option input {
@@ -182,12 +182,12 @@
   }
 
   .option-body strong {
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .option-body p {
     margin: 0;
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     font-size: var(--font-size-sm);
   }
 

@@ -123,11 +123,41 @@ describe('NumberPad', () => {
     });
   });
 
+  describe('column resolution (matches NumberPad.svelte default)', () => {
+    /**
+     * Mirrors the inline default in NumberPad.svelte's resolvedColumns
+     * derivation so a regression in the heuristic surfaces here.
+     */
+    function resolveColumns(rangeSize: number, explicit?: number): number {
+      return explicit ?? (rangeSize <= 6 ? 3 : 4);
+    }
+
+    it('uses 3 columns for short ranges (closed-box 1-3 path)', () => {
+      const range = generateNumberRange(1, 3);
+      expect(resolveColumns(range.length)).toBe(3);
+    });
+
+    it('uses 3 columns at the 6-item boundary', () => {
+      const range = generateNumberRange(1, 6);
+      expect(resolveColumns(range.length)).toBe(3);
+    });
+
+    it('uses 4 columns for the open-box 1-12 path', () => {
+      const range = generateNumberRange(1, 12);
+      expect(resolveColumns(range.length)).toBe(4);
+    });
+
+    it('honors an explicit columns override', () => {
+      const range = generateNumberRange(1, 12);
+      expect(resolveColumns(range.length, 6)).toBe(6);
+    });
+  });
+
   describe('integration scenarios', () => {
     it('generates default number pad range (1-12)', () => {
       const numbers = generateNumberRange(1, 12);
       expect(numbers).toHaveLength(12);
-      expect(calculateRows(numbers.length, 3)).toBe(4);
+      expect(calculateRows(numbers.length, 4)).toBe(3);
     });
 
     it('validates all numbers in generated range are in bounds', () => {

@@ -7,14 +7,12 @@
  * @see ADR-006 for routing strategy decision rationale
  */
 
-import Home from '../../routes/Home.svelte';
-import Random from '../../routes/Random.svelte';
-import RandomConfirm from '../../routes/RandomConfirm.svelte';
+import Pick from '../../routes/Pick.svelte';
 import Inventory from '../../routes/Inventory.svelte';
 import InventoryBoxEdit from '../../routes/InventoryBoxEdit.svelte';
 import InventoryRearrange from '../../routes/InventoryRearrange.svelte';
+import More from '../../routes/More.svelte';
 import NotFound from '../../routes/NotFound.svelte';
-import ComponentDemo from '../ComponentDemo.svelte';
 
 /**
  * Route configuration for svelte-spa-router
@@ -23,13 +21,11 @@ import ComponentDemo from '../ComponentDemo.svelte';
  * All routes use hash-based navigation (e.g., /#/inventory).
  */
 export const routes = {
-  '/': Home,
-  '/random': Random,
-  '/random/confirm': RandomConfirm,
+  '/': Pick,
   '/inventory': Inventory,
   '/inventory/:boxId/edit': InventoryBoxEdit,
   '/inventory/rearrange': InventoryRearrange,
-  '/component-demo': ComponentDemo,
+  '/more': More,
   '*': NotFound,
 };
 
@@ -52,16 +48,7 @@ export const routes = {
  * ```
  */
 export const ROUTES = {
-  /** Home screen with main action buttons */
-  HOME: '/',
-
-  /** Random flavor selection screen */
-  RANDOM: '/random',
-
-  /** Confirmation screen after random selection */
-  RANDOM_CONFIRM: '/random/confirm',
-
-  /** Inventory management screen (visual and table views) */
+  /** Inventory management screen */
   INVENTORY: '/inventory',
 
   /**
@@ -81,8 +68,11 @@ export const ROUTES = {
   /** Drag-and-drop box rearrangement screen */
   INVENTORY_REARRANGE: '/inventory/rearrange',
 
-  /** Component demo page for development and visual testing */
-  COMPONENT_DEMO: '/component-demo',
+  /** More screen with secondary functionality (backup, rearrange, settings) */
+  MORE: '/more',
+
+  /** Pick screen - the default landing route */
+  PICK: '/',
 } as const;
 
 /**

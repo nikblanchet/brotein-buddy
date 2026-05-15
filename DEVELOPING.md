@@ -849,6 +849,35 @@ The application state is managed using Svelte stores with automatic LocalStorage
 - [tests/unit/stores.test.ts](tests/unit/stores.test.ts) - Comprehensive state management tests (51 tests, 100% coverage)
 - [docs/teaching/1.5-svelte-stores-localstorage.md](docs/teaching/1.5-svelte-stores-localstorage.md) - Deep dive on reactive state and persistence
 
+### Sync Layer
+
+Optional multi-device sync backs local state up to Supabase. When the Supabase environment variables are absent the app runs exactly as before - local-only, no network - and the sync UI shows a "not configured" notice. Sign-in is passwordless (magic link).
+
+**Core modules:**
+
+- **`src/lib/supabase.ts`**: Supabase client singleton; `isSyncConfigured()` reports whether the env vars are present.
+- **`src/lib/auth.ts`**: magic-link sign-in/out and the `session` store.
+- **`src/lib/sync-coordinator.ts`**: the state machine wiring auth and `appState` mutations to debounced push, pull-on-start, realtime re-pull, and conflict resolution. Exposes `syncStatus`, `lastSyncedAt`, `pendingChanges`, and `pendingConflict` for the UI.
+- **`src/lib/sync.ts`, `sync-meta.ts`, `realtime.ts`**: push/pull primitives, persistent sync metadata (the `dirty` bit), and the Supabase Realtime subscription.
+
+**Sync UI:**
+
+- **`SyncStatusBadge.svelte`**: a five-state status pill in the app-shell topbar, visible on every route when signed in. Its label/variant mapping is the pure `sync-status-badge-utils.ts`.
+- **`SyncAccountModal.svelte`**: the Sync & Account sheet - a bottom sheet on phone, a right side panel on laptop (the same `.sheet` pattern as `AddInventoryPanel`). Opened from the More screen's Sync row and from the badge, both via the `syncSheetOpen` store in `src/lib/sync-ui-state.ts`.
+- **`ConflictResolutionModal.svelte`**: a blocking centered modal, mounted globally in `App.svelte`, that asks the user to keep local vs. server data on a diverging sign-in.
+
+**Key design decisions:**
+
+- The sync coordinator subscribes to the existing `appState` store, so every screen's edits are tracked without per-screen wiring.
+- Sync is strictly additive: with no Supabase env vars the feature degrades to a friendly notice, never an error.
+- The sync UI uses the Cloud Dancer token system; the badge's synced / offline / error states are carried by the `--success` / `--info` / `--danger` semantic tokens.
+
+**See:**
+
+- [ADR-012: Supabase-Backed Sync](docs/adr/012-supabase-sync.md) and [ADR-013: Realtime Sync](docs/adr/013-realtime-sync.md) - sync design rationale
+- [docs/teaching/1.7-supabase-magic-link-sync.md](docs/teaching/1.7-supabase-magic-link-sync.md) and [docs/teaching/1.8-realtime-and-offline-resilience.md](docs/teaching/1.8-realtime-and-offline-resilience.md) - deep dives
+- [supabase/README.md](supabase/README.md) - backend setup steps
+
 ### Key Algorithms
 
 - **Weighted random selection**: Picks flavors based on total quantity

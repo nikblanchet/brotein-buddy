@@ -21,7 +21,7 @@
   </p>
 
   <div class="actions">
-    <Button variant="primary" onclick={() => push(ROUTES.HOME)}>Go to Home</Button>
+    <Button variant="primary" onclick={() => push(ROUTES.PICK)}>Go to Pick</Button>
   </div>
 </div>
 
@@ -38,22 +38,22 @@
   }
 
   h1 {
-    font-size: var(--font-size-4xl);
-    color: var(--color-danger);
+    font-size: var(--font-size-3xl);
+    color: var(--danger);
     margin: 0;
     font-weight: var(--font-weight-bold);
   }
 
   h2 {
     font-size: var(--font-size-xl);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
     font-weight: var(--font-weight-semibold);
   }
 
   .description {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     max-width: 500px;
     margin: 0;
     line-height: 1.6;

@@ -75,7 +75,7 @@
     gap: var(--space-2);
 
     /* Styling */
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
     transition-property: background-color, border-color, transform, box-shadow;
     transition-duration: var(--transition-base);
     transition-timing-function: var(--transition-timing);
@@ -86,7 +86,7 @@
   }
 
   .button:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -105,48 +105,48 @@
 
   /* Primary: Main call-to-action */
   .button--primary {
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
+    background-color: var(--accent);
+    color: var(--surface-card);
   }
 
   .button--primary:hover:not(:disabled) {
-    background-color: var(--color-primary-hover);
+    background-color: var(--accent-ink);
   }
 
   .button--primary:active:not(:disabled) {
-    background-color: var(--color-primary-active);
+    background-color: var(--accent-ink);
   }
 
   /* Secondary: Outlined */
   .button--secondary {
     background-color: transparent;
-    color: var(--color-primary);
-    border: 2px solid var(--color-primary);
+    color: var(--accent);
+    border: 2px solid var(--accent);
   }
 
   .button--secondary:hover:not(:disabled) {
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
+    background-color: var(--accent);
+    color: var(--surface-card);
   }
 
   /* Danger: Destructive action */
   .button--danger {
-    background-color: var(--color-danger);
-    color: var(--color-text-inverse);
+    background-color: var(--danger);
+    color: var(--surface-card);
   }
 
   .button--danger:hover:not(:disabled) {
-    background-color: var(--color-danger-hover);
+    background-color: var(--danger);
   }
 
   /* Ghost: Transparent */
   .button--ghost {
     background-color: transparent;
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .button--ghost:hover:not(:disabled) {
-    background-color: var(--color-surface-300);
+    background-color: var(--surface-sunk);
   }
 
   /* ========================================

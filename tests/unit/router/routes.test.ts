@@ -10,16 +10,8 @@ import { ROUTES, type RouteParams } from '../../../src/lib/router/routes';
 
 describe('Routes Configuration', () => {
   describe('ROUTES constants', () => {
-    it('defines home route', () => {
-      expect(ROUTES.HOME).toBe('/');
-    });
-
-    it('defines random route', () => {
-      expect(ROUTES.RANDOM).toBe('/random');
-    });
-
-    it('defines random confirm route', () => {
-      expect(ROUTES.RANDOM_CONFIRM).toBe('/random/confirm');
+    it('defines pick (default landing) route at /', () => {
+      expect(ROUTES.PICK).toBe('/');
     });
 
     it('defines inventory route', () => {
@@ -28,6 +20,10 @@ describe('Routes Configuration', () => {
 
     it('defines inventory rearrange route', () => {
       expect(ROUTES.INVENTORY_REARRANGE).toBe('/inventory/rearrange');
+    });
+
+    it('defines more route', () => {
+      expect(ROUTES.MORE).toBe('/more');
     });
   });
 
@@ -68,20 +64,14 @@ describe('Routes Configuration', () => {
 
   describe('route structure validation', () => {
     it('all non-parameterized routes start with /', () => {
-      expect(ROUTES.HOME).toMatch(/^\//);
-      expect(ROUTES.RANDOM).toMatch(/^\//);
-      expect(ROUTES.RANDOM_CONFIRM).toMatch(/^\//);
+      expect(ROUTES.PICK).toMatch(/^\//);
       expect(ROUTES.INVENTORY).toMatch(/^\//);
       expect(ROUTES.INVENTORY_REARRANGE).toMatch(/^\//);
+      expect(ROUTES.MORE).toMatch(/^\//);
     });
 
-    it('all non-parameterized routes do not end with /', () => {
-      const routes = [
-        ROUTES.RANDOM,
-        ROUTES.RANDOM_CONFIRM,
-        ROUTES.INVENTORY,
-        ROUTES.INVENTORY_REARRANGE,
-      ];
+    it('non-pick routes do not end with /', () => {
+      const routes = [ROUTES.INVENTORY, ROUTES.INVENTORY_REARRANGE, ROUTES.MORE];
 
       routes.forEach((route) => {
         expect(route).not.toMatch(/\/$/);

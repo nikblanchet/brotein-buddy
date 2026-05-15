@@ -15,6 +15,7 @@
   import { session } from '$lib/auth';
   import { syncStatus, pendingChanges, lastSyncedAt } from '$lib/sync-coordinator';
   import { isSyncConfigured } from '$lib/supabase';
+  import { syncBadgeLabel, syncBadgeVariant } from './sync-status-badge-utils';
 
   interface Props {
     onclick?: () => void;
@@ -24,39 +25,8 @@
 
   let visible = $derived(isSyncConfigured() && $session !== null);
 
-  let label = $derived.by(() => {
-    switch ($syncStatus) {
-      case 'syncing':
-        return 'Syncing…';
-      case 'offline':
-        return 'Offline';
-      case 'error':
-        return 'Sync error';
-      case 'conflict-pending':
-        return 'Resolve conflict';
-      case 'saved':
-        return $pendingChanges ? 'Pending…' : 'Saved';
-      case 'idle':
-      default:
-        return $pendingChanges ? 'Pending…' : 'Synced';
-    }
-  });
-
-  let variant = $derived.by(() => {
-    switch ($syncStatus) {
-      case 'syncing':
-        return 'syncing';
-      case 'offline':
-        return 'offline';
-      case 'error':
-      case 'conflict-pending':
-        return 'error';
-      case 'saved':
-      case 'idle':
-      default:
-        return $pendingChanges ? 'pending' : 'ok';
-    }
-  });
+  let label = $derived(syncBadgeLabel($syncStatus, $pendingChanges));
+  let variant = $derived(syncBadgeVariant($syncStatus, $pendingChanges));
 
   let title = $derived.by(() => {
     if ($lastSyncedAt) {
@@ -88,21 +58,21 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
-    border-radius: 9999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-background);
-    color: var(--color-text-secondary);
+    border-radius: var(--r-full);
+    border: 1px solid var(--line-1);
+    background: var(--surface-card);
+    color: var(--ink-2);
     font-size: var(--font-size-sm);
     cursor: pointer;
     transition: background 0.15s ease;
   }
 
   .badge:hover {
-    background: var(--color-background-secondary);
+    background: var(--surface-hover);
   }
 
   .badge:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -116,19 +86,19 @@
 
   /* ok = synced, no pending changes */
   .badge.ok {
-    color: var(--color-success-dark);
-    background: var(--color-success-bg);
-    border-color: var(--color-success-dark);
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: var(--success);
   }
 
   /* pending = local changes not yet pushed (e.g. debounce window) */
   .badge.pending {
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   /* syncing = push or pull in flight */
   .badge.syncing {
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .badge.syncing .dot {
@@ -137,16 +107,16 @@
 
   /* offline = push failed, will retry on reconnect / backoff */
   .badge.offline {
-    color: var(--color-info-dark);
-    background: var(--color-info-bg);
-    border-color: var(--color-info-dark);
+    color: var(--info);
+    background: var(--info-soft);
+    border-color: var(--info);
   }
 
   /* error / conflict-pending = needs attention */
   .badge.error {
-    color: var(--color-danger-dark);
-    background: var(--color-danger-bg);
-    border-color: var(--color-danger-dark);
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger);
   }
 
   @keyframes pulse {

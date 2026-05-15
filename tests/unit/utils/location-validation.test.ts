@@ -265,9 +265,9 @@ describe('suggestNextLocation', () => {
 });
 
 describe('formatLocation', () => {
-  it('should format location as human-readable string', () => {
-    expect(formatLocation(1, 2)).toBe('Stack 1, Height 2');
-    expect(formatLocation(5, 10)).toBe('Stack 5, Height 10');
+  it('formats location with the "Stack N · Row H" separator', () => {
+    expect(formatLocation(1, 2)).toBe('Stack 1 · Row 2');
+    expect(formatLocation(5, 10)).toBe('Stack 5 · Row 10');
   });
 });
 

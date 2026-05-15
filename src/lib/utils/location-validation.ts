@@ -180,17 +180,22 @@ export function suggestNextLocation(allBoxes: Box[]): Location {
 /**
  * Formats a location as a human-readable string.
  *
+ * The "Stack N · Row H" wording matches the 2026 UX refresh - "Row" is
+ * what users actually see on the physical shelf and the middle dot
+ * separator avoids the comma-dot ambiguity that "Stack 1, 2" can
+ * introduce when the two numbers are adjacent in copy.
+ *
  * @param stack - The stack number
- * @param height - The height number
- * @returns Formatted string like "Stack 1, Height 2"
+ * @param height - The row number (height index, 1 at the bottom)
+ * @returns Formatted string like "Stack 1 · Row 3"
  *
  * @example
  * ```typescript
- * formatLocation(1, 3); // "Stack 1, Height 3"
+ * formatLocation(1, 3); // "Stack 1 · Row 3"
  * ```
  */
 export function formatLocation(stack: number, height: number): string {
-  return `Stack ${stack}, Height ${height}`;
+  return `Stack ${stack} · Row ${height}`;
 }
 
 /**

@@ -15,7 +15,7 @@
   import { appState, updateBoxLocation } from '$lib/stores';
   import { validateLocationNoGaps } from '$lib/utils/location-validation';
   import { groupBoxesByStack } from '$lib/inventory-utils';
-  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { getFlavorTone } from '$lib/utils/flavor-color';
   import { validateRearrangementState } from '$lib/rearrange-utils';
   import { dndzone, type DndEvent } from 'svelte-dnd-action';
   import type { Box } from '../types/models';
@@ -190,7 +190,7 @@
               class="box-visual"
               class:box-open={box.isOpen}
               class:box-invalid={validationErrors.has(box.id)}
-              style="background-color: {getFlavorColor(box.flavorId)};"
+              style="background-color: {getFlavorTone(box.flavorId).fill};"
               data-box-id={box.id}
             >
               <div class="box-flavor">{flavor?.name || 'Unknown'}</div>
@@ -230,20 +230,20 @@
 
   h1 {
     font-size: var(--font-size-2xl);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0 0 var(--space-2) 0;
   }
 
   .instructions {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
   .error-banner {
     background-color: var(--color-error-bg, #fee);
     border: 2px solid var(--color-error, #c00);
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     padding: var(--space-4);
     margin-bottom: var(--space-4);
   }
@@ -257,7 +257,7 @@
   .error-banner ul {
     margin: 0;
     padding-left: var(--space-5);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .error-banner li {
@@ -272,9 +272,9 @@
   }
 
   .stack {
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    background-color: var(--surface-app);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-md);
     padding: var(--space-3);
     min-height: 200px;
   }
@@ -282,11 +282,11 @@
   .stack-label {
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-base);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin-bottom: var(--space-3);
     text-align: center;
     padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--line-1);
   }
 
   .stack-boxes {
@@ -298,11 +298,11 @@
 
   .box-visual {
     padding: var(--space-3);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     cursor: grab;
     transition: all var(--transition-base);
     position: relative;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-1);
   }
 
   .box-visual:active {
@@ -330,7 +330,7 @@
       0.7
     ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     display: inline-block;
   }
 
@@ -344,7 +344,7 @@
       0.7
     ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     display: inline-block;
   }
 
@@ -356,9 +356,9 @@
     font-size: var(--font-size-xs);
     color: var(--color-error, #c00);
     text-align: center;
-    background-color: var(--color-surface-1);
+    background-color: var(--surface-card);
     padding: var(--space-1);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -369,7 +369,7 @@
     justify-content: flex-end;
     gap: var(--space-3);
     padding-top: var(--space-4);
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--line-1);
   }
 
   @media (max-width: 768px) {
