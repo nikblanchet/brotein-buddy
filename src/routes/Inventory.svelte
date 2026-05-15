@@ -15,7 +15,7 @@
 
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import AddInventoryModal from '$lib/components/AddInventoryModal.svelte';
+  import { addInventoryOpen } from '$lib/panel-state';
   import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
@@ -27,10 +27,8 @@
   import { formatLocation } from '$lib/utils/location-validation';
   import { generateFlavorId } from '$lib/utils/id';
 
-  /**
-   * Modal state for adding inventory
-   */
-  let isAddInventoryModalOpen = $state(false);
+  // The Add Inventory panel is mounted at the App level; we just toggle
+  // the shared store here when the user taps the trigger.
 
   /**
    * Modal state for backup/restore
@@ -174,7 +172,7 @@
         View: {viewMode === 'visual' ? 'Visual' : 'Table'}
       </Button>
       <Button variant="secondary" size="base" onclick={handleRearrangeClick}>Rearrange</Button>
-      <Button variant="secondary" size="base" onclick={() => (isAddInventoryModalOpen = true)}
+      <Button variant="secondary" size="base" onclick={() => addInventoryOpen.set(true)}
         >Add Inventory</Button
       >
       <Button variant="primary" size="base" onclick={handleNewFlavorClick}>New Flavor</Button>
@@ -321,13 +319,7 @@
   {/if}
 </div>
 
-<!-- Add Inventory Modal -->
-<AddInventoryModal
-  open={isAddInventoryModalOpen}
-  onclose={() => (isAddInventoryModalOpen = false)}
-  existingBoxes={$appState.boxes}
-  flavors={$appState.flavors}
-/>
+<!-- Add Inventory panel is mounted at the App level via addInventoryOpen -->
 
 <!-- Backup & Restore Modal -->
 <BackupRestoreModal open={isBackupModalOpen} onclose={() => (isBackupModalOpen = false)} />

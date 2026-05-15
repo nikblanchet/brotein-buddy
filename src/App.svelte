@@ -24,6 +24,7 @@
   import WelcomeModal from './lib/components/WelcomeModal.svelte';
   import AppNav from './lib/components/AppNav.svelte';
   import PickResultSheet from './lib/components/PickResultSheet.svelte';
+  import AddInventoryPanel from './lib/components/AddInventoryPanel.svelte';
   import { onMount } from 'svelte';
 
   /**
@@ -146,6 +147,7 @@
     viewport rather than at the top of the bottom tab bar.
   -->
   <PickResultSheet />
+  <AddInventoryPanel />
 </div>
 
 <!-- Welcome Modal (first-time users) -->
