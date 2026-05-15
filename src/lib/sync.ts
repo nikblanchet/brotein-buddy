@@ -193,28 +193,38 @@ export async function pullFullState(): Promise<AppState | null> {
  * The server snapshot wins for boxes/flavors/favorite/settings; events
  * are union-merged by id. This matches the PR 2 "last-write-wins on the
  * snapshot, append-only on the timeline" sync semantics.
+ *
+ * @returns The server's new `app_states.updated_at` timestamp (ISO 8601).
+ *   The coordinator persists this so subsequent reconciles can tell
+ *   whether the server has changed since our last successful push.
  */
-export async function pushFullState(state: AppState): Promise<void> {
+export async function pushFullState(state: AppState): Promise<string> {
   const client = requireClient();
   const userId = await requireUserId();
 
-  const { error: upsertErr } = await client.from('app_states').upsert(
-    {
-      user_id: userId,
-      version: state.version,
-      boxes: state.boxes,
-      flavors: state.flavors,
-      favorite_flavor_id: state.favoriteFlavorId,
-      settings: state.settings,
-    },
-    { onConflict: 'user_id' }
-  );
+  const { data: upsertRow, error: upsertErr } = await client
+    .from('app_states')
+    .upsert(
+      {
+        user_id: userId,
+        version: state.version,
+        boxes: state.boxes,
+        flavors: state.flavors,
+        favorite_flavor_id: state.favoriteFlavorId,
+        settings: state.settings,
+      },
+      { onConflict: 'user_id' }
+    )
+    .select('updated_at')
+    .single<{ updated_at: string }>();
 
   if (upsertErr) {
     throw new SyncError('Failed to upsert remote app_state.', upsertErr);
   }
 
-  if (state.events.length === 0) return;
+  const serverUpdatedAt = upsertRow?.updated_at ?? new Date().toISOString();
+
+  if (state.events.length === 0) return serverUpdatedAt;
 
   const rows = state.events.map((event) => splitEventForRow(event, userId));
 
@@ -227,6 +237,8 @@ export async function pushFullState(state: AppState): Promise<void> {
   if (evErr) {
     throw new SyncError('Failed to insert remote events.', evErr);
   }
+
+  return serverUpdatedAt;
 }
 
 /**

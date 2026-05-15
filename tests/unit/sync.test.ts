@@ -81,9 +81,29 @@ function buildMockClient(): MockClient {
           },
         };
       },
-      async upsert(rows: unknown, _opts?: unknown) {
+      upsert(rows: unknown, _opts?: unknown) {
         calls.push({ table, op: 'upsert', args: [rows, _opts] });
-        return { error: upsertError };
+        const result = {
+          data: { updated_at: '2026-05-14T12:00:00.000Z' },
+          error: upsertError,
+        };
+        return {
+          select() {
+            return {
+              single<T = unknown>() {
+                return Promise.resolve(result) as Promise<{
+                  data: T | null;
+                  error: typeof upsertError;
+                }>;
+              },
+            };
+          },
+          then<TResult1 = typeof result>(
+            onfulfilled?: (value: typeof result) => TResult1 | PromiseLike<TResult1>
+          ) {
+            return Promise.resolve(result).then(onfulfilled);
+          },
+        };
       },
       delete() {
         return {
