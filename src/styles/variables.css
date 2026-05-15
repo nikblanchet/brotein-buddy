@@ -52,6 +52,10 @@
      ======================================== */
   --danger: oklch(0.55 0.13 28);
   --danger-soft: oklch(0.95 0.025 28);
+  --success: oklch(0.55 0.12 150);
+  --success-soft: oklch(0.95 0.025 150);
+  --info: oklch(0.55 0.11 245);
+  --info-soft: oklch(0.95 0.025 245);
 
   /* ========================================
      Pool tints — Pick screen card backgrounds

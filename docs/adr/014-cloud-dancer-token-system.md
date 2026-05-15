@@ -38,7 +38,7 @@ We will replace the entire `--color-*` / `--shadow-*` / `--radius-*` token surfa
 --surface-hover: oklch(0.92 0.018 85);
 ```
 
-**Ink scale.** Four warm desaturated tones for primary / secondary / tertiary / disabled text. **Lines** at two weights for borders and dividers. **Accent** as a single bronze with a soft background variant and a deeper ink variant for chips and active controls. **Pool tints** for the Pick screen's two pool cards, parametrized so a future palette tweak doesn't require touching components. **Semantic** narrowed to `--danger` and `--danger-soft` only - the previous `--color-success-*`, `--color-warning-*`, and `--color-info-*` slots collapsed into accent or were retired entirely because the new minimal palette doesn't budget separate hues for them.
+**Ink scale.** Four warm desaturated tones for primary / secondary / tertiary / disabled text. **Lines** at two weights for borders and dividers. **Accent** as a single bronze with a soft background variant and a deeper ink variant for chips and active controls. **Pool tints** for the Pick screen's two pool cards, parametrized so a future palette tweak doesn't require touching components. **Semantic** kept deliberately small: three colors - `--danger`, `--success`, `--info` - each with a `-soft` background variant. `--success` and `--info` exist because the Supabase sync status badge has genuinely distinct synced / offline / error states; collapsing them onto the single accent would erase the very distinction the badge exists to communicate. `--warning` is retired - nothing in the app consumes it, and the minimal palette doesn't budget a hue on speculation. Each semantic color mirrors `--danger`'s construction (text/border at L≈0.55, soft background at L≈0.95).
 
 **Radii / shadows.** Renamed from `--radius-base` / `--shadow-base` to `--r-md` / `--shadow-1` to match the design's compact naming. `--r-sm`, `--r-md`, `--r-lg`, `--r-xl`, `--r-full` for radii; `--shadow-1`, `--shadow-2`, `--shadow-pop` for the three shadow weights (paper-flat, lifted, sheet-pop).
 
@@ -68,7 +68,7 @@ We will replace the entire `--color-*` / `--shadow-*` / `--radius-*` token surfa
 
 ### Neutral
 
-- The semantic color palette shrinks. Success/warning/info tokens that used to live in the system now collapse into accent. The OPEN-box badge that used `--color-success-*` is repainted with the flavor's accent within the box card; the inventory tally has no badge that needs warning/info color.
+- The semantic palette is narrower than the pre-2026 system - `--warning` is retired (nothing consumes it; the OPEN-box badge that once used `--color-success-*` now takes the flavor's own accent within the box card). What remains - `--danger`, `--success`, `--info` - is the minimum the current surfaces actually need: destructive actions, and the sync status badge's synced / offline / error states.
 
 ## Alternatives Considered
 
