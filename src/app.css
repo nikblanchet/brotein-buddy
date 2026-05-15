@@ -15,8 +15,8 @@
   font-weight: var(--font-weight-normal);
 
   color-scheme: light dark;
-  color: var(--color-text-primary);
-  background-color: var(--color-surface-200);
+  color: var(--ink-1);
+  background-color: var(--surface-app);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,11 +26,11 @@
 
 a {
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  color: var(--accent);
   text-decoration: inherit;
 }
 a:hover {
-  color: var(--color-primary-hover);
+  color: var(--accent-ink);
 }
 
 body {
@@ -61,9 +61,9 @@ h3 {
 
 .card {
   padding: var(--space-8);
-  background-color: var(--color-surface-100);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-base);
+  background-color: var(--surface-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
 }
 
 #app {
@@ -78,18 +78,18 @@ h3 {
  * Component-specific buttons (Button.svelte) will override these styles
  */
 button {
-  border-radius: var(--radius-base);
+  border-radius: var(--r-md);
   border: 1px solid transparent;
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  background-color: var(--color-surface-300);
+  background-color: var(--surface-sunk);
   cursor: pointer;
   transition: border-color var(--transition-base) var(--transition-timing);
 }
 button:hover:not(:disabled) {
-  border-color: var(--color-primary);
+  border-color: var(--accent);
 }
 button:focus,
 button:focus-visible {
