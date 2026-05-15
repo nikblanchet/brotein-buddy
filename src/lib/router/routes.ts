@@ -7,7 +7,7 @@
  * @see ADR-006 for routing strategy decision rationale
  */
 
-import Home from '../../routes/Home.svelte';
+import Pick from '../../routes/Pick.svelte';
 import Random from '../../routes/Random.svelte';
 import RandomConfirm from '../../routes/RandomConfirm.svelte';
 import Inventory from '../../routes/Inventory.svelte';
@@ -24,7 +24,7 @@ import ComponentDemo from '../ComponentDemo.svelte';
  * All routes use hash-based navigation (e.g., /#/inventory).
  */
 export const routes = {
-  '/': Home,
+  '/': Pick,
   '/random': Random,
   '/random/confirm': RandomConfirm,
   '/inventory': Inventory,

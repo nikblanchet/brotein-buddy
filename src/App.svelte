@@ -23,6 +23,7 @@
   import { routes } from './lib/router/routes';
   import WelcomeModal from './lib/components/WelcomeModal.svelte';
   import AppNav from './lib/components/AppNav.svelte';
+  import PickResultSheet from './lib/components/PickResultSheet.svelte';
   import { onMount } from 'svelte';
 
   /**
@@ -137,6 +138,14 @@
 
     <AppNav />
   </div>
+
+  <!--
+    Sheets that overlay the whole app stage live here as siblings of
+    .app-shell so their absolute-positioning escapes the layout grid
+    and the closed-sheet's translate(100%) parks them off the visible
+    viewport rather than at the top of the bottom tab bar.
+  -->
+  <PickResultSheet />
 </div>
 
 <!-- Welcome Modal (first-time users) -->
