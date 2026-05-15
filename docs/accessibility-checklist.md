@@ -78,6 +78,30 @@ This document provides a comprehensive checklist for ensuring all components in 
 - [ ] "Use Keyboard" option accessible via keyboard
 - [ ] Number grid navigable with arrow keys (future enhancement)
 
+### Sync Status Badge (`SyncStatusBadge.svelte`)
+
+- [x] Semantic `<button>` element
+- [x] `aria-label` describing the current status and the tap action
+- [x] `aria-haspopup="dialog"` (opens the Sync sheet)
+- [x] `aria-live="polite"` on the status label so status changes are announced
+- [x] Visible `:focus-visible` indicator
+- [x] Status carried by the label text, not the colour dot alone
+
+### Sync & Account Sheet (`SyncAccountModal.svelte`)
+
+- [x] `role="dialog"` with `aria-modal="true"`
+- [x] `aria-label` ("Sync and Account")
+- [x] `aria-hidden` and `inert` toggled with the open state (the closed sheet is fully inert)
+- [x] Email `<input>` wrapped in a visible `<label>`
+- [x] Send-link result uses `role="status"`; errors use `role="alert"`
+- [ ] Focus moves into the sheet on open and returns to the trigger on close
+
+### Conflict Resolution Modal (`ConflictResolutionModal.svelte`)
+
+- [x] `role="dialog"` and focus trap via the Modal component
+- [x] Choice list uses `role="radiogroup"` with labelled radio options
+- [x] Decision conveyed by text (box/event counts), not colour alone
+
 ### Home Screen (`Home.svelte`)
 
 - [ ] Page title updates to "Home - BroteinBuddy"
