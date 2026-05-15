@@ -2,17 +2,16 @@
   /**
    * More
    *
-   * Lightweight catch-all screen that surfaces the project's existing
-   * secondary functionality (backup/restore, rearrange, future settings)
-   * away from the primary Pick and Inventory flows.
-   *
-   * Bare-bones in this commit; styling and Backup & Restore wiring land in
-   * a later commit alongside the rest of the screen-level polish.
+   * Lightweight catch-all screen that surfaces the project's secondary
+   * functionality - Sync & sign-in, Backup & restore, Rearrange stacks,
+   * and a placeholder Settings row - away from the primary Pick and
+   * Inventory flows.
    */
 
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
+  import { syncSheetOpen } from '$lib/sync-ui-state';
 
   let backupOpen = $state(false);
 </script>
@@ -27,6 +26,17 @@
     <button type="button" class="more-row" onclick={() => (backupOpen = true)}>
       <span class="more-glyph" aria-hidden="true">↻</span>
       <span class="more-label">Backup &amp; restore</span>
+      <span class="more-chevron" aria-hidden="true">›</span>
+    </button>
+
+    <button
+      type="button"
+      class="more-row"
+      onclick={() => syncSheetOpen.set(true)}
+      data-testid="more-sync-row"
+    >
+      <span class="more-glyph" aria-hidden="true">☁</span>
+      <span class="more-label">Sync &amp; sign-in</span>
       <span class="more-chevron" aria-hidden="true">›</span>
     </button>
 
