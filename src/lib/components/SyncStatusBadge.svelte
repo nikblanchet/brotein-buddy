@@ -72,12 +72,13 @@
     class="badge {variant}"
     {onclick}
     aria-label={`Sync status: ${label}. Click to open sync settings.`}
+    aria-haspopup="dialog"
     {title}
     data-testid="sync-status-badge"
     data-variant={variant}
   >
     <span class="dot" aria-hidden="true"></span>
-    <span class="label">{label}</span>
+    <span class="label" aria-live="polite" aria-atomic="true">{label}</span>
   </button>
 {/if}
 

@@ -222,7 +222,15 @@ export async function pushFullState(state: AppState): Promise<string> {
     throw new SyncError('Failed to upsert remote app_state.', upsertErr);
   }
 
-  const serverUpdatedAt = upsertRow?.updated_at ?? new Date().toISOString();
+  // The trigger on app_states always sets updated_at; a successful upsert
+  // with null data is a protocol error, not a happy-path fallback.
+  // Treating it as a SyncError keeps meta.lastServerUpdatedAt honest —
+  // a client-generated timestamp would cause spurious "remoteFresher"
+  // pulls on the next boot due to clock skew.
+  if (!upsertRow?.updated_at) {
+    throw new SyncError('app_states upsert returned no updated_at — protocol error.');
+  }
+  const serverUpdatedAt = upsertRow.updated_at;
 
   if (state.events.length === 0) return serverUpdatedAt;
 

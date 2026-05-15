@@ -233,8 +233,15 @@ async function reconcileSync(opts: { treatLocalAsDirty: boolean }): Promise<void
       if (pulled) {
         applyServerState(pulled);
         persistAfterSync(remote.updatedAt);
+        markSynced();
+      } else {
+        // Server row disappeared between peek and pull (rare TOCTOU —
+        // e.g. an admin wipe, or "Keep this device" from another tab
+        // mid-flight). Don't mark synced with stale meta; leave the
+        // status alone so the next reconcile retries from a clean
+        // starting point.
+        recordError(new SyncError('Remote row vanished between peek and pull.'));
       }
-      markSynced();
       return;
     }
 
