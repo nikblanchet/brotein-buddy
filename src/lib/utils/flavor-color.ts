@@ -77,15 +77,3 @@ export function getFlavorTone(flavorId: string): FlavorTone {
   }
   return PALETTE[Math.abs(h) % PALETTE.length];
 }
-
-/**
- * Legacy single-color shim for the duration of the migration commit.
- * Returns the tone's `fill` value so existing background-color consumers
- * keep compiling until they switch to the full FlavorTone API.
- *
- * @deprecated Use `getFlavorTone` and pick `.fill`, `.accent`, or `.ink`
- *             explicitly. Removed in the next commit.
- */
-export function getFlavorColor(flavorId: string): string {
-  return getFlavorTone(flavorId).fill;
-}

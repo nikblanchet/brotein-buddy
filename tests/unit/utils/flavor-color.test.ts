@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getFlavorTone, getFlavorColor, PALETTE } from '../../../src/lib/utils/flavor-color.js';
+import { getFlavorTone, PALETTE } from '../../../src/lib/utils/flavor-color.js';
 
 describe('PALETTE', () => {
   it('contains exactly 12 tones', () => {
@@ -49,16 +49,5 @@ describe('getFlavorTone', () => {
     for (const tone of tones) {
       expect(PALETTE).toContainEqual(tone);
     }
-  });
-});
-
-describe('getFlavorColor (deprecated shim)', () => {
-  it('returns the tone fill for the same id', () => {
-    const id = 'flavor_chocolate';
-    expect(getFlavorColor(id)).toBe(getFlavorTone(id).fill);
-  });
-
-  it('returns an oklch color string', () => {
-    expect(getFlavorColor('flavor_123')).toMatch(/^oklch\(/);
   });
 });

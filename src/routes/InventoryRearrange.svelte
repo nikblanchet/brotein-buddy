@@ -15,7 +15,7 @@
   import { appState, updateBoxLocation } from '$lib/stores';
   import { validateLocationNoGaps } from '$lib/utils/location-validation';
   import { groupBoxesByStack } from '$lib/inventory-utils';
-  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { getFlavorTone } from '$lib/utils/flavor-color';
   import { validateRearrangementState } from '$lib/rearrange-utils';
   import { dndzone, type DndEvent } from 'svelte-dnd-action';
   import type { Box } from '../types/models';
@@ -190,7 +190,7 @@
               class="box-visual"
               class:box-open={box.isOpen}
               class:box-invalid={validationErrors.has(box.id)}
-              style="background-color: {getFlavorColor(box.flavorId)};"
+              style="background-color: {getFlavorTone(box.flavorId).fill};"
               data-box-id={box.id}
             >
               <div class="box-flavor">{flavor?.name || 'Unknown'}</div>

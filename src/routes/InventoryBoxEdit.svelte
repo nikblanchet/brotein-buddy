@@ -43,7 +43,7 @@
     removeBox,
   } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
-  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { getFlavorTone } from '$lib/utils/flavor-color';
   import {
     validateLocationNoGaps,
     getLocationConflict,
@@ -84,7 +84,7 @@
   // Derived state
   const box = $derived($appState.boxes.find((b) => b.id === boxId));
   const flavor = $derived(box ? maybeGetFlavor(box.flavorId, $appState.flavors) : null);
-  const boxColor = $derived(box && flavor ? getFlavorColor(flavor.id) : '#cccccc');
+  const boxColor = $derived(box && flavor ? getFlavorTone(flavor.id).fill : '#cccccc');
 
   // Handler: NumberPad selection for adding quantity
   function handleAddQuantitySelect(value: number | 'keyboard') {

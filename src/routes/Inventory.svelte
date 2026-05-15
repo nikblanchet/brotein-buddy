@@ -23,7 +23,7 @@
   import type { Flavor, RandomPool } from '../types/models';
   import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
   import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
-  import { getFlavorColor } from '$lib/utils/flavor-color';
+  import { getFlavorTone } from '$lib/utils/flavor-color';
   import { formatLocation } from '$lib/utils/location-validation';
   import { generateFlavorId } from '$lib/utils/id';
 
@@ -208,7 +208,7 @@
                     data-testid="box-{box.id}"
                     class="box-visual"
                     class:box-open={box.isOpen}
-                    style="background-color: {getFlavorColor(box.flavorId)};"
+                    style="background-color: {getFlavorTone(box.flavorId).fill};"
                     role="button"
                     tabindex="0"
                     onclick={() => handleBoxClick(box.id)}
@@ -240,7 +240,7 @@
             {#each outOfStockFlavors as flavor}
               <div
                 class="out-of-stock-item"
-                style="border-left-color: {getFlavorColor(flavor.id)};"
+                style="border-left-color: {getFlavorTone(flavor.id).accent};"
               >
                 {flavor.name}
               </div>
@@ -301,7 +301,7 @@
                 <td class="flavor-cell">
                   <span
                     class="flavor-indicator"
-                    style="background-color: {getFlavorColor(box.flavorId)};"
+                    style="background-color: {getFlavorTone(box.flavorId).fill};"
                   ></span>
                   {flavor?.name || 'Unknown'}
                   {#if box.isOpen}
