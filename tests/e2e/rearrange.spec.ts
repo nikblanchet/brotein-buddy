@@ -55,14 +55,13 @@ test.describe('Inventory Rearrange', () => {
     }
   });
 
-  test('should navigate to rearrange screen from inventory', async ({ page }) => {
-    // Navigate to inventory
-    await page.click('text=Manage Inventory');
+  test('should reach the rearrange screen from the More tab', async ({ page }) => {
+    // Post-refresh navigation: rearrange lives behind the More tab, not
+    // a "Manage Inventory" button on the old Home screen.
+    await page.getByTestId('nav-more').click();
+    await page.getByRole('button', { name: /rearrange stacks/i }).click();
 
-    // Click rearrange button
-    await page.click('text=Rearrange');
-
-    // Verify on rearrange screen
+    await expect(page).toHaveURL(/\/inventory\/rearrange$/);
     await expect(page.locator('h1')).toContainText('Rearrange Boxes');
     await expect(page.locator('text=Drag boxes to reorder')).toBeVisible();
   });
@@ -126,10 +125,12 @@ test.describe('Inventory Rearrange', () => {
   test('should show boxes with correct quantities', async ({ page }) => {
     await page.goto('/#/inventory/rearrange');
 
-    // Verify quantities shown
-    await expect(page.locator('text=12 bottles')).toBeVisible();
-    await expect(page.locator('text=10 bottles')).toBeVisible();
-    await expect(page.locator('text=8 bottles')).toBeVisible();
+    // Verify quantities shown. Scope to .box-quantity so the substring
+    // match can't collide with the globally-mounted Add Inventory
+    // panel's "Sealed boxes — 12 bottles each" copy.
+    await expect(page.locator('.box-quantity', { hasText: '12 bottles' })).toBeVisible();
+    await expect(page.locator('.box-quantity', { hasText: '10 bottles' })).toBeVisible();
+    await expect(page.locator('.box-quantity', { hasText: '8 bottles' })).toBeVisible();
   });
 
   test('should display header and instructions', async ({ page }) => {
