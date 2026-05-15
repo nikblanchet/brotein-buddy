@@ -109,15 +109,24 @@
     onclick={handleDismiss}
     data-testid="pick-result-backdrop"
   ></button>
+{/if}
 
-  <div
-    class="sheet result-sheet"
-    class:open={projection !== null}
-    role="dialog"
-    aria-modal="true"
-    aria-label="Your shake"
-    data-testid="pick-result-sheet"
-  >
+<!--
+  The sheet element stays mounted even when closed so its translateY
+  transition has a "from" state to animate from; the body content is
+  gated on `projection` since it dereferences the pick result.
+-->
+<div
+  class="sheet result-sheet"
+  class:open={projection !== null}
+  role="dialog"
+  aria-modal="true"
+  aria-label="Your shake"
+  aria-hidden={projection === null}
+  inert={projection === null}
+  data-testid="pick-result-sheet"
+>
+  {#if projection}
     <div class="grabber" aria-hidden="true"></div>
 
     <div class="result-body">
@@ -160,8 +169,8 @@
         </button>
       </div>
     </div>
-  </div>
-{/if}
+  {/if}
+</div>
 
 <style>
   .sheet {
@@ -180,10 +189,13 @@
     flex-direction: column;
     box-shadow: 0 -8px 32px oklch(0 0 0 / 0.15);
     overflow: hidden;
+    /* Closed sheet stays mounted; keep it from intercepting taps. */
+    pointer-events: none;
   }
 
   .sheet.open {
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .sheet-backdrop {
