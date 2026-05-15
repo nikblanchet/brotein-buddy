@@ -26,9 +26,13 @@
   import PickResultSheet from './lib/components/PickResultSheet.svelte';
   import AddInventoryPanel from './lib/components/AddInventoryPanel.svelte';
   import SyncAccountModal from './lib/components/SyncAccountModal.svelte';
+  import SyncStatusBadge from './lib/components/SyncStatusBadge.svelte';
   import { addInventoryOpen } from './lib/panel-state';
+  import { syncSheetOpen } from './lib/sync-ui-state';
   import ConflictResolutionModal from './lib/components/ConflictResolutionModal.svelte';
   import { initializeSync } from './lib/sync-coordinator';
+  import { isSyncConfigured } from './lib/supabase';
+  import { session } from './lib/auth';
   import { onMount } from 'svelte';
 
   /**
@@ -68,6 +72,26 @@
    * headers.
    */
   const onInventoryList = $derived(router.location === '/inventory');
+
+  /**
+   * The topbar's laptop Inventory affordances - the "Inventory" heading
+   * and the "+ Add inventory" button - show only on the Inventory list
+   * at laptop width so they don't compete with deep-flow stage headers.
+   */
+  const showInventoryTopbar = $derived(onInventoryList && isWide);
+
+  /**
+   * Whether the sync status badge has anything to show: sync configured
+   * and a session present. Mirrors SyncStatusBadge's own visibility gate
+   * so the topbar row knows whether it has content.
+   */
+  const syncReady = $derived(isSyncConfigured() && $session !== null);
+
+  /**
+   * The topbar grid row renders only when it has content; otherwise it
+   * collapses to 0px and screens like Pick keep their full height.
+   */
+  const showTopbar = $derived(showInventoryTopbar || syncReady);
 
   /**
    * Map routes to page titles
@@ -145,20 +169,27 @@
 
 <div class="app" class:is-wide={isWide} bind:this={appEl}>
   <div class="app-shell">
-    {#if onInventoryList && isWide}
-      <header class="topbar" data-testid="inventory-topbar">
-        <h1>
-          <span class="wordmark-dot" aria-hidden="true"></span>
-          Inventory
-        </h1>
-        <button
-          type="button"
-          class="topbar-add"
-          onclick={() => addInventoryOpen.set(true)}
-          data-testid="topbar-add-inventory"
-        >
-          <span class="plus" aria-hidden="true">+</span> Add inventory
-        </button>
+    {#if showTopbar}
+      <header class="topbar" class:compact={!showInventoryTopbar} data-testid="app-topbar">
+        {#if showInventoryTopbar}
+          <h1>
+            <span class="wordmark-dot" aria-hidden="true"></span>
+            Inventory
+          </h1>
+        {/if}
+        <div class="topbar-actions">
+          {#if showInventoryTopbar}
+            <button
+              type="button"
+              class="topbar-add"
+              onclick={() => addInventoryOpen.set(true)}
+              data-testid="topbar-add-inventory"
+            >
+              <span class="plus" aria-hidden="true">+</span> Add inventory
+            </button>
+          {/if}
+          <SyncStatusBadge onclick={() => syncSheetOpen.set(true)} />
+        </div>
       </header>
     {/if}
 
@@ -259,7 +290,7 @@
     grid-area: topbar;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 20px 28px 16px;
     border-bottom: 1px solid var(--line-1);
     background: var(--surface-app);
@@ -267,14 +298,29 @@
     z-index: 2;
   }
 
+  /*
+   * Badge-only topbar (phone, or any non-Inventory screen when signed
+   * in): a slim status strip rather than the full Inventory-header
+   * height, so Pick and More stay close to full-bleed.
+   */
+  .topbar.compact {
+    padding: 10px 16px;
+  }
+
   .topbar h1 {
     font-size: 18px;
     font-weight: var(--font-weight-semibold);
     letter-spacing: -0.01em;
-    margin: 0;
+    margin: 0 auto 0 0;
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .topbar .wordmark-dot {
