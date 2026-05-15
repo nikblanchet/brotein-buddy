@@ -76,6 +76,16 @@ let currentSession: Session | null = null;
 let conflictLocalSnapshot: AppState | null = null;
 
 /**
+ * Promise chain that serializes auth-event handling. supabase-js fires
+ * INITIAL_SESSION and SIGNED_IN back-to-back when a magic link is clicked
+ * on a device that already has a cached session; without serialization
+ * the two `async` handlers race and a slow pull can land after a fast
+ * conflict resolution, corrupting state. Each new event awaits the
+ * previous handler before its own work begins.
+ */
+let authEventQueue: Promise<void> = Promise.resolve();
+
+/**
  * Wires the coordinator to auth + store events. Call once at app boot.
  * Subsequent calls are no-ops.
  */
@@ -85,7 +95,13 @@ export function initializeSync(): void {
   initialized = true;
 
   supabase.auth.onAuthStateChange((event, session) => {
-    handleAuthEvent(event, session).catch((err) => recordError(err));
+    authEventQueue = authEventQueue
+      .catch(() => {
+        // Swallow earlier errors so they don't poison the chain — they're
+        // already surfaced via recordError on the previous tick.
+      })
+      .then(() => handleAuthEvent(event, session))
+      .catch((err) => recordError(err));
   });
 
   appState.subscribe((state) => {
