@@ -184,7 +184,7 @@
 
   .explainer {
     margin: 0;
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     line-height: 1.5;
   }
 
@@ -196,37 +196,37 @@
 
   .field span {
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .field input {
     padding: var(--space-3);
     font-size: var(--font-size-base);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-base);
-    background: var(--color-background);
-    color: var(--color-text-primary);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-md);
+    background: var(--surface-card);
+    color: var(--ink-1);
   }
 
   .field input:focus {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 1px;
   }
 
   .success {
     margin: 0;
-    color: var(--color-success-dark);
-    background: var(--color-success-bg);
+    color: var(--success);
+    background: var(--success-soft);
     padding: var(--space-3);
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
   }
 
   .error {
     margin: 0;
-    color: var(--color-danger-dark);
-    background: var(--color-danger-bg);
+    color: var(--danger);
+    background: var(--danger-soft);
     padding: var(--space-3);
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
   }
 
   .status-grid {
@@ -237,12 +237,12 @@
   }
 
   .status-grid dt {
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   .status-grid dd {
     margin: 0;
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .actions {
@@ -253,9 +253,9 @@
   }
 
   code {
-    background: var(--color-background-secondary);
+    background: var(--surface-hover);
     padding: 0 var(--space-1);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     font-size: 0.95em;
   }
 </style>

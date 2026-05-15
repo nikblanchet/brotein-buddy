@@ -88,21 +88,21 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
-    border-radius: 9999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-background);
-    color: var(--color-text-secondary);
+    border-radius: var(--r-full);
+    border: 1px solid var(--line-1);
+    background: var(--surface-card);
+    color: var(--ink-2);
     font-size: var(--font-size-sm);
     cursor: pointer;
     transition: background 0.15s ease;
   }
 
   .badge:hover {
-    background: var(--color-background-secondary);
+    background: var(--surface-hover);
   }
 
   .badge:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -116,19 +116,19 @@
 
   /* ok = synced, no pending changes */
   .badge.ok {
-    color: var(--color-success-dark);
-    background: var(--color-success-bg);
-    border-color: var(--color-success-dark);
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: var(--success);
   }
 
   /* pending = local changes not yet pushed (e.g. debounce window) */
   .badge.pending {
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   /* syncing = push or pull in flight */
   .badge.syncing {
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .badge.syncing .dot {
@@ -137,16 +137,16 @@
 
   /* offline = push failed, will retry on reconnect / backoff */
   .badge.offline {
-    color: var(--color-info-dark);
-    background: var(--color-info-bg);
-    border-color: var(--color-info-dark);
+    color: var(--info);
+    background: var(--info-soft);
+    border-color: var(--info);
   }
 
   /* error / conflict-pending = needs attention */
   .badge.error {
-    color: var(--color-danger-dark);
-    background: var(--color-danger-bg);
-    border-color: var(--color-danger-dark);
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger);
   }
 
   @keyframes pulse {
