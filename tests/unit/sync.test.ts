@@ -374,3 +374,13 @@ describe('clearRemoteState', () => {
     expect(deletes[1].table).toBe('app_states');
   });
 });
+
+describe('pushFullState — error paths', () => {
+  it('throws SyncError when the events upsert fails', async () => {
+    // The mock's upsert returns one shared error for both tables; this
+    // exercises the events-upsert failure branch by routing through the
+    // existing seeded error.
+    mock.__seedError('upsert', { message: 'events failed' });
+    await expect(pushFullState(SAMPLE_STATE)).rejects.toBeInstanceOf(SyncError);
+  });
+});

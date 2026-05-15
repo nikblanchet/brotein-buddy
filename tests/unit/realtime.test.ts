@@ -40,31 +40,29 @@ function makeMockClient() {
   removeChannel.mockClear();
   return {
     channel(_name: string): MockChannel {
-      mockChannel = {
+      const channel: MockChannel = {
         handlers: [],
-        on: vi.fn(function (
-          this: MockChannel,
+        on: vi.fn(),
+        subscribe: vi.fn(),
+      };
+      channel.on.mockImplementation(
+        (
           _type: string,
           config: { event: string; table: string; filter: string },
           callback: (payload: unknown) => void
-        ) {
-          this.handlers.push({
+        ) => {
+          channel.handlers.push({
             event: config.event,
             table: config.table,
             filter: config.filter,
             callback,
           });
-          return this;
-        }),
-        subscribe: vi.fn(function (this: MockChannel, _statusCallback?: unknown) {
-          return this;
-        }),
-      };
-      // The `on()` chain returns `this` so we need to bind the mock channel
-      // before exposing its methods.
-      mockChannel.on = mockChannel.on.bind(mockChannel);
-      mockChannel.subscribe = mockChannel.subscribe.bind(mockChannel);
-      return mockChannel;
+          return channel;
+        }
+      );
+      channel.subscribe.mockImplementation((_statusCallback?: unknown) => channel);
+      mockChannel = channel;
+      return channel;
     },
     removeChannel,
   };
@@ -132,5 +130,27 @@ describe('subscribeToRemoteChanges', () => {
 
     await expect(sub.unsubscribe()).resolves.toBeUndefined();
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning when the channel reports CHANNEL_ERROR or TIMED_OUT', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    subscribeToRemoteChanges('user-1', () => {});
+
+    // The subscribe() mock receives a status-callback; invoke it directly to
+    // simulate the channel transitioning into an error state.
+    const subscribeMock = mockChannel!.subscribe;
+    const statusCallback = subscribeMock.mock.calls[0]?.[0] as
+      | ((status: string, err?: unknown) => void)
+      | undefined;
+    expect(statusCallback).toBeDefined();
+
+    statusCallback?.('CHANNEL_ERROR', new Error('boom'));
+    expect(warn).toHaveBeenCalledWith('Realtime channel CHANNEL_ERROR', expect.any(Error));
+
+    statusCallback?.('TIMED_OUT');
+    expect(warn).toHaveBeenCalledWith('Realtime channel TIMED_OUT', undefined);
+
+    warn.mockRestore();
   });
 });

@@ -2,7 +2,7 @@
  * Unit tests for the persistent sync metadata module.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadSyncMeta, saveSyncMeta, clearSyncMeta } from '../../src/lib/sync-meta';
 
 const KEY = 'BROTEINBUDDY_SYNC_META';
@@ -59,6 +59,21 @@ describe('saveSyncMeta', () => {
     const raw = localStorage.getItem(KEY);
     expect(raw).not.toBeNull();
     expect(JSON.parse(raw!)).toMatchObject({ dirty: true });
+  });
+
+  it('logs but does not throw when localStorage.setItem fails', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota exceeded');
+    });
+
+    expect(() =>
+      saveSyncMeta({ dirty: true, lastServerUpdatedAt: null, lastSyncedAt: null })
+    ).not.toThrow();
+    expect(warn).toHaveBeenCalled();
+
+    setItem.mockRestore();
+    warn.mockRestore();
   });
 });
 

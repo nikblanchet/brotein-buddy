@@ -287,6 +287,32 @@ describe('INITIAL_SESSION — meta-aware reconcile', () => {
     expect(pullFullState).not.toHaveBeenCalled();
   });
 
+  it('records an error when pull returns null after a positive peek (TOCTOU)', async () => {
+    localStorage.setItem(
+      'BROTEINBUDDY_SYNC_META',
+      JSON.stringify({
+        dirty: false,
+        lastServerUpdatedAt: '2026-05-13T08:00:00.000Z',
+        lastSyncedAt: '2026-05-13T08:00:00.000Z',
+      })
+    );
+    peekRemoteState.mockResolvedValueOnce({
+      exists: true,
+      boxCount: 1,
+      flavorCount: 0,
+      eventCount: 0,
+      updatedAt: '2026-05-14T12:00:00.000Z',
+    });
+    pullFullState.mockResolvedValueOnce(null);
+
+    await fireAuthEvent('INITIAL_SESSION');
+
+    // Status should be 'error' (not 'saved') — we did NOT persist a stale
+    // meta.lastServerUpdatedAt, so the next reconcile gets a clean retry.
+    expect(get(coordinator.syncStatus)).toBe('error');
+    expect(get(coordinator.lastError)).toMatch(/vanished/i);
+  });
+
   it('pulls when only the server has changed since last sync', async () => {
     localStorage.setItem(
       'BROTEINBUDDY_SYNC_META',
