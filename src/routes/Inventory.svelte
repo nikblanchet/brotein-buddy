@@ -353,7 +353,7 @@
 
   .inv-tally .label {
     font-size: 13px;
-    color: var(--ink-3);
+    color: var(--ink-2);
   }
 
   .chip-row {
@@ -413,7 +413,7 @@
   .empty {
     text-align: center;
     padding: 40px 20px;
-    color: var(--ink-3);
+    color: var(--ink-2);
   }
 
   .stack-section {

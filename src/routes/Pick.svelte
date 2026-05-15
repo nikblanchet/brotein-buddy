@@ -239,7 +239,7 @@
 
   .eyebrow {
     font-size: 14px;
-    color: var(--ink-3);
+    color: var(--ink-2);
     margin: 0;
     font-weight: 500;
     letter-spacing: 0.04em;
@@ -428,7 +428,7 @@
   }
 
   .fav-btn[data-unset='true'] {
-    color: var(--ink-3);
+    color: var(--ink-2);
     border-style: dashed;
   }
 

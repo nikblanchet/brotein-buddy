@@ -93,7 +93,7 @@
     justify-content: center;
     gap: 3px;
     padding: 8px 4px 10px;
-    color: var(--ink-3);
+    color: var(--ink-2);
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.01em;
