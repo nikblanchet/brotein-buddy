@@ -66,11 +66,19 @@ h3 {
   box-shadow: var(--shadow-1);
 }
 
+/*
+ * The pre-refresh layout treated #app as a centered 1280px column with
+ * 32px padding. The 2026 refresh moves all sizing into the .app /
+ * .app-shell grid, which is 100vh tall and container-query driven, so
+ * #app needs to be a transparent passthrough - any padding here pushes
+ * .app off-viewport on phone widths and breaks click targets near the
+ * bottom of the screen (caught by Mobile Safari Playwright runs).
+ */
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: var(--space-8);
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 /**
