@@ -19,12 +19,13 @@
    * the grid.
    */
 
-  import Router, { router } from 'svelte-spa-router';
+  import Router, { router, location } from 'svelte-spa-router';
   import { routes } from './lib/router/routes';
   import WelcomeModal from './lib/components/WelcomeModal.svelte';
   import AppNav from './lib/components/AppNav.svelte';
   import PickResultSheet from './lib/components/PickResultSheet.svelte';
   import AddInventoryPanel from './lib/components/AddInventoryPanel.svelte';
+  import { addInventoryOpen } from './lib/panel-state';
   import { onMount } from 'svelte';
 
   /**
@@ -56,6 +57,14 @@
    * about the breakpoint without restating its own @container rule.
    */
   let isWide = $state(false);
+
+  /**
+   * Whether the current route is the Inventory list (not its deep
+   * flows). The laptop topbar mounts a "+ Add inventory" CTA only on
+   * this exact path so the topbar doesn't compete with deep-flow stage
+   * headers.
+   */
+  const onInventoryList = $derived($location === '/inventory');
 
   /**
    * Map routes to page titles
@@ -133,6 +142,23 @@
 
 <div class="app" class:is-wide={isWide} bind:this={appEl}>
   <div class="app-shell">
+    {#if onInventoryList && isWide}
+      <header class="topbar" data-testid="inventory-topbar">
+        <h1>
+          <span class="wordmark-dot" aria-hidden="true"></span>
+          Inventory
+        </h1>
+        <button
+          type="button"
+          class="topbar-add"
+          onclick={() => addInventoryOpen.set(true)}
+          data-testid="topbar-add-inventory"
+        >
+          <span class="plus" aria-hidden="true">+</span> Add inventory
+        </button>
+      </header>
+    {/if}
+
     <main id="main-content" class="main">
       <Router {routes} />
     </main>
@@ -219,6 +245,61 @@
     grid-area: main;
     min-height: 0;
     overflow: hidden;
+  }
+
+  .topbar {
+    grid-area: topbar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--line-1);
+    background: var(--surface-app);
+    position: relative;
+    z-index: 2;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar .wordmark-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .topbar-add {
+    appearance: none;
+    border: 0;
+    background: var(--ink-1);
+    color: var(--surface-card);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    padding: 10px 16px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .topbar-add:hover {
+    background: oklch(0.3 0.01 80);
+  }
+
+  .topbar-add .plus {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: -1px;
   }
 
   /**

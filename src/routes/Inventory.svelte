@@ -1,717 +1,674 @@
 <script lang="ts">
   /**
-   * Inventory Management Screen
+   * Inventory
    *
-   * Main inventory screen with visual stack view and table view toggle.
-   * Provides two modes for viewing box inventory:
-   * - Visual View: CSS Grid showing boxes stacked by physical location
-   * - Table View: Sortable table with flavor, quantity, and location columns
+   * Restructured for the 2026 UX refresh:
+   *  - Stacks split into Active (any box is open) and Storage (sealed
+   *    only) sections, each rendered in a 3-per-row grid that bottom-
+   *    aligns so taller stacks rise higher within their row - matching
+   *    the user's physical "buildings on a shelf" mental model.
+   *  - Square BoxCard tiles paint with the curated flavor tone (fill +
+   *    accent strip + ink text) and shrink their typography via
+   *    container queries so the 3-col grid stays readable on phone.
+   *  - Tally + filter chips at top; floating Add Inventory FAB at the
+   *    bottom so the primary CTA is one thumb away.
+   *  - Add Inventory is no longer a per-route modal - this screen just
+   *    flips the addInventoryOpen store and the panel mounts at the
+   *    App level.
+   *  - The legacy table view, view-mode toggle, and Rearrange button
+   *    are gone (Rearrange lives on the More tab now).
    *
-   * Users can tap boxes to edit them, navigate to rearrange screen,
-   * or add new flavors via modal.
+   * The New Flavor and Backup & Restore modals are kept here as small
+   * secondary actions for now; backup will move to the More screen in
+   * a later commit and the New Flavor entry stays as a quiet link.
    *
    * @component
    */
 
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import { addInventoryOpen } from '$lib/panel-state';
   import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
+  import BoxCard from '$lib/components/BoxCard.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
   import type { Flavor, RandomPool } from '../types/models';
   import { groupBoxesByStack, getOutOfStockFlavors } from '$lib/inventory-utils';
-  import { sortBoxes, type SortColumn, type SortDirection } from '$lib/utils/inventory-sort';
   import { getFlavorTone } from '$lib/utils/flavor-color';
-  import { formatLocation } from '$lib/utils/location-validation';
   import { generateFlavorId } from '$lib/utils/id';
-
-  // The Add Inventory panel is mounted at the App level; we just toggle
-  // the shared store here when the user taps the trigger.
+  import { addInventoryOpen } from '$lib/panel-state';
 
   /**
-   * Modal state for backup/restore
+   * Filter chip selection. Drives which flavors' boxes are shown.
+   */
+  let filter = $state<'all' | 'caff' | 'decaf'>('all');
+
+  /**
+   * Backup modal visibility (kept here until More polish lands).
    */
   let isBackupModalOpen = $state(false);
 
   /**
-   * View mode state
-   * 'visual' = CSS Grid stack view
-   * 'table' = Sortable table view
-   */
-  let viewMode = $state<'visual' | 'table'>('visual');
-
-  /**
-   * Modal state for adding new flavor
+   * New Flavor modal state. The redesign doesn't surface flavor
+   * creation prominently but the capability stays so the user isn't
+   * stranded with the flavors they have.
    */
   let isNewFlavorModalOpen = $state(false);
   let newFlavorName = $state('');
   let newFlavorRandomPool = $state<string>('caffeine-free');
 
-  /**
-   * Table sorting state
-   * sortColumn: which column to sort by
-   * sortDirection: 'asc' or 'desc'
-   */
-  let sortColumn = $state<SortColumn>('flavor');
-  let sortDirection = $state<SortDirection>('asc');
+  const flavorMap = $derived(new Map<string, Flavor>($appState.flavors.map((f) => [f.id, f])));
 
   /**
-   * Reactive: Get all boxes with their flavor information
+   * Boxes filtered by the active chip, paired with their flavor.
    */
-  let boxesWithFlavors = $derived(
-    $appState.boxes.map((box) => {
-      const flavor = $appState.flavors.find((f) => f.id === box.flavorId);
-      return {
-        box,
-        flavor: flavor || null,
-      };
-    })
+  const filteredBoxes = $derived(
+    $appState.boxes
+      .filter((box) => {
+        if (filter === 'all') return true;
+        const flavor = flavorMap.get(box.flavorId);
+        if (!flavor || !flavor.randomPool) return false;
+        if (filter === 'caff') return flavor.randomPool === 'caffeinated';
+        return flavor.randomPool === 'caffeine-free';
+      })
+      .map((box) => ({ box, flavor: flavorMap.get(box.flavorId) ?? null }))
   );
 
   /**
-   * Reactive: Group boxes by stack for visual view
-   * Returns Map<stack, Box[]> sorted by height within each stack
+   * Stacks grouped from filtered boxes.
    */
-  let boxesByStack = $derived(groupBoxesByStack(boxesWithFlavors));
+  const boxesByStack = $derived(groupBoxesByStack(filteredBoxes));
 
   /**
-   * Reactive: Get flavors with zero inventory for out-of-stock section
+   * Partition stacks into Active (any open box) vs Storage (sealed
+   * only) so the user sees what they're using right now at the top.
    */
-  let outOfStockFlavors = $derived(getOutOfStockFlavors($appState.flavors, $appState.boxes));
+  const partitionedStacks = $derived.by(() => {
+    const active: Array<[number, typeof filteredBoxes]> = [];
+    const storage: Array<[number, typeof filteredBoxes]> = [];
+    for (const [stackNum, list] of boxesByStack) {
+      const isActive = list.some((entry) => entry.box.isOpen);
+      (isActive ? active : storage).push([stackNum, list]);
+    }
+    return { active, storage };
+  });
 
   /**
-   * Reactive: Sorted table data based on current sort column and direction
+   * Flavors with zero stock across all (unfiltered) boxes - rendered
+   * as a small "out of stock" pill row regardless of the active chip
+   * so the user knows what to restock.
    */
-  let sortedTableData = $derived(sortBoxes(boxesWithFlavors, sortColumn, sortDirection));
+  const outOfStockFlavors = $derived(getOutOfStockFlavors($appState.flavors, $appState.boxes));
 
   /**
-   * Toggle between visual and table view
+   * Tally numbers for the header. Counted on the filtered set so the
+   * numbers match what's visible.
    */
-  function toggleView() {
-    viewMode = viewMode === 'visual' ? 'table' : 'visual';
-  }
+  const tally = $derived.by(() => {
+    let bottles = 0;
+    for (const { box } of filteredBoxes) {
+      bottles += box.quantity;
+    }
+    return { boxes: filteredBoxes.length, bottles };
+  });
 
-  /**
-   * Navigate to individual box edit screen
-   * @param boxId - The unique identifier of the box to edit
-   */
   function handleBoxClick(boxId: string) {
     push(ROUTES.INVENTORY_BOX_EDIT(boxId));
   }
 
-  /**
-   * Navigate to rearrange screen
-   */
-  function handleRearrangeClick() {
-    push(ROUTES.INVENTORY_REARRANGE);
-  }
-
-  /**
-   * Open new flavor modal
-   */
   function handleNewFlavorClick() {
     newFlavorName = '';
     newFlavorRandomPool = 'caffeine-free';
     isNewFlavorModalOpen = true;
   }
 
-  /**
-   * Close new flavor modal
-   */
   function closeNewFlavorModal() {
     isNewFlavorModalOpen = false;
     newFlavorName = '';
     newFlavorRandomPool = 'caffeine-free';
   }
 
-  /**
-   * Save new flavor
-   */
   function handleSaveNewFlavor() {
-    if (newFlavorName.trim() === '') {
-      return;
-    }
-
-    const newFlavor: Flavor = {
+    const trimmed = newFlavorName.trim();
+    if (trimmed === '') return;
+    addFlavor({
       id: generateFlavorId(),
-      name: newFlavorName.trim(),
+      name: trimmed,
       randomPool: (newFlavorRandomPool === 'none'
         ? null
         : newFlavorRandomPool) as RandomPool | null,
-    };
-
-    addFlavor(newFlavor);
+    });
     closeNewFlavorModal();
-  }
-
-  /**
-   * Handle table column header click for sorting
-   * @param column - The column to sort by ('flavor', 'quantity', or 'location')
-   */
-  function handleColumnClick(column: SortColumn) {
-    if (sortColumn === column) {
-      // Toggle direction if same column
-      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      // New column, default to ascending
-      sortColumn = column;
-      sortDirection = 'asc';
-    }
   }
 </script>
 
-<div class="inventory-screen">
-  <!-- Header with controls -->
-  <header class="inventory-header">
-    <h1>Inventory</h1>
+<section class="inventory" data-testid="inventory-screen">
+  <div class="inv-tally" data-testid="inv-tally">
+    <span class="big">{tally.boxes}</span>
+    <span class="label">boxes</span>
+    <span class="big" style="margin-left: 4px;">{tally.bottles}</span>
+    <span class="label">bottles</span>
+  </div>
 
-    <div class="controls">
-      <Button variant="ghost" size="base" onclick={toggleView}>
-        View: {viewMode === 'visual' ? 'Visual' : 'Table'}
-      </Button>
-      <Button variant="secondary" size="base" onclick={handleRearrangeClick}>Rearrange</Button>
-      <Button variant="secondary" size="base" onclick={() => addInventoryOpen.set(true)}
-        >Add Inventory</Button
+  <div class="chip-row">
+    <div class="chips" role="group" aria-label="Filter inventory by pool">
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={filter === 'all'}
+        onclick={() => (filter = 'all')}
+        data-testid="chip-all"
       >
-      <Button variant="primary" size="base" onclick={handleNewFlavorClick}>New Flavor</Button>
-      <Button
-        variant="ghost"
-        size="base"
-        onclick={() => (isBackupModalOpen = true)}
-        testId="inventory-backup-button"
+        All
+      </button>
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={filter === 'caff'}
+        onclick={() => (filter = 'caff')}
+        data-testid="chip-caff"
       >
-        Backup
-      </Button>
+        <span aria-hidden="true">⚡</span> Caffeinated
+      </button>
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={filter === 'decaf'}
+        onclick={() => (filter = 'decaf')}
+        data-testid="chip-decaf"
+      >
+        <span aria-hidden="true">💪</span> Decaf
+      </button>
     </div>
-  </header>
+    <button
+      type="button"
+      class="new-flavor-link"
+      onclick={handleNewFlavorClick}
+      data-testid="new-flavor-link"
+    >
+      + Add new flavor
+    </button>
+  </div>
 
-  <!-- Visual View -->
-  {#if viewMode === 'visual'}
-    <div class="visual-view">
-      {#if boxesByStack.size === 0}
-        <div class="empty-state">
-          <p>No boxes in inventory</p>
-          <p class="empty-hint">Add a new flavor to get started</p>
-        </div>
-      {:else}
-        <div class="stacks-container">
-          {#each [...boxesByStack.entries()] as [stackNum, boxes]}
-            <div class="stack" data-stack={stackNum}>
-              <div class="stack-label">Stack {stackNum}</div>
-              <div class="stack-boxes">
-                {#each boxes as { box, flavor }}
-                  <div
-                    data-testid="box-{box.id}"
-                    class="box-visual"
-                    class:box-open={box.isOpen}
-                    style="background-color: {getFlavorTone(box.flavorId).fill};"
-                    role="button"
-                    tabindex="0"
-                    onclick={() => handleBoxClick(box.id)}
-                    onkeydown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleBoxClick(box.id);
-                      }
-                    }}
-                  >
-                    <div class="box-flavor">{flavor?.name || 'Unknown'}</div>
-                    <div class="box-quantity">{box.quantity} bottles</div>
-                    {#if box.isOpen}
-                      <div class="box-status">Open</div>
-                    {/if}
-                  </div>
-                {/each}
-              </div>
+  {#if filteredBoxes.length === 0}
+    <div class="empty">No boxes match this filter.</div>
+  {/if}
+
+  {#if partitionedStacks.active.length > 0}
+    <section class="stack-section" data-testid="active-section">
+      <header class="stack-section-head">
+        <span class="sect-name">
+          <span class="dot" aria-hidden="true"></span>
+          Active
+        </span>
+        <span class="sect-meta">
+          {partitionedStacks.active.length} stack{partitionedStacks.active.length === 1 ? '' : 's'}
+          · in use
+        </span>
+      </header>
+      <div class="stack-group">
+        {#each partitionedStacks.active as [stackNum, list] (stackNum)}
+          {@const total = list.reduce((s, { box }) => s + box.quantity, 0)}
+          <div class="stack" data-testid="stack-{stackNum}">
+            <div class="stack-boxes">
+              {#each list as { box, flavor } (box.id)}
+                <BoxCard {box} {flavor} onclick={() => handleBoxClick(box.id)} />
+              {/each}
             </div>
-          {/each}
-        </div>
-      {/if}
-
-      <!-- Out of stock section -->
-      {#if outOfStockFlavors.length > 0}
-        <div class="out-of-stock-section">
-          <h2>Out of Stock</h2>
-          <div class="out-of-stock-list">
-            {#each outOfStockFlavors as flavor}
-              <div
-                class="out-of-stock-item"
-                style="border-left-color: {getFlavorTone(flavor.id).accent};"
-              >
-                {flavor.name}
-              </div>
-            {/each}
+            <div class="stack-header">
+              <span class="stack-num">S{stackNum}</span>
+              <span class="stack-total">{total} btl</span>
+            </div>
           </div>
-        </div>
-      {/if}
-    </div>
+        {/each}
+      </div>
+    </section>
   {/if}
 
-  <!-- Table View -->
-  {#if viewMode === 'table'}
-    <div class="table-view">
-      {#if boxesWithFlavors.length === 0}
-        <div class="empty-state">
-          <p>No boxes in inventory</p>
-          <p class="empty-hint">Add a new flavor to get started</p>
-        </div>
-      {:else}
-        <table class="inventory-table">
-          <thead>
-            <tr>
-              <th
-                class="sortable"
-                class:sorted={sortColumn === 'flavor'}
-                onclick={() => handleColumnClick('flavor')}
-              >
-                Flavor
-                {#if sortColumn === 'flavor'}
-                  <span class="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                {/if}
-              </th>
-              <th
-                class="sortable"
-                class:sorted={sortColumn === 'quantity'}
-                onclick={() => handleColumnClick('quantity')}
-              >
-                Quantity
-                {#if sortColumn === 'quantity'}
-                  <span class="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                {/if}
-              </th>
-              <th
-                class="sortable"
-                class:sorted={sortColumn === 'location'}
-                onclick={() => handleColumnClick('location')}
-              >
-                Location
-                {#if sortColumn === 'location'}
-                  <span class="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                {/if}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each sortedTableData as { box, flavor }}
-              <tr class="table-row" onclick={() => handleBoxClick(box.id)}>
-                <td class="flavor-cell">
-                  <span
-                    class="flavor-indicator"
-                    style="background-color: {getFlavorTone(box.flavorId).fill};"
-                  ></span>
-                  {flavor?.name || 'Unknown'}
-                  {#if box.isOpen}
-                    <span class="open-badge">Open</span>
-                  {/if}
-                </td>
-                <td class="quantity-cell">{box.quantity}</td>
-                <td class="location-cell">
-                  {formatLocation(box.location.stack, box.location.height)}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </div>
+  {#if partitionedStacks.storage.length > 0}
+    <section class="stack-section" data-testid="storage-section">
+      <header class="stack-section-head">
+        <span class="sect-name storage">
+          <span class="dot" aria-hidden="true"></span>
+          Storage
+        </span>
+        <span class="sect-meta">
+          {partitionedStacks.storage.length} stack{partitionedStacks.storage.length === 1
+            ? ''
+            : 's'} · sealed
+        </span>
+      </header>
+      <div class="stack-group">
+        {#each partitionedStacks.storage as [stackNum, list] (stackNum)}
+          {@const total = list.reduce((s, { box }) => s + box.quantity, 0)}
+          <div class="stack" data-testid="stack-{stackNum}">
+            <div class="stack-boxes">
+              {#each list as { box, flavor } (box.id)}
+                <BoxCard {box} {flavor} onclick={() => handleBoxClick(box.id)} />
+              {/each}
+            </div>
+            <div class="stack-header">
+              <span class="stack-num">S{stackNum}</span>
+              <span class="stack-total">{total} btl</span>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </section>
   {/if}
-</div>
 
-<!-- Add Inventory panel is mounted at the App level via addInventoryOpen -->
+  {#if outOfStockFlavors.length > 0}
+    <section class="oos-section" data-testid="oos-section">
+      <header class="stack-section-head">
+        <span class="sect-name storage">
+          <span class="dot" aria-hidden="true"></span>
+          Out of stock
+        </span>
+        <span class="sect-meta">
+          {outOfStockFlavors.length} flavor{outOfStockFlavors.length === 1 ? '' : 's'}
+        </span>
+      </header>
+      <div class="oos-list">
+        {#each outOfStockFlavors as flavor (flavor.id)}
+          {@const tone = getFlavorTone(flavor.id)}
+          <span class="oos-pill" style="--dot: {tone.accent};">
+            <span class="dot" aria-hidden="true"></span>
+            {flavor.name}
+          </span>
+        {/each}
+      </div>
+    </section>
+  {/if}
 
-<!-- Backup & Restore Modal -->
+  <div class="inv-footer-actions">
+    <button
+      type="button"
+      class="ghost-link"
+      onclick={() => (isBackupModalOpen = true)}
+      data-testid="inventory-backup-button"
+    >
+      Backup &amp; restore
+    </button>
+  </div>
+
+  <div class="fab-wrap">
+    <button
+      type="button"
+      class="fab"
+      onclick={() => addInventoryOpen.set(true)}
+      data-testid="add-inventory-fab"
+    >
+      <span class="plus" aria-hidden="true">+</span> Add inventory
+    </button>
+  </div>
+</section>
+
 <BackupRestoreModal open={isBackupModalOpen} onclose={() => (isBackupModalOpen = false)} />
 
-<!-- New Flavor Modal -->
-<Modal open={isNewFlavorModalOpen} title="Add New Flavor" onclose={closeNewFlavorModal} size="sm">
-  <div class="modal-form">
+<Modal open={isNewFlavorModalOpen} title="Add new flavor" onclose={closeNewFlavorModal} size="sm">
+  <div class="new-flavor-form">
     <div class="form-group">
-      <label for="flavor-name">Flavor Name</label>
+      <label for="new-flavor-name">Name</label>
       <input
-        id="flavor-name"
+        id="new-flavor-name"
         type="text"
         bind:value={newFlavorName}
-        placeholder="Enter flavor name"
-        class="text-input"
+        placeholder="e.g. Salted Caramel"
+        data-testid="new-flavor-name"
       />
     </div>
 
     <div class="form-group">
-      <label>Random Pool</label>
-      <div class="radio-group">
-        <label class="radio-label">
-          <input type="radio" bind:group={newFlavorRandomPool} value="caffeinated" />
-          ⚡ Caffeinated
-        </label>
-        <label class="radio-label">
-          <input type="radio" bind:group={newFlavorRandomPool} value="caffeine-free" />
-          💪 Caffeine-Free
-        </label>
-        <label class="radio-label">
-          <input type="radio" bind:group={newFlavorRandomPool} value="none" />
-          None (exclude from random)
-        </label>
-      </div>
+      <label for="new-flavor-pool">Random pool</label>
+      <select id="new-flavor-pool" bind:value={newFlavorRandomPool}>
+        <option value="caffeinated">Caffeinated</option>
+        <option value="caffeine-free">Caffeine-free</option>
+        <option value="none">Not in any pool</option>
+      </select>
     </div>
   </div>
-
-  {#snippet footer()}
+  <div class="modal-actions">
     <Button variant="ghost" onclick={closeNewFlavorModal}>Cancel</Button>
     <Button variant="primary" onclick={handleSaveNewFlavor} disabled={newFlavorName.trim() === ''}>
-      Save
+      Add flavor
     </Button>
-  {/snippet}
+  </div>
 </Modal>
 
 <style>
-  /**
-   * Inventory Screen Layout
-   */
-  .inventory-screen {
-    min-height: 100vh;
-    padding: var(--space-6);
+  .inventory {
+    overflow-y: auto;
+    padding: 18px 18px 96px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: 18px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
   }
 
-  /**
-   * Header with controls
-   */
-  .inventory-header {
+  @container app (min-width: 820px) {
+    .inventory {
+      padding: 28px 32px 32px;
+      gap: 24px;
+    }
+  }
+
+  .inv-tally {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+    align-items: baseline;
+    gap: 10px;
+    margin: -4px 0;
   }
 
-  .inventory-header h1 {
-    font-size: var(--font-size-3xl);
+  .inv-tally .big {
+    font-size: 22px;
     font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
     color: var(--ink-1);
-    margin: 0;
+    font-variant-numeric: tabular-nums;
   }
 
-  .controls {
+  .inv-tally .label {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  .chip-row {
     display: flex;
-    gap: var(--space-3);
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chips {
+    display: flex;
+    gap: 6px;
     flex-wrap: wrap;
   }
 
-  /**
-   * Visual View Styles
-   */
-  .visual-view {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
+  .chip {
+    appearance: none;
+    border: 1px solid var(--line-2);
+    background: var(--surface-card);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
   }
 
-  .stacks-container {
+  .chip[aria-pressed='true'] {
+    background: var(--ink-1);
+    color: var(--surface-card);
+    border-color: var(--ink-1);
+  }
+
+  .chip:hover:not([aria-pressed='true']) {
+    background: var(--surface-hover);
+  }
+
+  .new-flavor-link {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-underline-offset: 4px;
+  }
+
+  .new-flavor-link:hover {
+    color: var(--ink-1);
+  }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-3);
+  }
+
+  .stack-section {
     display: flex;
-    gap: var(--space-6);
-    overflow-x: auto;
-    padding: var(--space-4);
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stack-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+
+  .sect-name {
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sect-name .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .sect-name.storage .dot {
+    background: var(--ink-4);
+  }
+
+  .sect-meta {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stack-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    align-items: end;
+  }
+
+  @container app (min-width: 820px) {
+    .stack-group {
+      gap: 18px;
+    }
   }
 
   .stack {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    min-width: 200px;
+    gap: 6px;
+    min-width: 0;
   }
 
-  .stack-label {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--ink-2);
-    text-align: center;
-    padding: var(--space-2);
-    background-color: var(--surface-card);
-    border-radius: var(--r-md);
+  @container app (min-width: 820px) {
+    .stack {
+      gap: 8px;
+    }
   }
 
   .stack-boxes {
     display: flex;
     flex-direction: column-reverse;
-    gap: var(--space-2);
+    gap: 8px;
   }
 
-  .box-visual {
-    padding: var(--space-4);
-    border-radius: var(--r-md);
-    cursor: pointer;
-    transition:
-      transform var(--transition-base) var(--transition-timing),
-      box-shadow var(--transition-base) var(--transition-timing);
-    box-shadow: var(--shadow-1);
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
-
-  .box-visual:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-2);
-  }
-
-  .box-visual.box-open {
-    border: 3px solid rgba(255, 255, 255, 0.8);
-  }
-
-  .box-flavor {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-1);
-  }
-
-  .box-quantity {
-    font-size: var(--font-size-sm);
-    color: #ffffff; /* White text for contrast */
-    background: rgba(
-      0,
-      0,
-      0,
-      0.7
-    ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--r-sm);
-    display: inline-block;
-  }
-
-  .box-status {
-    font-size: var(--font-size-xs);
-    margin-top: var(--space-1);
-    opacity: 0.9;
-  }
-
-  /**
-   * Out of Stock Section
-   */
-  .out-of-stock-section {
-    padding: var(--space-6);
-    background-color: var(--surface-card);
-    border-radius: var(--r-lg);
-  }
-
-  .out-of-stock-section h2 {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--ink-1);
-    margin: 0 0 var(--space-4) 0;
-  }
-
-  .out-of-stock-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  .out-of-stock-item {
-    padding: var(--space-2) var(--space-4);
-    background-color: var(--surface-app);
-    border-left: 4px solid;
-    border-radius: var(--r-md);
-    font-size: var(--font-size-sm);
-    color: var(--ink-2);
-  }
-
-  /**
-   * Table View Styles
-   */
-  .table-view {
-    overflow-x: auto;
-  }
-
-  .inventory-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--surface-card);
-    border-radius: var(--r-lg);
-    overflow: hidden;
-  }
-
-  .inventory-table thead {
-    background-color: var(--surface-sunk);
-  }
-
-  .inventory-table th {
-    padding: var(--space-4);
-    text-align: left;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--ink-1);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .inventory-table th.sortable {
-    cursor: pointer;
-    user-select: none;
-    transition: background-color var(--transition-base) var(--transition-timing);
-  }
-
-  .inventory-table th.sortable:hover {
-    background-color: var(--surface-app);
-  }
-
-  .inventory-table th.sorted {
-    color: var(--accent);
-  }
-
-  .sort-indicator {
-    margin-left: var(--space-1);
-    font-size: var(--font-size-lg);
-  }
-
-  .inventory-table tbody tr {
-    border-bottom: 1px solid var(--line-1);
-  }
-
-  .inventory-table tbody tr:last-child {
-    border-bottom: none;
-  }
-
-  .table-row {
-    cursor: pointer;
-    transition: background-color var(--transition-base) var(--transition-timing);
-  }
-
-  .table-row:hover {
-    background-color: var(--surface-app);
-  }
-
-  .inventory-table td {
-    padding: var(--space-4);
-    font-size: var(--font-size-base);
-    color: var(--ink-1);
-  }
-
-  .flavor-cell {
+  .stack-header {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    justify-content: space-between;
+    padding: 4px 6px 2px;
+    border-top: 1px solid var(--line-1);
+    margin-top: 4px;
   }
 
-  .flavor-indicator {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  .stack-num {
+    font-family: var(--font-family-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
   }
 
-  .open-badge {
-    display: inline-block;
-    padding: var(--space-1) var(--space-2);
-    background-color: var(--accent);
-    color: white;
-    font-size: var(--font-size-xs);
-    border-radius: var(--r-md);
-    margin-left: var(--space-2);
+  .stack-total {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
   }
 
-  .quantity-cell {
-    font-weight: var(--font-weight-medium);
-  }
-
-  .location-cell {
-    color: var(--ink-2);
-  }
-
-  /**
-   * Empty State
-   */
-  .empty-state {
-    text-align: center;
-    padding: var(--space-8);
-    color: var(--ink-2);
-  }
-
-  .empty-state p {
-    margin: 0;
-    font-size: var(--font-size-lg);
-  }
-
-  .empty-hint {
-    margin-top: var(--space-2);
-    font-size: var(--font-size-base);
-    color: var(--ink-2);
-  }
-
-  /**
-   * Modal Form Styles
-   */
-  .modal-form {
+  .oos-section {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: 10px;
+  }
+
+  .oos-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .oos-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 8px;
+    background: var(--surface-card);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  .oos-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot, var(--ink-3));
+    opacity: 0.55;
+  }
+
+  .inv-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .ghost-link {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-underline-offset: 4px;
+  }
+
+  .ghost-link:hover {
+    color: var(--ink-1);
+  }
+
+  .fab-wrap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px 20px 24px;
+    background: linear-gradient(to top, var(--surface-app) 50%, transparent);
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .fab {
+    pointer-events: auto;
+    appearance: none;
+    border: 0;
+    background: var(--ink-1);
+    color: var(--surface-card);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: var(--font-weight-semibold);
+    padding: 14px 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-2);
+    letter-spacing: -0.005em;
+  }
+
+  .fab:hover {
+    background: oklch(0.3 0.01 80);
+  }
+
+  .fab .plus {
+    font-size: 18px;
+    line-height: 1;
+    margin-top: -1px;
+  }
+
+  /**
+   * Hide the FAB on laptop. The topbar's "+ Add inventory" button is
+   * the wide-layout entry point - mounting the FAB there too would
+   * give the user two equally-prominent triggers in opposite corners.
+   */
+  @container app (min-width: 820px) {
+    .fab-wrap {
+      display: none;
+    }
+  }
+
+  .new-flavor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 8px;
   }
 
   .form-group label {
-    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--ink-1);
+    font-size: 14px;
   }
 
-  .text-input {
-    padding: var(--space-3);
-    font-size: var(--font-size-base);
+  .form-group input,
+  .form-group select {
+    padding: 8px 12px;
     border: 1px solid var(--line-1);
-    border-radius: var(--r-md);
-    background-color: var(--surface-card);
+    border-radius: var(--r-sm);
+    font-size: 16px;
+    background: var(--surface-card);
     color: var(--ink-1);
-    transition: border-color var(--transition-base) var(--transition-timing);
+    font-family: inherit;
   }
 
-  .text-input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .radio-group {
+  .modal-actions {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .radio-label {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    cursor: pointer;
-    font-size: var(--font-size-base);
-  }
-
-  .radio-label input[type='radio'] {
-    cursor: pointer;
-  }
-
-  /**
-   * Responsive Design
-   */
-  @media (min-width: 768px) {
-    .inventory-screen {
-      padding: var(--space-8);
-    }
-
-    .inventory-header {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .stacks-container {
-      padding: var(--space-6);
-    }
-
-    .stack {
-      min-width: 250px;
-    }
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: flex-end;
   }
 </style>
