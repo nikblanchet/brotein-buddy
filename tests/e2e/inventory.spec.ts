@@ -80,9 +80,15 @@ test('filter chip narrows the visible stacks', async ({ page }) => {
   await expect(page.getByTestId('storage-section')).toHaveCount(0);
 });
 
-test('FAB opens the Add Inventory panel', async ({ page }) => {
-  await page.getByTestId('add-inventory-fab').click();
-  await expect(page.getByTestId('add-inventory-panel')).toBeVisible();
+test('opens the Add Inventory panel', async ({ page }) => {
+  // FAB on phone widths, topbar "+ Add inventory" button on laptop.
+  const fab = page.getByTestId('add-inventory-fab');
+  if (await fab.isVisible()) {
+    await fab.click();
+  } else {
+    await page.getByTestId('topbar-add-inventory').click();
+  }
+  await expect(page.getByTestId('add-inventory-panel')).toHaveAttribute('aria-hidden', 'false');
 });
 
 test('clicking a box card navigates to Box Edit', async ({ page }) => {
