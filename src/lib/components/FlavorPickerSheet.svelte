@@ -34,6 +34,14 @@
 
   const { open, title, flavors, onselect, onclose }: Props = $props();
 
+  /**
+   * Always-non-empty accessible name for the dialog and its inner
+   * radiogroup. The parent passes an empty title while the picker is
+   * closed, but axe still inspects the rendered (off-screen) dialog
+   * and an empty aria-label is a serious violation.
+   */
+  const accessibleLabel = $derived(title || 'Flavor picker');
+
   function poolLabel(flavor: Flavor): string | null {
     if (flavor.randomPool === 'caffeinated') return 'Caff';
     if (flavor.randomPool === 'caffeine-free') return 'Decaf';
@@ -51,13 +59,15 @@
   class:open
   role="dialog"
   aria-modal="true"
-  aria-label={title}
+  aria-label={accessibleLabel}
+  aria-hidden={!open}
+  inert={!open}
   data-testid="flavor-picker-sheet"
 >
   <div class="grabber" aria-hidden="true"></div>
 
   <div class="panel-head">
-    <h2>{title}</h2>
+    <h2>{accessibleLabel}</h2>
     <button class="icon-btn" onclick={onclose} aria-label="Close">✕</button>
   </div>
 
@@ -65,7 +75,7 @@
     {#if flavors.length === 0}
       <p class="empty">No flavors yet. Add one from Inventory.</p>
     {:else}
-      <div class="flavor-list" role="radiogroup" aria-label={title}>
+      <div class="flavor-list" role="radiogroup" aria-label={accessibleLabel}>
         {#each flavors as flavor (flavor.id)}
           {@const tone = getFlavorTone(flavor.id)}
           {@const pool = poolLabel(flavor)}

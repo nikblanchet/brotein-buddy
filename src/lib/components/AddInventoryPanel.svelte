@@ -196,6 +196,8 @@
   role="dialog"
   aria-modal="true"
   aria-label="Add inventory"
+  aria-hidden={!$addInventoryOpen}
+  inert={!$addInventoryOpen}
   data-testid="add-inventory-panel"
 >
   <div class="grabber" aria-hidden="true"></div>
