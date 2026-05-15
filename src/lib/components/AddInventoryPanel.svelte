@@ -344,10 +344,17 @@
     flex-direction: column;
     box-shadow: 0 -8px 32px oklch(0 0 0 / 0.15);
     overflow: hidden;
+    /*
+     * The closed sheet stays in the DOM for the slide-out animation;
+     * pointer-events: none keeps it from occluding the underlying
+     * screen when it's off-viewport. .open re-enables the events.
+     */
+    pointer-events: none;
   }
 
   .sheet.open {
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .sheet-backdrop {

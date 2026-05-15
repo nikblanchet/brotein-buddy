@@ -119,10 +119,19 @@
     flex-direction: column;
     box-shadow: 0 -8px 32px oklch(0 0 0 / 0.15);
     overflow: hidden;
+    /*
+     * Pointer events are gated on .open so the off-viewport closed
+     * sheet doesn't intercept taps on the underlying screen.
+     * Without this, Playwright's "is the target the topmost element"
+     * check still finds the absolute-positioned sheet at the bottom
+     * of .app and reports the underlying button as occluded.
+     */
+    pointer-events: none;
   }
 
   .sheet.open {
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .sheet-backdrop {
