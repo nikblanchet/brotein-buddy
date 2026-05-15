@@ -149,12 +149,12 @@
     font-family: var(--font-family-base);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
 
     /* Styling */
-    background-color: var(--color-surface-200);
-    border: 2px solid var(--color-border-light);
-    border-radius: var(--radius-base);
+    background-color: var(--surface-app);
+    border: 2px solid var(--line-1);
+    border-radius: var(--r-md);
     cursor: pointer;
 
     /* Transitions */
@@ -168,19 +168,19 @@
   }
 
   .numberpad-button:hover:not(:disabled) {
-    background-color: var(--color-surface-300);
-    border-color: var(--color-border-medium);
+    background-color: var(--surface-sunk);
+    border-color: var(--line-2);
   }
 
   .numberpad-button:active:not(:disabled) {
     transform: scale(0.95);
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
-    border-color: var(--color-primary);
+    background-color: var(--accent);
+    color: var(--surface-card);
+    border-color: var(--accent);
   }
 
   .numberpad-button:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 

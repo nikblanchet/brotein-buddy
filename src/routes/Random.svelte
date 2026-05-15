@@ -187,8 +187,8 @@
   .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid var(--color-border);
-    border-top-color: var(--color-primary);
+    border: 4px solid var(--line-1);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -201,7 +201,7 @@
 
   .loading-text {
     font-size: var(--font-size-lg);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
@@ -222,13 +222,13 @@
   h1 {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
   .error-message {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     line-height: 1.6;
     margin: 0;
   }

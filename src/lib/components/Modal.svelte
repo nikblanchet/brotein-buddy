@@ -280,9 +280,9 @@
    * The modal container
    */
   .modal-dialog {
-    background-color: var(--color-surface-100);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    background-color: var(--surface-card);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
     max-height: 90vh;
     width: 100%;
     display: flex;
@@ -332,7 +332,7 @@
     .modal-dialog--full {
       max-width: 900px;
       max-height: 90vh;
-      border-radius: var(--radius-lg);
+      border-radius: var(--r-lg);
     }
   }
 
@@ -344,14 +344,14 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space-6);
-    border-bottom: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--line-1);
   }
 
   .modal-title {
     margin: 0;
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   /**
@@ -362,8 +362,8 @@
     border: none;
     padding: var(--space-2);
     cursor: pointer;
-    color: var(--color-text-secondary);
-    border-radius: var(--radius-base);
+    color: var(--ink-2);
+    border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -371,12 +371,12 @@
   }
 
   .modal-close:hover {
-    background-color: var(--color-surface-300);
-    color: var(--color-text-primary);
+    background-color: var(--surface-sunk);
+    color: var(--ink-1);
   }
 
   .modal-close:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -405,6 +405,6 @@
     justify-content: flex-end;
     gap: var(--space-3);
     padding: var(--space-6);
-    border-top: 1px solid var(--color-border-light);
+    border-top: 1px solid var(--line-1);
   }
 </style>

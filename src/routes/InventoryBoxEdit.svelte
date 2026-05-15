@@ -534,7 +534,7 @@
 
   .header h1 {
     font-size: var(--font-size-xl);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
@@ -547,11 +547,11 @@
   .box-visual {
     width: 150px;
     height: 150px;
-    border-radius: var(--border-radius-md);
+    border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-2);
     border: 3px solid rgba(0, 0, 0, 0.1);
   }
 
@@ -567,12 +567,12 @@
       0,
       0.7
     ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
   }
 
   .box-details {
-    background: var(--color-background-secondary);
-    border-radius: var(--border-radius-md);
+    background: var(--surface-app);
+    border-radius: var(--r-md);
     padding: var(--space-4);
     margin-bottom: var(--space-6);
     display: flex;
@@ -588,28 +588,28 @@
 
   .label {
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   .value {
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .status-badge {
     padding: var(--space-1) var(--space-3);
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--r-sm);
     font-size: var(--font-size-sm);
   }
 
   .status-badge.open {
-    background-color: var(--color-success-light);
-    color: var(--color-success-dark);
+    background-color: var(--accent-soft);
+    color: var(--accent-ink);
   }
 
   .status-badge.closed {
-    background-color: var(--color-neutral-light);
-    color: var(--color-neutral-dark);
+    background-color: var(--ink-3);
+    color: var(--ink-1);
   }
 
   .actions {
@@ -633,13 +633,13 @@
 
   .form-group label {
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .form-group input {
     padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-sm);
     font-size: var(--font-size-base);
   }
 
@@ -652,13 +652,13 @@
 
   .numberpad-label {
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     font-size: var(--font-size-base);
     display: block;
   }
 
   .error-message {
-    color: var(--color-danger);
+    color: var(--danger);
     font-size: var(--font-size-sm);
     margin: 0;
   }
@@ -683,13 +683,13 @@
 
   .conflict-message {
     font-size: var(--font-size-base);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
   .conflict-question {
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
@@ -703,11 +703,11 @@
   .delete-prompt p,
   .delete-confirm p {
     margin: 0;
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .warning {
-    color: var(--color-danger);
+    color: var(--danger);
     font-weight: var(--font-weight-medium);
     font-size: var(--font-size-sm);
   }

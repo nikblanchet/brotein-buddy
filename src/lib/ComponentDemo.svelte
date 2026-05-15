@@ -115,23 +115,23 @@
       <h3>Colors</h3>
       <div class="color-grid">
         <div class="color-swatch">
-          <div class="color-box" style="background-color: var(--color-primary)"></div>
+          <div class="color-box" style="background-color: var(--accent)"></div>
           <p class="text-sm">Primary</p>
         </div>
         <div class="color-swatch">
-          <div class="color-box" style="background-color: var(--color-success)"></div>
+          <div class="color-box" style="background-color: var(--accent)"></div>
           <p class="text-sm">Success</p>
         </div>
         <div class="color-swatch">
-          <div class="color-box" style="background-color: var(--color-warning)"></div>
+          <div class="color-box" style="background-color: var(--accent)"></div>
           <p class="text-sm">Warning</p>
         </div>
         <div class="color-swatch">
-          <div class="color-box" style="background-color: var(--color-danger)"></div>
+          <div class="color-box" style="background-color: var(--danger)"></div>
           <p class="text-sm">Danger</p>
         </div>
         <div class="color-swatch">
-          <div class="color-box" style="background-color: var(--color-info)"></div>
+          <div class="color-box" style="background-color: var(--accent)"></div>
           <p class="text-sm">Info</p>
         </div>
       </div>
@@ -218,9 +218,9 @@
   .demo-section {
     margin-bottom: var(--space-12);
     padding: var(--space-6);
-    background-color: var(--color-surface-100);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border-light);
+    background-color: var(--surface-card);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line-1);
   }
 
   .demo-section h2 {
@@ -243,7 +243,7 @@
     margin-bottom: var(--space-4);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   .color-grid {
@@ -259,14 +259,14 @@
   .color-box {
     width: 100%;
     height: 80px;
-    border-radius: var(--radius-base);
-    border: 2px solid var(--color-border-light);
+    border-radius: var(--r-md);
+    border: 2px solid var(--line-1);
     margin-bottom: var(--space-2);
   }
 
   .spacing-box {
     height: var(--space-8);
-    background-color: var(--color-primary);
-    border-radius: var(--radius-sm);
+    background-color: var(--accent);
+    border-radius: var(--r-sm);
   }
 </style>

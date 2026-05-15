@@ -397,7 +397,7 @@
   .inventory-header h1 {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
@@ -433,11 +433,11 @@
   .stack-label {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     text-align: center;
     padding: var(--space-2);
-    background-color: var(--color-surface-100);
-    border-radius: var(--radius-base);
+    background-color: var(--surface-card);
+    border-radius: var(--r-md);
   }
 
   .stack-boxes {
@@ -448,19 +448,19 @@
 
   .box-visual {
     padding: var(--space-4);
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
     cursor: pointer;
     transition:
       transform var(--transition-base) var(--transition-timing),
       box-shadow var(--transition-base) var(--transition-timing);
-    box-shadow: var(--shadow-base);
+    box-shadow: var(--shadow-1);
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
   .box-visual:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-2);
   }
 
   .box-visual.box-open {
@@ -483,7 +483,7 @@
       0.7
     ); /* Semi-transparent dark background ensures WCAG AA contrast on any box color */
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     display: inline-block;
   }
 
@@ -498,14 +498,14 @@
    */
   .out-of-stock-section {
     padding: var(--space-6);
-    background-color: var(--color-surface-100);
-    border-radius: var(--radius-lg);
+    background-color: var(--surface-card);
+    border-radius: var(--r-lg);
   }
 
   .out-of-stock-section h2 {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0 0 var(--space-4) 0;
   }
 
@@ -517,11 +517,11 @@
 
   .out-of-stock-item {
     padding: var(--space-2) var(--space-4);
-    background-color: var(--color-surface-200);
+    background-color: var(--surface-app);
     border-left: 4px solid;
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   /**
@@ -534,13 +534,13 @@
   .inventory-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--color-surface-100);
-    border-radius: var(--radius-lg);
+    background-color: var(--surface-card);
+    border-radius: var(--r-lg);
     overflow: hidden;
   }
 
   .inventory-table thead {
-    background-color: var(--color-surface-300);
+    background-color: var(--surface-sunk);
   }
 
   .inventory-table th {
@@ -548,7 +548,7 @@
     text-align: left;
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -560,11 +560,11 @@
   }
 
   .inventory-table th.sortable:hover {
-    background-color: var(--color-surface-200);
+    background-color: var(--surface-app);
   }
 
   .inventory-table th.sorted {
-    color: var(--color-primary);
+    color: var(--accent);
   }
 
   .sort-indicator {
@@ -573,7 +573,7 @@
   }
 
   .inventory-table tbody tr {
-    border-bottom: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--line-1);
   }
 
   .inventory-table tbody tr:last-child {
@@ -586,13 +586,13 @@
   }
 
   .table-row:hover {
-    background-color: var(--color-surface-200);
+    background-color: var(--surface-app);
   }
 
   .inventory-table td {
     padding: var(--space-4);
     font-size: var(--font-size-base);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .flavor-cell {
@@ -611,10 +611,10 @@
   .open-badge {
     display: inline-block;
     padding: var(--space-1) var(--space-2);
-    background-color: var(--color-primary);
+    background-color: var(--accent);
     color: white;
     font-size: var(--font-size-xs);
-    border-radius: var(--radius-base);
+    border-radius: var(--r-md);
     margin-left: var(--space-2);
   }
 
@@ -623,7 +623,7 @@
   }
 
   .location-cell {
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   /**
@@ -632,7 +632,7 @@
   .empty-state {
     text-align: center;
     padding: var(--space-8);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   .empty-state p {
@@ -643,7 +643,7 @@
   .empty-hint {
     margin-top: var(--space-2);
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   /**
@@ -664,22 +664,22 @@
   .form-group label {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .text-input {
     padding: var(--space-3);
     font-size: var(--font-size-base);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-base);
-    background-color: var(--color-surface-100);
-    color: var(--color-text-primary);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-md);
+    background-color: var(--surface-card);
+    color: var(--ink-1);
     transition: border-color var(--transition-base) var(--transition-timing);
   }
 
   .text-input:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--accent);
   }
 
   .radio-group {

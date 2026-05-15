@@ -103,13 +103,13 @@
     position: absolute;
     top: -40px;
     left: 0;
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
+    background: var(--accent);
+    color: var(--surface-card);
     padding: var(--space-2) var(--space-4);
     text-decoration: none;
     font-weight: var(--font-weight-semibold);
     z-index: 100;
-    border-radius: 0 0 var(--radius-base) 0;
+    border-radius: 0 0 var(--r-md) 0;
   }
 
   .skip-link:focus {

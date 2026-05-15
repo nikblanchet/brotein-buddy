@@ -207,13 +207,13 @@
   h1 {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
   .subtitle {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
@@ -239,7 +239,7 @@
     }
 
     h1 {
-      font-size: var(--font-size-4xl);
+      font-size: var(--font-size-3xl);
     }
 
     .subtitle {
@@ -261,7 +261,7 @@
   }
 
   .empty-state p {
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
@@ -279,9 +279,9 @@
     align-items: flex-start;
     gap: var(--space-1);
     padding: var(--space-4);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-base);
+    background: var(--surface-card);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-md);
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
@@ -289,8 +289,8 @@
   }
 
   .flavor-item:hover {
-    background: var(--color-surface-hover);
-    border-color: var(--color-primary);
+    background: var(--surface-hover);
+    border-color: var(--accent);
     transform: translateY(-1px);
   }
 
@@ -301,7 +301,7 @@
   .flavor-name {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .pool-badge {

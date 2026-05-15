@@ -194,13 +194,13 @@
 }
 
 .text-primary {
-  color: var(--color-text-primary);
+  color: var(--ink-1);
 }
 .text-secondary {
-  color: var(--color-text-secondary);
+  color: var(--ink-2);
 }
 .text-disabled {
-  color: var(--color-text-disabled);
+  color: var(--ink-4);
 }
 
 /* ========================================

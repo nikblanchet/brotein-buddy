@@ -103,7 +103,7 @@
   .welcome-message {
     font-size: var(--font-size-base);
     line-height: 1.6;
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
@@ -119,7 +119,7 @@
   .features h3 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
@@ -135,7 +135,7 @@
   .features li {
     font-size: var(--font-size-sm);
     line-height: 1.5;
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   /**
@@ -149,7 +149,7 @@
 
   .cta-message {
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
     text-align: center;
   }

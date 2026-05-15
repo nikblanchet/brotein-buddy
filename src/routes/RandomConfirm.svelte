@@ -316,7 +316,7 @@
   .flavor-name {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-primary);
+    color: var(--accent);
     margin: 0;
     text-align: center;
   }
@@ -335,7 +335,7 @@
   h2 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
     text-align: center;
   }
@@ -349,14 +349,14 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-4);
-    border-radius: var(--radius-base);
-    border: 2px solid var(--color-border);
-    background: var(--color-background);
+    border-radius: var(--r-md);
+    border: 2px solid var(--line-1);
+    background: var(--surface-app);
   }
 
   .priority-box {
-    border-color: var(--color-primary);
-    background: var(--color-background-secondary);
+    border-color: var(--accent);
+    background: var(--surface-app);
   }
 
   .box-info {
@@ -368,34 +368,34 @@
   .quantity {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
   }
 
   .quantity.low-quantity {
-    color: var(--color-warning);
+    color: var(--accent);
   }
 
   .location {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
   }
 
   .status {
     font-size: var(--font-size-sm);
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     width: fit-content;
     font-weight: var(--font-weight-medium);
   }
 
   .status.open {
-    background: var(--color-success-bg);
-    color: var(--color-success-dark);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
   }
 
   .status.unopened {
-    background: var(--color-info-bg);
-    color: var(--color-info-dark);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
   }
 
   /**
@@ -411,7 +411,7 @@
   h3 {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
     text-align: center;
   }
@@ -473,13 +473,13 @@
   .error-container h1 {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: var(--ink-1);
     margin: 0;
   }
 
   .error-message {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     line-height: 1.6;
     margin: 0;
   }
@@ -498,8 +498,8 @@
   .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid var(--color-border);
-    border-top-color: var(--color-primary);
+    border: 4px solid var(--line-1);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -512,7 +512,7 @@
 
   .loading-text {
     font-size: var(--font-size-lg);
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     margin: 0;
   }
 
@@ -526,7 +526,7 @@
     }
 
     .flavor-name {
-      font-size: var(--font-size-4xl);
+      font-size: var(--font-size-3xl);
     }
 
     h2 {
