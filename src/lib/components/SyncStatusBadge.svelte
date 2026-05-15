@@ -15,6 +15,7 @@
   import { session } from '$lib/auth';
   import { syncStatus, pendingChanges, lastSyncedAt } from '$lib/sync-coordinator';
   import { isSyncConfigured } from '$lib/supabase';
+  import { syncBadgeLabel, syncBadgeVariant } from './sync-status-badge-utils';
 
   interface Props {
     onclick?: () => void;
@@ -24,39 +25,8 @@
 
   let visible = $derived(isSyncConfigured() && $session !== null);
 
-  let label = $derived.by(() => {
-    switch ($syncStatus) {
-      case 'syncing':
-        return 'Syncing…';
-      case 'offline':
-        return 'Offline';
-      case 'error':
-        return 'Sync error';
-      case 'conflict-pending':
-        return 'Resolve conflict';
-      case 'saved':
-        return $pendingChanges ? 'Pending…' : 'Saved';
-      case 'idle':
-      default:
-        return $pendingChanges ? 'Pending…' : 'Synced';
-    }
-  });
-
-  let variant = $derived.by(() => {
-    switch ($syncStatus) {
-      case 'syncing':
-        return 'syncing';
-      case 'offline':
-        return 'offline';
-      case 'error':
-      case 'conflict-pending':
-        return 'error';
-      case 'saved':
-      case 'idle':
-      default:
-        return $pendingChanges ? 'pending' : 'ok';
-    }
-  });
+  let label = $derived(syncBadgeLabel($syncStatus, $pendingChanges));
+  let variant = $derived(syncBadgeVariant($syncStatus, $pendingChanges));
 
   let title = $derived.by(() => {
     if ($lastSyncedAt) {
