@@ -27,6 +27,7 @@
    * @component
    */
 
+  import { untrack } from 'svelte';
   import { push } from 'svelte-spa-router';
   import { appState, updateBoxQuantity, updateBoxIsOpen, removeBox } from '$lib/stores';
   import { maybeGetFlavor } from '$lib/utils/flavor';
@@ -71,14 +72,18 @@
   );
 
   /**
-   * Sync the working copy from the store whenever the box id changes.
-   * Watching box.id rather than box itself avoids resetting mid-edit if
-   * an unrelated store mutation rebuilds the array reference.
+   * Reseed the working copy when the route points at a different box.
+   * The box is looked up inside untrack() so a background store
+   * mutation - notably a sync pull calling replaceAppState - can't
+   * re-fire this effect and discard the user's in-progress edits; the
+   * only tracked dependency is boxId.
    */
   $effect(() => {
-    if (box) {
-      quantity = box.quantity;
-      isOpen = box.isOpen;
+    const id = boxId;
+    const current = untrack(() => $appState.boxes.find((b) => b.id === id));
+    if (current) {
+      quantity = current.quantity;
+      isOpen = current.isOpen;
     }
   });
 
