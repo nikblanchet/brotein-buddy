@@ -85,6 +85,8 @@
         return 'Saved';
       case 'error':
         return 'Error';
+      case 'offline':
+        return 'Offline — changes saved locally';
       case 'conflict-pending':
         return 'Waiting on conflict resolution';
     }
