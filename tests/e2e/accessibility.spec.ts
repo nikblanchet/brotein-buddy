@@ -36,6 +36,9 @@ test('Pick screen has nav landmarks and an active aria-current tab', async ({ pa
 test('Pick screen has no axe-detectable accessibility violations', async ({ page }) => {
   await page.goto('/#/');
   await dismissWelcome(page);
+  // Wait for the screen to mount before axe runs - otherwise the
+  // analysis can race the route change and report on an empty shell.
+  await expect(page.getByTestId('pick-screen')).toBeVisible();
   const results = await new AxeBuilder({ page })
     .disableRules(['region']) // The single-page shell intentionally omits a per-screen <main> region
     .analyze();
@@ -45,6 +48,7 @@ test('Pick screen has no axe-detectable accessibility violations', async ({ page
 test('Inventory screen has no axe-detectable accessibility violations', async ({ page }) => {
   await page.goto('/#/inventory');
   await dismissWelcome(page);
+  await expect(page.getByTestId('inventory-screen')).toBeVisible();
   const results = await new AxeBuilder({ page }).disableRules(['region']).analyze();
   expect(results.violations).toEqual([]);
 });
@@ -52,6 +56,7 @@ test('Inventory screen has no axe-detectable accessibility violations', async ({
 test('More screen has no axe-detectable accessibility violations', async ({ page }) => {
   await page.goto('/#/more');
   await dismissWelcome(page);
+  await expect(page.getByRole('heading', { name: 'More', level: 1 })).toBeVisible();
   const results = await new AxeBuilder({ page }).disableRules(['region']).analyze();
   expect(results.violations).toEqual([]);
 });

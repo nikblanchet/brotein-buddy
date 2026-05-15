@@ -137,6 +137,7 @@
 </script>
 
 <section class="inventory" data-testid="inventory-screen">
+  <h1 class="sr-only">Inventory</h1>
   <div class="inv-tally" data-testid="inv-tally">
     <span class="big">{tally.boxes}</span>
     <span class="label">boxes</span>
