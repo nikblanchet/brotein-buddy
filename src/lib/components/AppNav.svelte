@@ -12,7 +12,7 @@
    * keep the highlight in sync automatically.
    */
 
-  import { push, location } from 'svelte-spa-router';
+  import { push, router } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
 
   type Tab = 'pick' | 'inventory' | 'more';
@@ -28,7 +28,7 @@
     return 'pick';
   }
 
-  const activeTab = $derived(deriveTab($location));
+  const activeTab = $derived(deriveTab(router.location));
 
   function go(tab: Tab) {
     if (tab === 'pick') push(ROUTES.PICK);

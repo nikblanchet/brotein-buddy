@@ -19,7 +19,7 @@
    * the grid.
    */
 
-  import Router, { router, location } from 'svelte-spa-router';
+  import Router, { router } from 'svelte-spa-router';
   import { routes } from './lib/router/routes';
   import WelcomeModal from './lib/components/WelcomeModal.svelte';
   import AppNav from './lib/components/AppNav.svelte';
@@ -64,7 +64,7 @@
    * this exact path so the topbar doesn't compete with deep-flow stage
    * headers.
    */
-  const onInventoryList = $derived($location === '/inventory');
+  const onInventoryList = $derived(router.location === '/inventory');
 
   /**
    * Map routes to page titles
