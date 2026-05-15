@@ -99,6 +99,19 @@
     });
     clearPickResult();
   }
+
+  /**
+   * Escape dismisses the sheet, recording the cancellation just like a
+   * backdrop tap.
+   */
+  $effect(() => {
+    if (!projection) return;
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') handleDismiss();
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  });
 </script>
 
 {#if projection}

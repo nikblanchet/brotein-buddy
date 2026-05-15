@@ -76,6 +76,19 @@
     addInventoryOpen.set(false);
   }
 
+  /**
+   * Escape closes the panel, matching the dialog pattern. Attached only
+   * while the panel is open.
+   */
+  $effect(() => {
+    if (!$addInventoryOpen) return;
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') close();
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  });
+
   function chooseLocMode(mode: 'auto' | 'pick') {
     locMode = mode;
     if (mode === 'pick' && !selectedSlot) {
@@ -243,7 +256,7 @@
         {#if flavors.length === 0}
           <p class="field-hint">No flavors yet. Add one from Inventory.</p>
         {:else}
-          <div class="flavor-list" role="radiogroup" aria-label="Flavor">
+          <div class="flavor-list" role="group" aria-label="Flavor">
             {#each flavors as flavor (flavor.id)}
               {@const tone = getFlavorTone(flavor.id)}
               {@const badge = poolBadge(flavor)}

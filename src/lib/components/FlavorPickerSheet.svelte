@@ -36,11 +36,25 @@
 
   /**
    * Always-non-empty accessible name for the dialog and its inner
-   * radiogroup. The parent passes an empty title while the picker is
+   * flavor group. The parent passes an empty title while the picker is
    * closed, but axe still inspects the rendered (off-screen) dialog
    * and an empty aria-label is a serious violation.
    */
   const accessibleLabel = $derived(title || 'Flavor picker');
+
+  /**
+   * Escape closes the sheet, matching the dialog pattern. The listener
+   * is attached only while the sheet is open so it doesn't swallow
+   * Escape for the screen beneath.
+   */
+  $effect(() => {
+    if (!open) return;
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onclose();
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  });
 
   function poolLabel(flavor: Flavor): string | null {
     if (flavor.randomPool === 'caffeinated') return 'Caff';
@@ -75,7 +89,7 @@
     {#if flavors.length === 0}
       <p class="empty">No flavors yet. Add one from Inventory.</p>
     {:else}
-      <div class="flavor-list" role="radiogroup" aria-label={accessibleLabel}>
+      <div class="flavor-list" role="group" aria-label={accessibleLabel}>
         {#each flavors as flavor (flavor.id)}
           {@const tone = getFlavorTone(flavor.id)}
           {@const pool = poolLabel(flavor)}

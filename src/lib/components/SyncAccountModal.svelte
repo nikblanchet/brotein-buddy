@@ -45,6 +45,19 @@
     syncSheetOpen.set(false);
   }
 
+  /**
+   * Escape closes the sheet, matching the dialog pattern. Attached only
+   * while the sheet is open.
+   */
+  $effect(() => {
+    if (!$syncSheetOpen) return;
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') close();
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  });
+
   async function handleSendLink() {
     stage = 'sending';
     errorMessage = '';
