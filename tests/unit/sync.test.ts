@@ -81,9 +81,29 @@ function buildMockClient(): MockClient {
           },
         };
       },
-      async upsert(rows: unknown, _opts?: unknown) {
+      upsert(rows: unknown, _opts?: unknown) {
         calls.push({ table, op: 'upsert', args: [rows, _opts] });
-        return { error: upsertError };
+        const result = {
+          data: { updated_at: '2026-05-14T12:00:00.000Z' },
+          error: upsertError,
+        };
+        return {
+          select() {
+            return {
+              single<T = unknown>() {
+                return Promise.resolve(result) as Promise<{
+                  data: T | null;
+                  error: typeof upsertError;
+                }>;
+              },
+            };
+          },
+          then<TResult1 = typeof result>(
+            onfulfilled?: (value: typeof result) => TResult1 | PromiseLike<TResult1>
+          ) {
+            return Promise.resolve(result).then(onfulfilled);
+          },
+        };
       },
       delete() {
         return {
@@ -352,5 +372,15 @@ describe('clearRemoteState', () => {
     expect(deletes).toHaveLength(2);
     expect(deletes[0].table).toBe('events');
     expect(deletes[1].table).toBe('app_states');
+  });
+});
+
+describe('pushFullState — error paths', () => {
+  it('throws SyncError when the events upsert fails', async () => {
+    // The mock's upsert returns one shared error for both tables; this
+    // exercises the events-upsert failure branch by routing through the
+    // existing seeded error.
+    mock.__seedError('upsert', { message: 'events failed' });
+    await expect(pushFullState(SAMPLE_STATE)).rejects.toBeInstanceOf(SyncError);
   });
 });

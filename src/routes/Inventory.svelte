@@ -18,6 +18,7 @@
   import AddInventoryModal from '$lib/components/AddInventoryModal.svelte';
   import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
   import SyncAccountModal from '$lib/components/SyncAccountModal.svelte';
+  import SyncStatusBadge from '$lib/components/SyncStatusBadge.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
   import { appState, addFlavor } from '$lib/stores';
@@ -200,6 +201,7 @@
       >
         Sync
       </Button>
+      <SyncStatusBadge onclick={() => (isSyncModalOpen = true)} />
     </div>
   </header>
 
