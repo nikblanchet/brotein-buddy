@@ -87,6 +87,6 @@ We considered keeping the old `--color-*` names as aliases over the new tokens f
 ## References
 
 - ADR-005: Original design system decision (superseded for tokens; build/test infrastructure decisions still apply)
-- Design handoff: `~/Downloads/design_handoff_ux_refresh_2026/README.md`
+- Design handoff: [`docs/design/2026-ux-refresh/README.md`](../design/2026-ux-refresh/README.md) (annotated screenshots in the sibling `screenshots/` directory)
 - OKLCH color reference: https://oklch.com
 - Pantone Color of the Year 2026: Cloud Dancer
