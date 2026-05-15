@@ -49,11 +49,8 @@ jobs:
       - name: Run E2E - button
         run: npx playwright test tests/e2e/button.spec.ts
 
-      - name: Run E2E - favorite-flow
-        run: npx playwright test tests/e2e/favorite-flow.spec.ts
-
-      - name: Run E2E - home
-        run: npx playwright test tests/e2e/home.spec.ts
+      - name: Run E2E - pick
+        run: npx playwright test tests/e2e/pick.spec.ts
 
       - name: Run E2E - inventory-box-edit
         run: npx playwright test tests/e2e/inventory-box-edit.spec.ts
@@ -61,11 +58,8 @@ jobs:
       - name: Run E2E - inventory
         run: npx playwright test tests/e2e/inventory.spec.ts
 
-      - name: Run E2E - manual-flow
-        run: npx playwright test tests/e2e/manual-flow.spec.ts
-
-      - name: Run E2E - random-flow
-        run: npx playwright test tests/e2e/random-flow.spec.ts
+      - name: Run E2E - add-inventory
+        run: npx playwright test tests/e2e/add-inventory.spec.ts
 
       - name: Run E2E - rearrange
         run: npx playwright test tests/e2e/rearrange.spec.ts

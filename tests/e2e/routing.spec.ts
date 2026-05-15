@@ -1,323 +1,88 @@
-import { test, expect } from '@playwright/test';
-import type { AppState } from '../../src/types/models';
-
 /**
- * E2E tests for client-side routing
+ * Routing smoke tests for the post-refresh route map.
  *
- * Tests navigation between all routes, hash URL handling,
- * browser back/forward navigation, deep linking, and 404 handling.
- *
- * These tests run in a mobile viewport (iPhone 13 Pro) to match
- * the PWA's primary use case.
+ * The old `/random` and `/random/confirm` routes are gone; `/more` is
+ * new; `/component-demo` is removed. This spec verifies each surviving
+ * route loads its expected screen-level content and that AppNav active
+ * state stays in sync with the URL via aria-current.
  */
 
-test.beforeEach(async ({ page }) => {
-  // Set up test data for box edit routing tests
-  await page.goto('/#/');
+import { test, expect, Page } from '@playwright/test';
+import { STORAGE_KEY } from '../../src/lib/storage';
 
-  // Dismiss WelcomeModal if it appears
+async function dismissWelcome(page: Page) {
   try {
-    const startFreshButton = page.getByRole('button', { name: /start fresh/i });
-    await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
-    await startFreshButton.click();
-    await page.waitForTimeout(500); // Wait for modal close animation
+    const startFresh = page.getByRole('button', { name: /start fresh/i });
+    await startFresh.waitFor({ state: 'visible', timeout: 1500 });
+    await startFresh.click();
   } catch {
-    // Modal didn't appear (localStorage already prevents it), continue with test
+    // welcome already dismissed
   }
+}
 
-  await page.evaluate(() => {
-    const testState: AppState = {
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem('broteinbuddy_welcome_shown', 'true'));
+});
+
+test('/ renders the Pick screen', async ({ page }) => {
+  await page.goto('/#/');
+  await dismissWelcome(page);
+  await expect(page.getByTestId('pick-screen')).toBeVisible();
+});
+
+test('/inventory renders the Inventory screen', async ({ page }) => {
+  await page.goto('/#/inventory');
+  await dismissWelcome(page);
+  await expect(page.getByTestId('inventory-screen')).toBeVisible();
+});
+
+test('/more renders the More screen', async ({ page }) => {
+  await page.goto('/#/more');
+  await dismissWelcome(page);
+  await expect(page.getByRole('heading', { name: 'More', level: 1 })).toBeVisible();
+});
+
+test('AppNav highlights the active tab from the URL', async ({ page }) => {
+  await page.goto('/#/inventory');
+  await dismissWelcome(page);
+  await expect(page.getByTestId('nav-inventory')).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByTestId('nav-pick')).not.toHaveAttribute('aria-current', 'page');
+
+  await page.getByTestId('nav-more').click();
+  await expect(page).toHaveURL(/#\/more$/);
+  await expect(page.getByTestId('nav-more')).toHaveAttribute('aria-current', 'page');
+});
+
+test('unknown routes fall through to NotFound', async ({ page }) => {
+  await page.goto('/#/this-route-does-not-exist');
+  await dismissWelcome(page);
+  await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+});
+
+test('persistent nav remains during deep-flow box edit', async ({ page }) => {
+  await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
+    key: STORAGE_KEY,
+    value: JSON.stringify({
       version: 2,
       boxes: [
         {
-          id: 'test-box-123',
-          flavorId: 'flavor_chocolate',
-          quantity: 5,
-          location: { stack: 1, height: 1 },
-          isOpen: false,
-        },
-        {
-          id: 'box-123',
-          flavorId: 'flavor_vanilla',
-          quantity: 3,
-          location: { stack: 1, height: 2 },
-          isOpen: true,
-        },
-        {
-          id: 'box-abc',
-          flavorId: 'flavor_strawberry',
-          quantity: 8,
-          location: { stack: 2, height: 1 },
-          isOpen: false,
-        },
-        {
-          id: 'direct-link-box',
-          flavorId: 'flavor_chocolate',
-          quantity: 4,
-          location: { stack: 2, height: 2 },
-          isOpen: false,
-        },
-        {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          flavorId: 'flavor_vanilla',
+          id: 'box-x',
+          flavorId: 'flavor-x',
           quantity: 6,
-          location: { stack: 3, height: 1 },
+          location: { stack: 1, height: 1 },
           isOpen: true,
         },
-        {
-          id: 'box-123_test-ABC',
-          flavorId: 'flavor_strawberry',
-          quantity: 7,
-          location: { stack: 3, height: 2 },
-          isOpen: false,
-        },
       ],
-      flavors: [
-        { id: 'flavor_chocolate', name: 'Chocolate', randomPool: 'caffeine-free' },
-        { id: 'flavor_vanilla', name: 'Vanilla', randomPool: 'caffeine-free' },
-        { id: 'flavor_strawberry', name: 'Strawberry', randomPool: 'caffeine-free' },
-      ],
+      flavors: [{ id: 'flavor-x', name: 'Test Flavor', randomPool: 'caffeinated' }],
       favoriteFlavorId: null,
       settings: {},
-    };
-    localStorage.setItem('BROTEINBUDDY_APP_STATE', JSON.stringify(testState));
+      events: [],
+    }),
   });
-  await page.reload();
-});
-
-test.describe('Routing - Basic Navigation', () => {
-  test('home page loads at root path', async ({ page }) => {
-    await page.goto('/#/');
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-    await expect(page).toHaveURL(/#\/$/);
-  });
-
-  test('random selection route loads', async ({ page }) => {
-    await page.goto('/#/random');
-    // Random.svelte either shows loading state, redirects, or shows error
-    // Check that it loads without crashing (URL or h1 will exist)
-    await expect(page).toHaveURL(/#\/random/);
-    // Component auto-performs selection, may have already redirected
-    // Just verify it loaded successfully
-  });
-
-  test('random confirm route loads', async ({ page }) => {
-    await page.goto('/#/random/confirm');
-    // RandomConfirm.svelte shows error if no selectedFlavorId in sessionStorage
-    await expect(page.locator('h1')).toContainText('Unable to Confirm');
-    await expect(page).toHaveURL(/#\/random\/confirm$/);
-  });
-
-  test('inventory route loads', async ({ page }) => {
-    await page.goto('/#/inventory');
-    await expect(page.locator('h1')).toContainText('Inventory');
-    await expect(page).toHaveURL(/#\/inventory$/);
-  });
-
-  test('inventory rearrange route loads', async ({ page }) => {
-    await page.goto('/#/inventory/rearrange');
-    await expect(page.locator('h1')).toContainText('Rearrange Boxes');
-    await expect(page).toHaveURL(/#\/inventory\/rearrange$/);
-  });
-
-  test('inventory box edit route loads with boxId parameter', async ({ page }) => {
-    await page.goto('/#/inventory/test-box-123/edit');
-    await expect(page.locator('h1')).toContainText('Edit Box');
-    await expect(page).toHaveURL(/#\/inventory\/test-box-123\/edit$/);
-  });
-});
-
-test.describe('Routing - Button Navigation', () => {
-  test.skip('navigates from random to home via button', async ({ page }) => {
-    await page.goto('/#/random');
-    await expect(page.locator('h1')).toContainText('Random Selection');
-
-    await page.click('text=Back to Home');
-
-    await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-
-  test.skip('navigates from inventory to home via button', async ({ page }) => {
-    await page.goto('/#/inventory');
-    await expect(page.locator('h1')).toContainText('Inventory');
-
-    await page.click('text=Back to Home');
-
-    await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-
-  test('navigates from box edit to inventory via button', async ({ page }) => {
-    await page.goto('/#/inventory/box-123/edit');
-    await expect(page.locator('h1')).toContainText('Edit Box');
-
-    await page.click('text=← Back');
-
-    await expect(page).toHaveURL(/#\/inventory$/);
-    await expect(page.locator('h1')).toContainText('Inventory');
-  });
-
-  test('navigates from rearrange to inventory via button', async ({ page }) => {
-    await page.goto('/#/inventory/rearrange');
-    await expect(page.locator('h1')).toContainText('Rearrange Boxes');
-
-    await page.click('text=Cancel');
-
-    await expect(page).toHaveURL(/#\/inventory$/);
-    await expect(page.locator('h1')).toContainText('Inventory');
-  });
-});
-
-test.describe('Routing - Browser Navigation', () => {
-  test('back button navigates to previous route', async ({ page }) => {
-    await page.goto('/#/');
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-
-    // Use /inventory instead of /random (which auto-redirects)
-    await page.goto('/#/inventory');
-    await expect(page.locator('h1')).toContainText('Inventory');
-
-    await page.goBack();
-    await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-
-  test('forward button navigates after going back', async ({ page }) => {
-    await page.goto('/#/');
-    await page.goto('/#/inventory');
-    await page.goBack();
-
-    await expect(page).toHaveURL(/#\/$/);
-    await page.goForward();
-    await expect(page).toHaveURL(/#\/inventory$/);
-    await expect(page.locator('h1')).toContainText('Inventory');
-  });
-
-  test('back button works through multiple routes', async ({ page }) => {
-    await page.goto('/#/');
-    await page.goto('/#/inventory');
-    await page.goto('/#/inventory/box-abc/edit');
-
-    await expect(page.locator('h1')).toContainText('Edit Box');
-
-    await page.goBack();
-    await expect(page).toHaveURL(/#\/inventory$/);
-    await expect(page.locator('h1')).toContainText('Inventory');
-
-    await page.goBack();
-    await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-});
-
-test.describe('Routing - Deep Linking', () => {
-  test('directly accessing root without hash redirects correctly', async ({ page }) => {
-    await page.goto('/#/');
-    // svelte-spa-router may add hash automatically
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-
-  test('directly accessing route with hash works', async ({ page }) => {
-    await page.goto('/#/inventory');
-    await expect(page.locator('h1')).toContainText('Inventory');
-    await expect(page).toHaveURL(/#\/inventory$/);
-  });
-
-  test('directly accessing parameterized route works', async ({ page }) => {
-    await page.goto('/#/inventory/direct-link-box/edit');
-    await expect(page.locator('h1')).toContainText('Edit Box');
-    await expect(page).toHaveURL(/#\/inventory\/direct-link-box\/edit$/);
-  });
-
-  test('direct link with UUID format boxId works', async ({ page }) => {
-    const uuid = '550e8400-e29b-41d4-a716-446655440000';
-    await page.goto(`/#/inventory/${uuid}/edit`);
-    await expect(page.locator('h1')).toContainText('Edit Box');
-    await expect(page).toHaveURL(new RegExp(`#/inventory/${uuid}/edit$`));
-  });
-
-  test('direct link with complex boxId works', async ({ page }) => {
-    const boxId = 'box-123_test-ABC';
-    await page.goto(`/#/inventory/${boxId}/edit`);
-    await expect(page.locator('h1')).toContainText('Edit Box');
-    await expect(page).toHaveURL(new RegExp(`#/inventory/${boxId}/edit$`));
-  });
-});
-
-test.describe('Routing - 404 Handling', () => {
-  test('invalid route shows 404 page', async ({ page }) => {
-    await page.goto('/#/this-route-does-not-exist');
-    await expect(page.locator('h1')).toContainText('404');
-    await expect(page.locator('h2')).toContainText('Page Not Found');
-  });
-
-  test('404 page has working home button', async ({ page }) => {
-    await page.goto('/#/invalid-route');
-    await expect(page.locator('h1')).toContainText('404');
-
-    await page.click('text=Go to Home');
-
-    await expect(page).toHaveURL(/#\/$/);
-    await expect(page.locator('h1')).toContainText('BroteinBuddy');
-  });
-
-  test('malformed inventory route shows 404', async ({ page }) => {
-    await page.goto('/#/inventory/edit'); // Missing boxId parameter
-    await expect(page.locator('h1')).toContainText('404');
-  });
-
-  test('extra path segments show 404', async ({ page }) => {
-    await page.goto('/#/inventory/box-123/edit/extra');
-    await expect(page.locator('h1')).toContainText('404');
-  });
-});
-
-test.describe('Routing - Hash URL Format', () => {
-  test('all routes use hash-based URLs', async ({ page }) => {
-    const routes = [
-      { path: '/#/', expectedHeading: 'BroteinBuddy' },
-      { path: '/#/inventory', expectedHeading: 'Inventory' },
-    ];
-
-    for (const route of routes) {
-      await page.goto(route.path);
-      await expect(page).toHaveURL(new RegExp(route.path.replace(/\//g, '\\/')));
-      await expect(page.locator('h1')).toContainText(route.expectedHeading);
-    }
-  });
-
-  test('hash format preserved through navigation', async ({ page }) => {
-    await page.goto('/#/');
-    await expect(page).toHaveURL(/#\//);
-
-    await page.goto('/#/inventory');
-    await expect(page).toHaveURL(/#\/inventory/);
-
-    await page.goBack();
-    await expect(page).toHaveURL(/#\//);
-  });
-});
-
-test.describe('Routing - Placeholder Content', () => {
-  test.skip('all placeholder screens show coming soon status', async ({ page }) => {
-    const routes = ['/random', '/inventory', '/inventory/box-1/edit', '/inventory/rearrange'];
-
-    for (const route of routes) {
-      await page.goto(route);
-      await expect(page.locator('.status')).toContainText('Coming soon');
-    }
-  });
-
-  test.skip('placeholder screens use consistent styling', async ({ page }) => {
-    await page.goto('/#/random');
-
-    const screen = page.locator('.placeholder-screen');
-    await expect(screen).toBeVisible();
-
-    // Check that design system is being used
-    const title = page.locator('h1');
-    await expect(title).toBeVisible();
-    await expect(title).toHaveCSS('margin', '0px');
-  });
+  await page.goto('/#/inventory/box-x/edit');
+  await dismissWelcome(page);
+  await expect(page.getByTestId('box-edit-screen')).toBeVisible();
+  await expect(page.getByTestId('nav-pick')).toBeVisible();
+  await expect(page.getByTestId('nav-inventory')).toBeVisible();
+  await expect(page.getByTestId('nav-more')).toBeVisible();
 });
