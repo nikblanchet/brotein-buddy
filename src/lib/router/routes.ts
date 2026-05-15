@@ -8,14 +8,11 @@
  */
 
 import Pick from '../../routes/Pick.svelte';
-import Random from '../../routes/Random.svelte';
-import RandomConfirm from '../../routes/RandomConfirm.svelte';
 import Inventory from '../../routes/Inventory.svelte';
 import InventoryBoxEdit from '../../routes/InventoryBoxEdit.svelte';
 import InventoryRearrange from '../../routes/InventoryRearrange.svelte';
 import More from '../../routes/More.svelte';
 import NotFound from '../../routes/NotFound.svelte';
-import ComponentDemo from '../ComponentDemo.svelte';
 
 /**
  * Route configuration for svelte-spa-router
@@ -25,13 +22,10 @@ import ComponentDemo from '../ComponentDemo.svelte';
  */
 export const routes = {
   '/': Pick,
-  '/random': Random,
-  '/random/confirm': RandomConfirm,
   '/inventory': Inventory,
   '/inventory/:boxId/edit': InventoryBoxEdit,
   '/inventory/rearrange': InventoryRearrange,
   '/more': More,
-  '/component-demo': ComponentDemo,
   '*': NotFound,
 };
 
@@ -54,16 +48,7 @@ export const routes = {
  * ```
  */
 export const ROUTES = {
-  /** Home screen with main action buttons */
-  HOME: '/',
-
-  /** Random flavor selection screen */
-  RANDOM: '/random',
-
-  /** Confirmation screen after random selection */
-  RANDOM_CONFIRM: '/random/confirm',
-
-  /** Inventory management screen (visual and table views) */
+  /** Inventory management screen */
   INVENTORY: '/inventory',
 
   /**
@@ -86,17 +71,8 @@ export const ROUTES = {
   /** More screen with secondary functionality (backup, rearrange, settings) */
   MORE: '/more',
 
-  /**
-   * Pick screen alias for HOME.
-   *
-   * The Pick screen replaces Home as the default route in the 2026 UX
-   * refresh. PICK and HOME both resolve to '/' so existing call sites
-   * keep working until they migrate.
-   */
+  /** Pick screen - the default landing route */
   PICK: '/',
-
-  /** Component demo page for development and visual testing */
-  COMPONENT_DEMO: '/component-demo',
 } as const;
 
 /**

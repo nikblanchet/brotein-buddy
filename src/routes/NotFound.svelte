@@ -21,7 +21,7 @@
   </p>
 
   <div class="actions">
-    <Button variant="primary" onclick={() => push(ROUTES.HOME)}>Go to Home</Button>
+    <Button variant="primary" onclick={() => push(ROUTES.PICK)}>Go to Pick</Button>
   </div>
 </div>
 

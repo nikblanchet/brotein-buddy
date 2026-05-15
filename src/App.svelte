@@ -71,8 +71,6 @@
    */
   const pageTitles: Record<string, string> = {
     '/': 'Pick a flavor',
-    '/random': 'Random Selection',
-    '/random/confirm': 'Confirm Selection',
     '/inventory': 'Inventory',
     '/inventory/rearrange': 'Rearrange Inventory',
     '/more': 'More',

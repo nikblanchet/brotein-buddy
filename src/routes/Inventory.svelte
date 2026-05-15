@@ -27,7 +27,6 @@
 
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import BackupRestoreModal from '$lib/components/BackupRestoreModal.svelte';
   import BoxCard from '$lib/components/BoxCard.svelte';
   import { push } from 'svelte-spa-router';
   import { ROUTES } from '$lib/router/routes';
@@ -42,11 +41,6 @@
    * Filter chip selection. Drives which flavors' boxes are shown.
    */
   let filter = $state<'all' | 'caff' | 'decaf'>('all');
-
-  /**
-   * Backup modal visibility (kept here until More polish lands).
-   */
-  let isBackupModalOpen = $state(false);
 
   /**
    * New Flavor modal state. The redesign doesn't surface flavor
@@ -280,17 +274,6 @@
     </section>
   {/if}
 
-  <div class="inv-footer-actions">
-    <button
-      type="button"
-      class="ghost-link"
-      onclick={() => (isBackupModalOpen = true)}
-      data-testid="inventory-backup-button"
-    >
-      Backup &amp; restore
-    </button>
-  </div>
-
   <div class="fab-wrap">
     <button
       type="button"
@@ -302,8 +285,6 @@
     </button>
   </div>
 </section>
-
-<BackupRestoreModal open={isBackupModalOpen} onclose={() => (isBackupModalOpen = false)} />
 
 <Modal open={isNewFlavorModalOpen} title="Add new flavor" onclose={closeNewFlavorModal} size="sm">
   <div class="new-flavor-form">
@@ -559,28 +540,6 @@
     border-radius: 50%;
     background: var(--dot, var(--ink-3));
     opacity: 0.55;
-  }
-
-  .inv-footer-actions {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .ghost-link {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: var(--ink-3);
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: var(--line-2);
-    text-underline-offset: 4px;
-  }
-
-  .ghost-link:hover {
-    color: var(--ink-1);
   }
 
   .fab-wrap {
