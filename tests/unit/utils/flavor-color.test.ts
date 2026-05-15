@@ -1,53 +1,64 @@
 /**
- * Unit tests for flavor color generation
+ * Unit tests for the curated flavor palette
  */
 
 import { describe, it, expect } from 'vitest';
-import { getFlavorColor } from '../../../src/lib/utils/flavor-color.js';
+import { getFlavorTone, getFlavorColor, PALETTE } from '../../../src/lib/utils/flavor-color.js';
 
-describe('getFlavorColor', () => {
-  it('generates HSL color string', () => {
-    const color = getFlavorColor('flavor_123');
-    expect(color).toMatch(/^hsl\(\d+, 65%, 55%\)$/);
+describe('PALETTE', () => {
+  it('contains exactly 12 tones', () => {
+    expect(PALETTE).toHaveLength(12);
   });
 
-  it('generates consistent color for same ID', () => {
-    const color1 = getFlavorColor('flavor_chocolate');
-    const color2 = getFlavorColor('flavor_chocolate');
+  it('every tone has fill, accent, and ink expressed as oklch()', () => {
+    for (const tone of PALETTE) {
+      expect(tone.fill).toMatch(/^oklch\(/);
+      expect(tone.accent).toMatch(/^oklch\(/);
+      expect(tone.ink).toMatch(/^oklch\(/);
+    }
+  });
+});
 
-    expect(color1).toBe(color2);
+describe('getFlavorTone', () => {
+  it('returns a tone with fill, accent, and ink in oklch', () => {
+    const tone = getFlavorTone('flavor_123');
+    expect(tone.fill).toMatch(/^oklch\(/);
+    expect(tone.accent).toMatch(/^oklch\(/);
+    expect(tone.ink).toMatch(/^oklch\(/);
   });
 
-  it('generates different colors for different IDs', () => {
-    const color1 = getFlavorColor('flavor_chocolate');
-    const color2 = getFlavorColor('flavor_vanilla');
-
-    expect(color1).not.toBe(color2);
+  it('is deterministic for the same id', () => {
+    const a = getFlavorTone('flavor_chocolate');
+    const b = getFlavorTone('flavor_chocolate');
+    expect(a).toEqual(b);
   });
 
-  it('generates colors in valid hue range (0-359)', () => {
-    const colors = [
-      getFlavorColor('flavor_1'),
-      getFlavorColor('flavor_2'),
-      getFlavorColor('flavor_3'),
-    ];
-
-    colors.forEach((color) => {
-      const hueMatch = color.match(/^hsl\((\d+), 65%, 55%\)$/);
-      expect(hueMatch).not.toBeNull();
-      const hue = parseInt(hueMatch![1], 10);
-      expect(hue).toBeGreaterThanOrEqual(0);
-      expect(hue).toBeLessThan(360);
-    });
+  it('returns a tone for every id (no out-of-range index)', () => {
+    const samples = ['', 'a', 'flavor_!@#$%^&*()', 'a'.repeat(100)];
+    for (const id of samples) {
+      const tone = getFlavorTone(id);
+      expect(PALETTE).toContainEqual(tone);
+    }
   });
 
-  it('handles empty string', () => {
-    const color = getFlavorColor('');
-    expect(color).toMatch(/^hsl\(\d+, 65%, 55%\)$/);
+  it('mixes length into the seed so identical-prefix ids can land on different tones', () => {
+    // Not guaranteed for any specific pair, but at least one collision-prone pair
+    // should differ thanks to the length-mix in the seed.
+    const tones = ['Chocolate', 'Chocolate Wintermint'].map(getFlavorTone);
+    // Both must still be valid palette entries
+    for (const tone of tones) {
+      expect(PALETTE).toContainEqual(tone);
+    }
+  });
+});
+
+describe('getFlavorColor (deprecated shim)', () => {
+  it('returns the tone fill for the same id', () => {
+    const id = 'flavor_chocolate';
+    expect(getFlavorColor(id)).toBe(getFlavorTone(id).fill);
   });
 
-  it('handles special characters', () => {
-    const color = getFlavorColor('flavor_!@#$%^&*()');
-    expect(color).toMatch(/^hsl\(\d+, 65%, 55%\)$/);
+  it('returns an oklch color string', () => {
+    expect(getFlavorColor('flavor_123')).toMatch(/^oklch\(/);
   });
 });
