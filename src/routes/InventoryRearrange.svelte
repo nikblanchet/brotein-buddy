@@ -218,10 +218,12 @@
 
 <style>
   .rearrange-container {
-    padding: var(--space-4);
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: var(--space-4) var(--space-4) var(--space-8);
     max-width: 1200px;
     margin: 0 auto;
-    min-height: 100vh;
   }
 
   header {
