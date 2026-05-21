@@ -12,55 +12,9 @@ mkdir -p "$SHARED_DIR/.planning"
 mkdir -p "$SHARED_DIR/.scratch"
 mkdir -p "$SHARED_DIR/.claude"
 
-# Create CLAUDE.md with project context
-cat > "$SHARED_DIR/CLAUDE.md" << 'EOF'
-# BroteinBuddy
-
-A Progressive Web App for tracking protein shake inventory by flavor and location.
-
-## Tech Stack
-- Svelte + TypeScript
-- Vite
-- Vitest (unit/integration), Playwright (E2E), @testing-library/svelte
-- LocalStorage for persistence
-- PWA (installable on iOS)
-- Deployed on Vercel
-
-## Key Features
-- Weighted random flavor selection
-- Visual inventory management with drag-and-drop rearrange
-- Box location tracking with conflict resolution
-- Configurable favorite flavor quick-pick
-- Smart box selection (open before unopened, lower qty first)
-
-## Development Standards
-See the `brotein-buddy-standards` skill for:
-- Git workflow: feature/* branches, squash merge to main
-- Many small commits, not big commits after-the-fact
-- Testing requirements: 90% coverage overall, 100% for critical paths
-- All tests must pass before merge
-- Code quality: ESLint + Prettier + Husky pre-commit hooks
-- Documentation: README (user-facing), DEVELOPING (dev-facing), ADRs for decisions
-
-## Project Structure
-```
-BroteinBuddy/
-├── wt/                       # All worktrees
-│   ├── main/                # Main branch
-│   └── feature-*/           # Feature branches
-├── .shared/                  # Shared files (symlinked to worktrees)
-│   ├── CLAUDE.md            # This file
-│   ├── CLAUDE_CONTEXT.md    # Confidential context
-│   ├── .planning/           # Planning documents
-│   ├── .scratch/            # Throwaway files
-│   └── .claude/             # Claude Code settings
-├── src/                     # Source code
-├── tests/                   # Tests
-└── docs/                    # Documentation (ADRs, etc.)
-```
-
-See DEVELOPING.md for detailed setup and architecture information.
-EOF
+# CLAUDE.md is no longer created here. It is now a tracked file in the
+# repo and is populated into every worktree by `git checkout` automatically.
+# This script only seeds the files that remain personal / shared-local.
 
 # Create CLAUDE_CONTEXT.md with confidential information
 cat > "$SHARED_DIR/CLAUDE_CONTEXT.md" << 'EOF'
@@ -133,14 +87,11 @@ echo ""
 echo "✅ .shared directory initialized at: $SHARED_DIR"
 echo ""
 echo "Files created:"
-echo "  - CLAUDE.md (project context)"
 echo "  - CLAUDE_CONTEXT.md (confidential - job application info)"
 echo "  - .planning/ (for implementation plan and planning docs)"
 echo "  - .scratch/ (for throwaway files)"
 echo "  - .claude/settings.local.json (Claude Code settings)"
-echo "  - .claude/skills/ → $CENTRAL_SKILLS"
+echo "  - .claude/skills/ -> $CENTRAL_SKILLS"
 echo ""
-echo "Next steps:"
-echo "  1. Review and customize .shared/CLAUDE.md if needed"
-echo "  2. Run ./setup-worktree.sh main to create main worktree"
-echo "  3. Move this implementation plan to .shared/.planning/PLAN.md"
+echo "Note: CLAUDE.md is tracked in git and populated by 'git checkout'"
+echo "      into every worktree - no need to seed it here."
