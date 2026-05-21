@@ -20,7 +20,7 @@ The fix made phone rearrange _possible_ but did not make it _good_. Long-press-a
 
 - Cross-stack drag on phone is awkward when the target stack is off-screen. The user starts a drag, the container begins auto-scrolling, but precise control over scroll speed and final drop position is hard.
 - Intra-stack reorder on phone is fine — the gesture is short, no edge-scroll involved.
-- The keyboard path (Space lift, Tab to focus target zone, which fires `handleZoneFocus`) works on a laptop with an external keyboard. It is not available on phone.
+- The keyboard path (Space to lift, Tab to focus the target stack, which `svelte-dnd-action` interprets as a drop) works on a laptop with an external keyboard. It is not available on phone.
 - Desktop drag works as designed. The problem is specific to touchscreen + cross-stack with overflow.
 
 The interaction model needs a phone-appropriate affordance for the specifically hard case, without regressing the cases that already work.
@@ -51,9 +51,9 @@ When `movingBoxId === null`, the screen behaves exactly as it does today. When n
 
 **Drag suspension.** While in move mode, the `dndzone` `dragDisabled` config flag is set on every stack. This avoids tap/drag conflict (a user holding the Move button briefly should not accidentally start a drag) and reserves the screen for the marker interaction.
 
-**Commit.** Tapping a marker calls the existing `simulateMove(boxId, targetStackId, targetHeight)` from `src/lib/rearrange-utils.ts`, then `validateRearrangementState`. These paths are unchanged from drag drop today, so validation surface (per-box red borders, global error banner) and undo behavior are preserved.
+**Commit.** Tapping a marker calls the existing `simulateMove(boxes, boxId, { stack, height })` from `src/lib/rearrange-utils.ts`, then `validateRearrangementState(boxes)`. These paths are unchanged from drag drop today, so validation surface (per-box red borders, global error banner) and undo behavior are preserved.
 
-**Keyboard parity.** The Move button is focusable; Enter activates it. Markers are focusable; arrow keys cycle through them in document order; Enter commits. Escape exits move mode. The pre-existing `svelte-dnd-action` keyboard path (Space lift, Tab + focus target zone) is untouched and remains a parallel route.
+**Keyboard parity.** The Move button is focusable; Enter activates it. Markers are focusable; arrow keys cycle through them top-to-bottom within a stack and left-to-right across stacks (matching the visual reading order produced by the auto-fit grid); Enter commits. Escape exits move mode. The pre-existing `svelte-dnd-action` keyboard path (Space to lift, Tab to focus the target stack) is untouched and remains a parallel route.
 
 **E2E coverage.** A new test in `tests/e2e/rearrange.spec.ts` at iPhone-SE viewport exercises the button + marker path end-to-end. The existing keyboard cross-stack-rearrange test (the deterministic regression guard for dnd) is unchanged.
 
@@ -63,15 +63,15 @@ When `movingBoxId === null`, the screen behaves exactly as it does today. When n
 
 - Cross-stack-with-overflow on phone has a precise affordance. Markers preserve drag's full expressiveness — pick any insertion position, not just "land at the bottom of stack N."
 - One UI ships to every device. No viewport-conditional branching, no second interaction model to maintain.
-- State utilities (`simulateMove`, `reorderBoxesAfterMove`, `getAffectedBoxes`, `validateRearrangementState`, `validateLocationNoGaps`) and validation surface are reused as-is. No new business logic.
+- State utilities in `src/lib/rearrange-utils.ts` (`simulateMove`, `reorderBoxesAfterMove`, `getAffectedBoxes`, `validateRearrangementState`) plus `validateLocationNoGaps` from `src/lib/utils/location-validation.ts` are reused as-is. No new business logic.
 - Keyboard a11y is preserved through two parallel paths: the existing dnd keyboard path and the new Move-button + marker path. Both land in the same state-update functions.
-- Drag is not removed. Existing muscle memory is intact; the change is purely additive.
+- Drag is not removed. Existing muscle memory is intact; outside move mode the screen behaves exactly as it does today. The change is purely additive.
 
 ### Negative
 
 - Per-box chrome on the rearrange screen: a small icon button on each box card. Only this screen carries the visual cost; the normal inventory view is unchanged.
 - Move mode is a hidden state. The sticky banner with an explicit Cancel mitigates discoverability cost, but a user who taps the Move button by accident must read the banner to understand what happened.
-- Insertion markers need design polish. Density risks feel cluttered if proportions are wrong, especially on an 8-stack-by-3-boxes iPhone-SE layout (~24 markers visible during move mode).
+- Insertion markers need design polish. Density risks feel cluttered if proportions are wrong, especially on a dense iPhone-SE layout: a stack of N boxes renders N+1 markers, so 8 stacks of 3 boxes show 32 markers simultaneously during move mode.
 
 ### Neutral
 
