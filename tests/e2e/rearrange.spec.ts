@@ -82,8 +82,14 @@ test.describe('Inventory Rearrange', () => {
   test('should show confirm and cancel buttons', async ({ page }) => {
     await page.goto('/#/inventory/rearrange');
 
-    await expect(page.getByRole('button', { name: /confirm/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /cancel/i })).toBeVisible();
+    // Now that .rearrange-container is a scrollport, future seed growth
+    // could push the buttons below the fold. scrollIntoViewIfNeeded keeps
+    // the existing visibility assertion meaningful regardless of seed size.
+    const confirm = page.getByRole('button', { name: /confirm/i });
+    const cancel = page.getByRole('button', { name: /cancel/i });
+    await confirm.scrollIntoViewIfNeeded();
+    await expect(confirm).toBeVisible();
+    await expect(cancel).toBeVisible();
   });
 
   test('should navigate back on cancel', async ({ page }) => {
@@ -138,5 +144,180 @@ test.describe('Inventory Rearrange', () => {
 
     await expect(page.locator('h1')).toHaveText('Rearrange Boxes');
     await expect(page.locator('text=Drag boxes to reorder')).toBeVisible();
+  });
+});
+
+/**
+ * Regression coverage for the "screen is not scrollable" bug: with enough
+ * stacks to overflow the viewport, the user could not reach stacks below
+ * the fold to drag boxes from / into / between them. Root cause was the
+ * .rearrange-container lacking overflow-y while .main is overflow: hidden,
+ * so no ancestor was a scrollport. These tests seed eight stacks at
+ * iPhone-SE viewport so overflow is forced, then prove both that the
+ * container scrolls and that a box can land in a stack that started off
+ * the visible area.
+ */
+test.describe('Inventory Rearrange - scrolling with many stacks', () => {
+  test.beforeEach(async ({ page, context }) => {
+    // Seed 8 stacks with 2 boxes each (16 boxes total). 8 stacks at
+    // iPhone-SE width is 4 rows in a 2-column auto-fit grid, which
+    // forces vertical overflow regardless of small engine differences.
+    // 2 boxes per stack keeps every source stack populated after a
+    // keyboard cross-stack drag, so groupBoxesByStack does not drop
+    // the stack from the rendered grid and shift other stacks around.
+    await context.addInitScript((key) => {
+      const flavors = Array.from({ length: 8 }, (_, i) => ({
+        id: `f${i + 1}`,
+        name: `Flavor ${i + 1}`,
+        randomPool: 'caffeine-free' as const,
+      }));
+      const boxes = Array.from({ length: 8 }, (_, stackIdx) => [
+        {
+          id: `box-${stackIdx + 1}a`,
+          flavorId: `f${stackIdx + 1}`,
+          quantity: 12,
+          location: { stack: stackIdx + 1, height: 1 },
+          isOpen: false,
+        },
+        {
+          id: `box-${stackIdx + 1}b`,
+          flavorId: `f${stackIdx + 1}`,
+          quantity: 12,
+          location: { stack: stackIdx + 1, height: 2 },
+          isOpen: false,
+        },
+      ]).flat();
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          version: 2,
+          boxes,
+          flavors,
+          favoriteFlavorId: null,
+          settings: {},
+        })
+      );
+    }, STORAGE_KEY);
+
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/#/');
+
+    try {
+      const startFreshButton = page.getByRole('button', { name: /start fresh/i });
+      await startFreshButton.waitFor({ state: 'visible', timeout: 2000 });
+      await startFreshButton.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // Modal didn't appear, continue
+    }
+  });
+
+  test('should be scrollable when stacks overflow the viewport', async ({ page }) => {
+    await page.goto('/#/inventory/rearrange');
+
+    const container = page.locator('.rearrange-container');
+    await expect(container).toBeVisible();
+
+    // Scrollport invariant: the container has more content than fits.
+    // This is the cheap deterministic guard - if it ever regresses, the
+    // CSS scrollport change was lost.
+    const { scrollH, clientH } = await container.evaluate((el) => ({
+      scrollH: el.scrollHeight,
+      clientH: el.clientHeight,
+    }));
+    expect(scrollH).toBeGreaterThan(clientH);
+
+    // A stack that started off-screen becomes reachable via scroll.
+    const lastStack = page.locator('[data-stack="8"]');
+    await expect(lastStack).toBeAttached();
+    await lastStack.scrollIntoViewIfNeeded();
+    await expect(lastStack).toBeInViewport();
+  });
+
+  test('off-screen stacks become interactable after scrolling', async ({ page }) => {
+    // After the scrollport fix, the user can scroll a stack that started
+    // below the fold into view. This test proves the stack started off
+    // screen, that scrolling brings it in, and that its box remains
+    // interactable after scrolling settles.
+    await page.goto('/#/inventory/rearrange');
+
+    const lastStack = page.locator('[data-stack="8"]');
+    // Pre-condition: stack 8 is NOT in the viewport before scrolling.
+    // Without this, the test could silently pass on a future viewport
+    // widening or seed shrink that brings stack 8 into the initial view.
+    await expect(lastStack).not.toBeInViewport();
+
+    const container = page.locator('.rearrange-container');
+    await container.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    const lastStackBox = page.locator('[data-box-id="box-8a"]');
+    await expect(lastStackBox).toBeInViewport();
+    await lastStackBox.hover();
+    await expect(lastStackBox).toBeInViewport();
+  });
+
+  test('keyboard-driven cross-stack rearrange works after scrolling', async ({ page }) => {
+    // Closes the regression-coverage gap left by the lack of a pointer-
+    // drag test: this exercises the full dnd pipeline through to a
+    // localBoxes update via svelte-dnd-action's keyboard support.
+    // Deterministic across engines because it doesn't depend on pointer
+    // interpolation through a mid-drag-reflowing grid.
+    //
+    // The two assertions that the scrollport fix is required:
+    //   - expect(sourceBox).toBeInViewport()
+    //   - expect(targetZone).toBeInViewport()
+    // both placed AFTER the scrollTop assignment. Without the CSS fix
+    // (which adds `overflow-y: auto` and `height: 100%` so the container
+    // becomes a real scrollport), .main's `overflow: hidden` clips
+    // stacks 7 and 8 below the fold and `scrollTop = scrollHeight` is a
+    // no-op - so both assertions fail and the test rightly flags the
+    // regression.
+    //
+    // Keyboard contract (svelte-dnd-action 0.9.69, src/keyboardAction.js):
+    //   - Items receive focus via Tab when not dragging.
+    //   - Space or Enter on a focused item calls handleDragStart -
+    //     isDragging becomes true.
+    //   - Focusing a *different* dndzone while isDragging fires
+    //     handleZoneFocus (lines 88-118), which SYNCHRONOUSLY removes
+    //     the item from the source zone's items, inserts it into the
+    //     target zone's items, and dispatches finalize on both zones.
+    //   - That is: the move happens on the target-zone focus event,
+    //     not on a subsequent Space press. The library's keydown
+    //     listener is wired to draggable children only, not zones
+    //     (keyboardAction.js line 324), so a Space after zone focus
+    //     would be a no-op.
+    await page.goto('/#/inventory/rearrange');
+
+    const container = page.locator('.rearrange-container');
+    await container.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    const sourceBox = page.locator('[data-box-id="box-7a"]');
+    const targetZone = page.locator('[data-stack="8"] .stack-boxes');
+    await expect(sourceBox).toBeInViewport();
+    await expect(targetZone).toBeInViewport();
+
+    await sourceBox.focus();
+    await page.keyboard.press('Space'); // lifts box-7a (handleDragStart)
+    await targetZone.focus(); // triggers handleZoneFocus -> the move
+
+    // Wait past flipDurationMs so finalize handlers have settled.
+    await page.waitForTimeout(300);
+
+    // Click Confirm and verify the location update was persisted.
+    const confirmButton = page.getByRole('button', { name: /confirm/i });
+    await confirmButton.scrollIntoViewIfNeeded();
+    await confirmButton.click();
+
+    await expect(page).toHaveURL('/#/inventory');
+    const state = await page.evaluate(
+      (key) => JSON.parse(localStorage.getItem(key) ?? '{}'),
+      STORAGE_KEY
+    );
+    const movedBox = state.boxes.find((b: { id: string }) => b.id === 'box-7a');
+    expect(movedBox?.location?.stack).toBe(8);
   });
 });

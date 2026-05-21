@@ -181,6 +181,13 @@
             items: boxes.map((b) => b.box),
             flipDurationMs: 200,
             dropTargetStyle: {},
+            // 150ms touch hold (not the library default of 80ms when
+            // set to `true`) so iOS PWA touch-scroll inside the new
+            // scrollport is not hijacked as a drag on quick flicks.
+            // 150ms matches iOS's typical long-press convention; 80ms
+            // leaves a perceptual dead-zone where a short tap is
+            // neither a complete flick nor a held-drag.
+            delayTouchStart: 150,
           }}
           onconsider={(e) => handleDndConsider(e, Number(stackNum))}
           onfinalize={(e) => handleDndFinalize(e, Number(stackNum))}
@@ -218,10 +225,12 @@
 
 <style>
   .rearrange-container {
-    padding: var(--space-4);
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: var(--space-4) var(--space-4) var(--space-8);
     max-width: 1200px;
     margin: 0 auto;
-    min-height: 100vh;
   }
 
   header {
