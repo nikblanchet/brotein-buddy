@@ -15,6 +15,13 @@ a child of `BroteinBuddy/`. To set this up from scratch:
 mkdir BroteinBuddy && cd BroteinBuddy
 git clone --bare git@github.com:nikblanchet/brotein-buddy.git .bare
 
+# 1b. Replace the --bare default fetch refspec (which maps heads/heads and
+#     collides with worktree branches) with the normal-clone refspec, then
+#     populate refs/remotes/origin/*. Without this, `git log origin/main`
+#     silently lies — origin/main never advances even though fetches succeed.
+git --git-dir=.bare config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git --git-dir=.bare fetch origin
+
 # 2. Tell git this directory is backed by .bare.
 echo "gitdir: ./.bare" > .git
 
@@ -72,6 +79,18 @@ ln -sfn ../../.shared/.claude/settings.local.json .claude/settings.local.json
 New worktrees created via `setup-worktree.py` already produce these symlinks
 with the correct two-level (`../../`) target paths, so this manual step is
 only needed for worktrees that pre-date the cleanup.
+
+If your clone was created before step 1b above was documented, `.bare/config`
+likely has no fetch refspec under `[remote "origin"]` (or has the `--bare`
+default `+refs/heads/*:refs/heads/*`), so `git fetch` populates objects but
+never advances `refs/remotes/origin/*`. `git log origin/main` will silently
+show stale commits even after a successful fetch. Patch the refspec once:
+
+```bash
+git --git-dir=<repo-root>/.bare config remote.origin.fetch \
+    '+refs/heads/*:refs/remotes/origin/*'
+git --git-dir=<repo-root>/.bare fetch origin
+```
 
 ### Creating New Worktrees
 
