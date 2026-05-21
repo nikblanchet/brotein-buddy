@@ -4,32 +4,87 @@
 
 This project uses **git worktrees** for parallel development with multiple Claude Code instances.
 
-### First Time Setup
+### Bootstrapping on a new machine
+
+The repo uses a bare-repo + worktrees layout: `.bare/` is the canonical
+repository, `.git` is a file pointer, and each worktree (including `main/`) is
+a child of `BroteinBuddy/`. To set this up from scratch:
 
 ```bash
-# Clone the repository
-git clone git@github.com:nikblanchet/brotein-buddy.git
-cd brotein-buddy
+# 1. Create the parent container, then a bare clone inside it.
+mkdir BroteinBuddy && cd BroteinBuddy
+git clone --bare git@github.com:nikblanchet/brotein-buddy.git .bare
 
-# Initialize shared directory structure
-./init-shared.sh
+# 2. Tell git this directory is backed by .bare.
+echo "gitdir: ./.bare" > .git
 
-# Create main worktree
-./setup-worktree.sh main
+# 3. Extract init-shared.sh from the bare repo and run it.
+#    Populates .shared/ AND .bare/info/exclude.
+git --git-dir=.bare show HEAD:init-shared.sh | bash
 
-# Start working
-cd wt/main
-npm run dev
+# 4. Create the main worktree at the BroteinBuddy/ level.
+git --git-dir=.bare worktree add main main
+
+# 5. Seed main/'s symlinks to .shared/. These aren't tracked in git; new
+#    worktrees created with setup-worktree.py get them automatically, but the
+#    first main/ needs manual seeding. `ln -sfn` replaces an existing symlink
+#    without following it, which is important because `main/.claude/` itself
+#    must remain a real directory (see note below).
+cd main
+ln -sfn ../.shared/CLAUDE_CONTEXT.md CLAUDE_CONTEXT.md
+ln -sfn ../.shared/.planning .planning
+ln -sfn ../.shared/.scratch .scratch
+mkdir -p .claude
+ln -sfn ../../.shared/.claude/agents .claude/agents
+ln -sfn ../../.shared/.claude/skills .claude/skills
+ln -sfn ../../.shared/.claude/settings.local.json .claude/settings.local.json
 ```
+
+> **Note for maintainers:** `main/.claude/` must be a real directory containing
+> per-file symlinks, **not** a single symlink to `.shared/.claude/`. Replacing
+> the directory with a symlink would cause the subsequent `ln -sfn` calls to
+> write _through_ that symlink into `.shared/.claude/`, creating
+> self-referential links inside the shared store and breaking every worktree.
+
+> **Note:** `.claude/skills` resolves through `.shared/.claude/skills` to
+> `~/Code/repos/custom-claude-skills/project-scope/brotein-buddy/`. That central
+> skills repo is a separate per-machine concern; on a brand-new machine,
+> populate it first (clone from your own dotfiles/skills source) or
+> skill-backed features won't work.
+
+### Migrating an existing clone
+
+If you already had a clone before this cleanup landed, `git pull` will delete
+four index entries (`.claude/.claude`, `.claude/agents`,
+`.claude/settings.local.json`, `.claude/skills`). Those tracked symlinks had
+broken target paths (`../../../.shared/...`, one level too high) and were
+non-functional anyway, but their deletion removes them from your working tree
+too. To re-seed any existing worktree with correct symlinks:
+
+```bash
+cd <worktree>          # e.g., cd main
+mkdir -p .claude
+ln -sfn ../../.shared/.claude/agents .claude/agents
+ln -sfn ../../.shared/.claude/skills .claude/skills
+ln -sfn ../../.shared/.claude/settings.local.json .claude/settings.local.json
+```
+
+New worktrees created via `setup-worktree.py` already produce these symlinks
+with the correct two-level (`../../`) target paths, so this manual step is
+only needed for worktrees that pre-date the cleanup.
 
 ### Creating New Worktrees
 
+From inside `main/`, use `setup-worktree.py` (it creates the branch, the
+worktree directory at `BroteinBuddy/<dir-name>/`, all symlinks, and assigns a
+unique dev port):
+
 ```bash
-# Create a new feature branch worktree
-./setup-worktree.sh feature/random-selection
+.claude/skills/git-github-workflow/scripts/setup-worktree.py \
+    --source-worktree main --branch-name feature/random-selection --dir-name feature-random-selection
 
 # Work in the new worktree
-cd wt/feature/random-selection
+cd ../feature-random-selection
 npm run dev
 ```
 
@@ -37,21 +92,19 @@ npm run dev
 
 ```
 BroteinBuddy/
-├── wt/                       # All worktrees
-│   ├── main/                # Main branch worktree
-│   └── feature-*/           # Feature branch worktrees
-├── .shared/                  # Shared files (not committed)
-│   ├── CLAUDE.md            # Project context
-│   ├── CLAUDE_CONTEXT.md    # Confidential info
-│   ├── .planning/           # Planning documents
-│   ├── .scratch/            # Throwaway files
-│   └── .claude/             # Claude Code settings
-├── src/                     # Source code
-├── tests/                   # Test files
-└── docs/                    # Documentation (ADRs, etc.)
+├── .bare/                # bare git repository (canonical)
+├── .git                  # file: gitdir: ./.bare
+├── .shared/              # personal/scratch (not committed)
+│   ├── CLAUDE_CONTEXT.md # confidential context
+│   ├── .planning/        # planning documents
+│   ├── .scratch/         # throwaway files
+│   └── .claude/          # Claude Code per-clone state (settings, agents, skills)
+├── main/                 # main branch worktree
+└── <feature-x>/          # short-lived feature worktrees (deleted after merge)
 ```
 
-**Why worktrees?** They enable multiple Claude Code instances to work on different features simultaneously without conflicts.
+**Why worktrees?** They enable multiple Claude Code instances to work on
+different features simultaneously without conflicts.
 
 ## Development Workflow
 
