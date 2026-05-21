@@ -181,6 +181,7 @@
             items: boxes.map((b) => b.box),
             flipDurationMs: 200,
             dropTargetStyle: {},
+            delayTouchStart: 150,
           }}
           onconsider={(e) => handleDndConsider(e, Number(stackNum))}
           onfinalize={(e) => handleDndFinalize(e, Number(stackNum))}
