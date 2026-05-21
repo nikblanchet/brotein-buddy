@@ -159,12 +159,12 @@ test.describe('Inventory Rearrange', () => {
  */
 test.describe('Inventory Rearrange - scrolling with many stacks', () => {
   test.beforeEach(async ({ page, context }) => {
-    // Seed 8 stacks with 2 boxes each (16 boxes total). Two reasons for
-    // the 2-per-stack shape: (a) 8 stacks at iPhone-SE width is 4 rows
-    // tall, which forces vertical overflow regardless of small engine
-    // differences; (b) when we drag a box out of its source stack later,
-    // the source stack keeps its remaining box - so it does not vanish
-    // from the grid mid-drag and reflow the target's screen coordinates.
+    // Seed 8 stacks with 2 boxes each (16 boxes total). 8 stacks at
+    // iPhone-SE width is 4 rows in a 2-column auto-fit grid, which
+    // forces vertical overflow regardless of small engine differences.
+    // 2 boxes per stack keeps every source stack populated after a
+    // keyboard cross-stack drag, so groupBoxesByStack does not drop
+    // the stack from the rendered grid and shift other stacks around.
     await context.addInitScript((key) => {
       const flavors = Array.from({ length: 8 }, (_, i) => ({
         id: `f${i + 1}`,
@@ -236,24 +236,16 @@ test.describe('Inventory Rearrange - scrolling with many stacks', () => {
 
   test('off-screen stacks become interactable after scrolling', async ({ page }) => {
     // After the scrollport fix, the user can scroll a stack that started
-    // below the fold into view. This test proves that once scrolled in,
-    // the stack's box is actually reachable - that is, its center is in
-    // the visible portion of the viewport, hovering it does not throw,
-    // and the page does not auto-scroll it back out from under us.
-    //
-    // We deliberately do NOT exercise the full drag-and-drop pipeline
-    // here. svelte-dnd-action 0.9.69 listens to pointer events and
-    // reorders the grid mid-drag (the consider event updates localBoxes
-    // before drop, which reflows the column-fit grid). Playwright's
-    // mouse interpolation through a reflowing layout is brittle: the
-    // target's screen position shifts under the cursor mid-path, and
-    // the final dropzone is non-deterministic across engines. The
-    // rearrange logic itself is covered by unit tests in
-    // tests/unit/rearrange-utils.test.ts (simulateMove,
-    // reorderBoxesAfterMove, validateRearrangementState), and the
-    // end-to-end drag-into-off-screen-stack behavior is on the manual
-    // hardware verification checklist in the PR description.
+    // below the fold into view. This test proves the stack started off
+    // screen, that scrolling brings it in, and that its box remains
+    // interactable after scrolling settles.
     await page.goto('/#/inventory/rearrange');
+
+    const lastStack = page.locator('[data-stack="8"]');
+    // Pre-condition: stack 8 is NOT in the viewport before scrolling.
+    // Without this, the test could silently pass on a future viewport
+    // widening or seed shrink that brings stack 8 into the initial view.
+    await expect(lastStack).not.toBeInViewport();
 
     const container = page.locator('.rearrange-container');
     await container.evaluate((el) => {
@@ -262,10 +254,61 @@ test.describe('Inventory Rearrange - scrolling with many stacks', () => {
 
     const lastStackBox = page.locator('[data-box-id="box-8a"]');
     await expect(lastStackBox).toBeInViewport();
-
-    // Hovering must not throw and the element must remain interactable
-    // after the hover settles - this is the precondition for any drag.
     await lastStackBox.hover();
     await expect(lastStackBox).toBeInViewport();
+  });
+
+  test('keyboard-driven cross-stack rearrange works after scrolling', async ({ page }) => {
+    // Closes the regression-coverage gap left by the lack of a pointer-
+    // drag test: this exercises the full dnd pipeline (focus -> lift ->
+    // tab into another zone -> drop) through to a localBoxes update via
+    // svelte-dnd-action's keyboard support. Deterministic across engines
+    // because it doesn't depend on pointer interpolation through a
+    // mid-drag-reflowing grid.
+    //
+    // Keyboard contract (svelte-dnd-action 0.9.69, src/keyboardAction.js):
+    //   - Items receive focus via Tab when not dragging.
+    //   - Space or Enter on a focused item lifts it (isDragging=true).
+    //   - During drag, items get tabIndex=-1 and valid drop zones get
+    //     tabIndex=0, so Tab moves focus between zones.
+    //   - Space or Enter on a focused zone (or its child) drops there.
+    await page.goto('/#/inventory/rearrange');
+
+    const container = page.locator('.rearrange-container');
+    await container.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    const sourceBox = page.locator('[data-box-id="box-7a"]');
+    const targetZone = page.locator('[data-stack="8"] .stack-boxes');
+    await expect(sourceBox).toBeInViewport();
+    await expect(targetZone).toBeInViewport();
+
+    // Focus the source box. The library wires keydown to each dndzone
+    // child, so the keydown fires on the dragged item.
+    await sourceBox.focus();
+    await page.keyboard.press('Space'); // lift
+
+    // Tab to the adjacent zone (stack 8). Items inside stack 7 have
+    // tabIndex=-1 during drag, so Tab skips them and lands on the
+    // next focusable zone or item in document order.
+    await targetZone.focus();
+    await page.keyboard.press('Space'); // drop
+
+    // Wait past flipDurationMs so finalize handlers have settled.
+    await page.waitForTimeout(300);
+
+    // Click Confirm and verify the location update was persisted.
+    const confirmButton = page.getByRole('button', { name: /confirm/i });
+    await confirmButton.scrollIntoViewIfNeeded();
+    await confirmButton.click();
+
+    await expect(page).toHaveURL('/#/inventory');
+    const state = await page.evaluate(
+      (key) => JSON.parse(localStorage.getItem(key) ?? '{}'),
+      STORAGE_KEY
+    );
+    const movedBox = state.boxes.find((b: { id: string }) => b.id === 'box-7a');
+    expect(movedBox?.location?.stack).toBe(8);
   });
 });
