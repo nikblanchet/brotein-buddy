@@ -260,18 +260,34 @@ test.describe('Inventory Rearrange - scrolling with many stacks', () => {
 
   test('keyboard-driven cross-stack rearrange works after scrolling', async ({ page }) => {
     // Closes the regression-coverage gap left by the lack of a pointer-
-    // drag test: this exercises the full dnd pipeline (focus -> lift ->
-    // tab into another zone -> drop) through to a localBoxes update via
-    // svelte-dnd-action's keyboard support. Deterministic across engines
-    // because it doesn't depend on pointer interpolation through a
-    // mid-drag-reflowing grid.
+    // drag test: this exercises the full dnd pipeline through to a
+    // localBoxes update via svelte-dnd-action's keyboard support.
+    // Deterministic across engines because it doesn't depend on pointer
+    // interpolation through a mid-drag-reflowing grid.
+    //
+    // The two assertions that the scrollport fix is required:
+    //   - expect(sourceBox).toBeInViewport()
+    //   - expect(targetZone).toBeInViewport()
+    // both placed AFTER the scrollTop assignment. Without the CSS fix
+    // (which adds `overflow-y: auto` and `height: 100%` so the container
+    // becomes a real scrollport), .main's `overflow: hidden` clips
+    // stacks 7 and 8 below the fold and `scrollTop = scrollHeight` is a
+    // no-op - so both assertions fail and the test rightly flags the
+    // regression.
     //
     // Keyboard contract (svelte-dnd-action 0.9.69, src/keyboardAction.js):
     //   - Items receive focus via Tab when not dragging.
-    //   - Space or Enter on a focused item lifts it (isDragging=true).
-    //   - During drag, items get tabIndex=-1 and valid drop zones get
-    //     tabIndex=0, so Tab moves focus between zones.
-    //   - Space or Enter on a focused zone (or its child) drops there.
+    //   - Space or Enter on a focused item calls handleDragStart -
+    //     isDragging becomes true.
+    //   - Focusing a *different* dndzone while isDragging fires
+    //     handleZoneFocus (lines 88-118), which SYNCHRONOUSLY removes
+    //     the item from the source zone's items, inserts it into the
+    //     target zone's items, and dispatches finalize on both zones.
+    //   - That is: the move happens on the target-zone focus event,
+    //     not on a subsequent Space press. The library's keydown
+    //     listener is wired to draggable children only, not zones
+    //     (keyboardAction.js line 324), so a Space after zone focus
+    //     would be a no-op.
     await page.goto('/#/inventory/rearrange');
 
     const container = page.locator('.rearrange-container');
@@ -284,16 +300,9 @@ test.describe('Inventory Rearrange - scrolling with many stacks', () => {
     await expect(sourceBox).toBeInViewport();
     await expect(targetZone).toBeInViewport();
 
-    // Focus the source box. The library wires keydown to each dndzone
-    // child, so the keydown fires on the dragged item.
     await sourceBox.focus();
-    await page.keyboard.press('Space'); // lift
-
-    // Tab to the adjacent zone (stack 8). Items inside stack 7 have
-    // tabIndex=-1 during drag, so Tab skips them and lands on the
-    // next focusable zone or item in document order.
-    await targetZone.focus();
-    await page.keyboard.press('Space'); // drop
+    await page.keyboard.press('Space'); // lifts box-7a (handleDragStart)
+    await targetZone.focus(); // triggers handleZoneFocus -> the move
 
     // Wait past flipDurationMs so finalize handlers have settled.
     await page.waitForTimeout(300);
