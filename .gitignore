@@ -25,8 +25,7 @@ lerna-debug.log*
 # Shared directory - personal files not committed
 /.shared/
 
-# Confidential context (if symlinked to root)
-CLAUDE.md
+# Confidential context (still symlinked from .shared/; do not commit)
 CLAUDE_CONTEXT.md
 
 # Planning and scratch (if symlinked to root)
