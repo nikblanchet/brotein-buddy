@@ -638,11 +638,7 @@ Skills provide context and instructions that guide Claude Code's behavior. They 
 
 **Global Skills** (available in all projects):
 
-- **development-standards**: No emoji in developer-facing content, modern language features, thorough documentation
-- **exhaustive-testing**: Comprehensive test coverage across all test types
-- **dependency-management**: Quality dependencies and package management
-- **cli-ux-colorful**: Colorful CLI output design with ANSI colors
-- **handle-deprecation-warnings**: Address deprecation warnings immediately
+Several global skills (development standards, exhaustive testing, dependency management, CLI UX, deprecation handling, and more) live in `~/Code/repos/custom-claude-skills/global-scope/` and apply across all projects. They are personal to the maintainer's machine setup and drift independently of this repo; consult that directory for the current list.
 
 **Project-Specific Skills** (BroteinBuddy only):
 
@@ -722,12 +718,13 @@ All worktrees automatically have access to these skills and agents via symlinks.
 
 ### Tech Stack
 
-- **Svelte + TypeScript**: UI framework and type safety
-- **Vite**: Build tool and dev server
-- **Vitest**: Unit and integration testing
+- **Svelte 5 (runes mode) + TypeScript**: UI framework and type safety
+- **Vite (with PWA plugin)**: Build tool, dev server, and installable PWA
+- **Vitest**: Unit and integration testing (with `@testing-library/svelte`)
 - **Playwright**: End-to-end testing
-- **LocalStorage**: Data persistence (no backend needed)
-- **PWA**: Installable app with offline support
+- **LocalStorage**: Offline persistence — every device works fully without a network
+- **Supabase (Postgres + Auth)**: Multi-device sync via passwordless magic-link sign-in; the app degrades gracefully to local-only when Supabase env vars are absent
+- **Vercel**: Production deployment
 
 ### Data Model
 
@@ -952,12 +949,12 @@ BroteinBuddy maintains comprehensive documentation across multiple formats, each
 - **DEVELOPING.md**: This file - complete setup guide, development workflow, architecture overview, and troubleshooting
 - **docs/adr/**: Architecture Decision Records documenting design decisions and their rationale
 - **docs/api/**: API documentation (reserved for future use - intentionally deferred until Phase 1 when the application API exists)
-- **Teaching docs**: Educational documents explaining concepts and patterns (in `.planning/teaching/`)
+- **docs/teaching/**: Educational write-ups, one per merged change, authored by the `teaching-mentor` subagent
 
 **Project Planning:**
 
-- **.planning/**: Implementation plan, task breakdown, and project management (in `.shared/`)
-- **CLAUDE.md**: Project context and standards for AI-assisted development (in `.shared/`)
+- **.planning/**: Implementation plan, task breakdown, and project management (in `.shared/`, not tracked)
+- **CLAUDE.md**: Project context and standards for AI-assisted development (tracked at `main/CLAUDE.md`)
 
 ### Architecture Decision Records (ADRs)
 
@@ -973,6 +970,20 @@ We use ADRs to document significant architectural and design decisions. Each ADR
 - [ADR-000: Template](docs/adr/000-template.md) - Template for new ADRs
 - [ADR-001: Technology Stack Selection](docs/adr/001-technology-stack-selection.md) - Svelte, TypeScript, LocalStorage, PWA
 - [ADR-002: Data Model Design](docs/adr/002-data-model-design.md) - Normalized ID-based structure, type guards, location system
+- [ADR-003: LocalStorage Strategy](docs/adr/003-localstorage-strategy.md) - Persistence approach, validation, and migration framework
+- [ADR-004: State Management Approach](docs/adr/004-state-management-approach.md) - Svelte stores with LocalStorage auto-sync
+- [ADR-005: Design System and Component Library](docs/adr/005-design-system.md) - Token system and component library foundations
+- [ADR-006: Client-Side Routing Strategy](docs/adr/006-routing-strategy.md) - Hash-based routing via svelte-spa-router
+- [ADR-007: Progressive Web App Implementation](docs/adr/007-pwa-implementation.md) - Service worker, manifest, and iOS install
+- [ADR-008: Performance Optimization and Accessibility Implementation](docs/adr/008-performance-accessibility-optimization.md) - Bundle splitting and a11y baseline
+- [ADR-009: Deployment Strategy and Production Launch](docs/adr/009-deployment-strategy.md) - Vercel deployment pipeline
+- [ADR-010: Backup & Restore Feature Design](docs/adr/010-backup-restore-design.md) - In-app JSON backup and restore
+- [ADR-011: Local Event Timeline](docs/adr/011-event-timeline.md) - Append-only event log underpinning sync
+- [ADR-012: Supabase-Backed Sync with Magic-Link Auth](docs/adr/012-supabase-sync.md) - Multi-device sync architecture
+- [ADR-013: Realtime Sync, Offline Resilience, and Burning Man](docs/adr/013-realtime-sync.md) - Realtime subscription + offline behavior
+- [ADR-014: OKLCH Cloud Dancer Token System with Curated Flavor Palette](docs/adr/014-cloud-dancer-token-system.md) - 2026 UI refresh color system
+- [ADR-015: Persistent Three-Tab Navigation with Pick as Default Route](docs/adr/015-persistent-tab-navigation.md) - 2026 UI navigation model
+- [ADR-016: Phone-Friendly Rearrange UX](docs/adr/016-phone-rearrange-ux.md) - Scrollable rearrange surface for small viewports
 
 **When to write an ADR:**
 
@@ -1233,11 +1244,17 @@ ls -lh dist/assets/*.js
 
 ### Symlinks not working
 
+A worktree's `.claude/` symlinks (`agents`, `skills`, `settings.local.json`) can break if the worktree pre-dates the cleanup landed in PR #100 or if its symlinks were created with the wrong relative target. Re-seed from inside the worktree:
+
 ```bash
-# Re-run setup for the worktree
-cd ../..  # Go to repo root
-./setup-worktree.sh <branch-name>
+cd <worktree>          # e.g., cd main
+mkdir -p .claude
+ln -sfn ../../.shared/.claude/agents .claude/agents
+ln -sfn ../../.shared/.claude/skills .claude/skills
+ln -sfn ../../.shared/.claude/settings.local.json .claude/settings.local.json
 ```
+
+See "Migrating an existing clone" earlier in this document for context on why this is sometimes needed. New worktrees created via `setup-worktree.py` already produce correct symlinks.
 
 ### Dependencies out of sync
 
@@ -1248,11 +1265,14 @@ npm install
 
 ### Worktree cleanup
 
-```bash
-# Remove a worktree
-git worktree remove wt/<branch-name>
+After a squash-merge, remove the worktree and delete the branch. The `git-github-workflow` skill owns the canonical cleanup recipe; the short form is:
 
-# List all worktrees
+```bash
+# From the repo root (e.g., BroteinBuddy/)
+git worktree remove <branch-dir>     # e.g., feature-random-selection
+git branch -D <branch-name>          # e.g., feature/random-selection
+
+# List remaining worktrees
 git worktree list
 ```
 
