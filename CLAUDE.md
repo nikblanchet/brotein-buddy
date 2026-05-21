@@ -33,7 +33,7 @@ All work happens in a short-lived worktree branched from `main`, squash-merged, 
 
 3. **Local checks pass.** `npm test`, `npm run lint`, `npm run build`.
 
-4. **Fresh-context code review.** Spawn a new `code-reviewer` subagent in a clean session. The reviewer reads only the diff and the existing codebase. **It does NOT read the PR description, planning docs, or commit messages** — those leak authorial intent and bias the review. (This supersedes earlier guidance in `git-github-workflow/references/code-reviewer-guide.md`, which is being updated in a follow-up PR to match.)
+4. **Fresh-context code review.** Spawn a new `code-reviewer` subagent in a clean session. The reviewer reads only the diff and the existing codebase. **It does NOT read the PR description, planning docs, or commit messages** — those leak authorial intent and bias the review. See `git-github-workflow/references/code-reviewer-guide.md` for the full invocation prompt and blinding contract.
 
 5. **Address blockers.** Small commits per fix. Re-run the fresh-context review if post-review changes are non-trivial.
 
